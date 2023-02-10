@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Menu -->
+    <string name="home_menu_refresh">Refresh</string>
+    <string name="home_menu_restart">Restart</string>
+    <string name="home_menu_set_server">Set Server</string>
+    <string name="home_menu_server_set">Server Set</string>
+    <string name="menu_content_description">Menu</string>
+
+    <!-- View Type -->
+    <string name="report_view_table">Table</string>
+    <string name="report_view_bar_month">Bar: Months</string>
+    <string name="report_view_bar_account">Bar: Accounts</string>
+
+    <!-- Months -->
+    <string name="header_jan">Jan</string>
+    <string name="header_feb">Feb</string>
+    <string name="header_mar">Mar</string>
+    <string name="header_apr">Apr</string>
+    <string name="header_may">May</string>
+    <string name="header_jun">Jun</string>
+    <string name="header_jul">Jul</string>
+    <string name="header_aug">Aug</string>
+    <string name="header_sep">Sep</string>
+    <string name="header_oct">Oct</string>
+    <string name="header_nov">Nov</string>
+    <string name="header_dec">Dec</string>
+    <string name="header_total">Total</string>
+    <string name="header_invalid">Invalid</string>
+
+    <string name="report_year_selector_content_description">Year</string>
+    <string name="report_view_selector_content_description">View type</string>
+</resources>
