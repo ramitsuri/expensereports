@@ -41,7 +41,6 @@ dependencies {
     implementation(libs.multiplatformSettings.common)
     implementation(libs.kotlinx.dateTime)
     implementation(libs.koin.android)
-    implementation ("com.github.tehras:charts:0.2.4-alpha")
     implementation(libs.kotlin.bignum)
     testImplementation(libs.junit)
 }
