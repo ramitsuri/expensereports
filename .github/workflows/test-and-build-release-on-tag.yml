@@ -1,4 +1,4 @@
-name: Test And Create Build
+name: Test And Create Release
 
 on:
   push:
@@ -38,7 +38,11 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
-      - uses: actions/upload-artifact@v2
+      - name: Publish to Play Console
+        uses: r0adkll/upload-google-play@v1.0.19
         with:
-          name: Signed app bundle
-          path: ${{steps.sign_app.outputs.signedReleaseFile}}
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_CONSOLE_SERVICE_ACCOUNT_JSON }}
+          packageName: com.ramitsuri.expensereports.android
+          releaseFiles: androidApp/build/outputs/bundle/release/androidApp-release.aab
+          track: internal
+          status: completed
