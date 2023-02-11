@@ -57,6 +57,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -65,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.extensions.shutdown
 import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.ui.FilterItem
@@ -179,14 +181,27 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun BarChartAccount(accounts: Map<String, BigDecimal>, total: BigDecimal) {
         Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Text(text = "Total: ${total.toStringExpanded()}", fontWeight = FontWeight.Bold)
-            LazyColumn {
-                accounts.forEach { (account, amount) ->
-                    item {
-                        Text(text = "$account -> ${amount.toStringExpanded()}")
+            Text(
+                text = "Total: ${total.toStringExpanded()}",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(8.dp)
+            )
+            if (total != BigDecimal.ZERO) {
+                LazyColumn {
+                    accounts.forEach { (account, amount) ->
+                        item {
+                            val value = amount.divide(total, decimalMode = DecimalMode.US_CURRENCY)
+                                .floatValue(exactRequired = false)
+                            BarChartBar(
+                                value = value,
+                                label1 = account,
+                                label2 = amount.toStringExpanded()
+                            )
+                        }
                     }
                 }
             }
@@ -196,18 +211,56 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun BarChartMonth(months: Map<Int, BigDecimal>, total: BigDecimal) {
         Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Text(text = "Total: ${total.toStringExpanded()}", fontWeight = FontWeight.Bold)
-            LazyColumn {
-                months.forEach { (month, amount) ->
-                    item {
-                        val monthText = stringResource(id = month.string())
-                        Text(text = "$monthText -> ${amount.toStringExpanded()}")
+            Text(
+                text = "Total: ${total.toStringExpanded()}",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(8.dp)
+            )
+            if (total != BigDecimal.ZERO) {
+                LazyColumn {
+                    months.forEach { (month, amount) ->
+                        item {
+                            val value = amount.divide(total, decimalMode = DecimalMode.US_CURRENCY)
+                                .floatValue(exactRequired = false)
+                            BarChartBar(
+                                value = value,
+                                label1 = stringResource(id = month.string()),
+                                label2 = amount.toStringExpanded()
+                            )
+                        }
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun BarChartBar(value: Float, label1: String, label2: String) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(0.2f),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(text = label1, style = MaterialTheme.typography.bodySmall)
+                Text(text = label2, style = MaterialTheme.typography.bodySmall)
+            }
+            LinearProgressIndicator(
+                progress = value,
+                modifier = Modifier
+                    .weight(0.7F)
+                    .height(8.dp),
+                color = MaterialTheme.colorScheme.primary,
+                strokeCap = StrokeCap.Round
+            )
         }
     }
 
