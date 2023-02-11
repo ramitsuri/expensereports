@@ -6,8 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -32,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,11 +62,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -191,16 +198,58 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.padding(8.dp)
             )
             if (total != BigDecimal.ZERO) {
-                LazyColumn {
-                    accounts.forEach { (account, amount) ->
-                        item {
-                            val value = amount.divide(total, decimalMode = DecimalMode.US_CURRENCY)
-                                .floatValue(exactRequired = false)
-                            BarChartBar(
-                                value = value,
-                                label1 = account,
-                                label2 = amount.toStringExpanded()
-                            )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Spacer(modifier = Modifier.weight(0.15f))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.6f)
+                        ) {
+                            (1..10).forEach { index ->
+                                Row(
+                                    modifier = Modifier.weight(0.02F)
+                                ) {
+                                    Text(
+                                        "${(11 - index) * 10}%",
+                                        fontSize = TextUnit(6F, TextUnitType.Sp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Divider(
+                                        modifier = Modifier.height(1.dp),
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(0.08F))
+                            }
+                        }
+                        Spacer(modifier = Modifier.weight(0.25f))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        LazyRow(
+                        ) {
+                            accounts.forEach { (account, amount) ->
+                                item {
+                                    val value =
+                                        amount.divide(total, decimalMode = DecimalMode.US_CURRENCY)
+                                            .floatValue(exactRequired = false)
+                                    BarChartBar(
+                                        value = value,
+                                        label1 = account,
+                                        label2 = amount.toStringExpanded()
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -221,16 +270,60 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.padding(8.dp)
             )
             if (total != BigDecimal.ZERO) {
-                LazyColumn {
-                    months.forEach { (month, amount) ->
-                        item {
-                            val value = amount.divide(total, decimalMode = DecimalMode.US_CURRENCY)
-                                .floatValue(exactRequired = false)
-                            BarChartBar(
-                                value = value,
-                                label1 = stringResource(id = month.string()),
-                                label2 = amount.toStringExpanded()
-                            )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Spacer(modifier = Modifier.weight(0.15f))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.6f)
+                        ) {
+                            (1..10).forEach { index ->
+                                Row(
+                                    modifier = Modifier.weight(0.02F)
+                                ) {
+                                    Text(
+                                        "${(11 - index) * 10}%",
+                                        fontSize = TextUnit(6F, TextUnitType.Sp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Divider(
+                                        modifier = Modifier.height(1.dp),
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(0.08F))
+                            }
+                        }
+                        Spacer(modifier = Modifier.weight(0.25f))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            months.forEach { (month, amount) ->
+                                item {
+                                    val value =
+                                        amount.divide(total, decimalMode = DecimalMode.US_CURRENCY)
+                                            .floatValue(exactRequired = false)
+                                    BarChartBar(
+                                        value = value,
+                                        label1 = stringResource(id = month.string()),
+                                        label2 = amount.toStringExpanded()
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -238,29 +331,57 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun BarChartBar(value: Float, label1: String, label2: String) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxHeight()
+                .widthIn(min = 0.dp, max = 64.dp)
+                .padding(horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.weight(0.15f))
+            Column(
+                modifier = Modifier
+                    .weight(0.6F)
+                    .width(24.dp)
+            ) {
+                if (value != 1F) {
+                    Spacer(
+                        modifier = Modifier
+                            .weight(1F - value)
+                    )
+                }
+                if (value != 0F) {
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(value),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.weight(0.05f))
             Column(
                 modifier = Modifier.weight(0.2f),
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = label1, style = MaterialTheme.typography.bodySmall)
-                Text(text = label2, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = label1,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Visible,
+                    modifier = Modifier.basicMarquee()
+                )
+                Text(
+                    text = label2,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Visible,
+                    modifier = Modifier.basicMarquee()
+                )
             }
-            LinearProgressIndicator(
-                progress = value,
-                modifier = Modifier
-                    .weight(0.7F)
-                    .height(8.dp),
-                color = MaterialTheme.colorScheme.primary,
-                strokeCap = StrokeCap.Round
-            )
         }
     }
 
