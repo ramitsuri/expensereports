@@ -61,7 +61,11 @@ class NetworkProvider(
     }
 
     fun reportApi(): ReportApi {
-        return ReportApiImpl(client, prefManager.getServerUrl(), dispatcherProvider)
+        return if (prefManager.getServerUrl().isEmpty()) {
+            DummyReportApiImpl()
+        } else {
+            ReportApiImpl(client, prefManager.getServerUrl(), dispatcherProvider)
+        }
     }
 
     companion object {
