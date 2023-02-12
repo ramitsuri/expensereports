@@ -151,36 +151,51 @@ class ExpenseReportViewModel(
         }
     }
 
-    private suspend fun onReportAvailableForFirstTime(report: ExpenseReport) {
-        calculator = ExpenseReportCalculator(report, dispatchers.default)
-        val reportView =
+    private suspend fun onReportAvailableForFirstTime(initialReport: ExpenseReport) {
+        calculator = ExpenseReportCalculator(initialReport, dispatchers.default)
+        val calculatedReport =
             calculator.calculate(by = ExpenseReportCalculator.By.FULL) as? ExpenseReportView.Full
-        if (reportView == null) {
+        if (calculatedReport == null) {
             _state.update {
                 it.copy(loading = false)
             }
             return
         }
-
-        val reportMonths = reportView.sortedMonths
-            .map { monthNumber ->
-                Month(month = monthNumber, selected = true, id = monthNumber)
+        val monthsFromInitialReport = initialReport.accountTotals.first().monthAmounts
+            .map { (monthNumber, _) ->
+                Month(
+                    month = monthNumber,
+                    selected = calculatedReport.total.monthAmounts.keys.contains(monthNumber),
+                    id = monthNumber
+                )
             }
         val months: List<Month> = listOf(
-            Month(month = FilterItem.ALL_ID, selected = true, id = FilterItem.ALL_ID)
-        ) + reportMonths
+            Month(
+                month = FilterItem.ALL_ID,
+                selected = monthsFromInitialReport.size == calculatedReport.total.monthAmounts.size,
+                id = FilterItem.ALL_ID
+            )
+        ) + monthsFromInitialReport
 
-        val reportAccounts = reportView.accountTotals
+        val accountsFromInitialReport = initialReport.accountTotals
+            .sortedBy { it.name }
             .mapIndexed { index, accountTotal ->
-                Account(accountTotal.name, selected = true, id = index)
+                Account(
+                    accountTotal.name,
+                    selected = calculatedReport.accountTotals.count { it.name == accountTotal.name } != 0,
+                    id = index
+                )
             }
         val accounts: List<Account> = listOf(
-            Account(selected = true, id = FilterItem.ALL_ID)
-        ) + reportAccounts
+            Account(
+                selected = accountsFromInitialReport.size == calculatedReport.accountTotals.size,
+                id = FilterItem.ALL_ID
+            )
+        ) + accountsFromInitialReport
         _state.update {
             it.copy(
                 loading = false,
-                report = reportView,
+                report = calculatedReport,
                 months = months,
                 accounts = accounts
             )
@@ -198,9 +213,9 @@ data class ReportsViewState(
     val loading: Boolean = false,
     val serverUrl: String = "",
     val years: List<Year> = listOf(
-        Year(2021),
+        Year(2023),
         Year(2022),
-        Year(2023)
+        Year(2021)
     ),
     val views: List<View> = listOf(
         View(ViewType.TABLE),

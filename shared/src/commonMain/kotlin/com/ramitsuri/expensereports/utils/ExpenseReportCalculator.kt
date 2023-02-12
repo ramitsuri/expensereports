@@ -60,17 +60,45 @@ class ExpenseReportCalculator(
                 monthAmounts = totalsAccountMonthAmounts,
                 total = totalAccountTotal
             )
-            val sortedMonths = totalAccount.monthAmounts.keys.sorted()
             ExpenseReportView.Full(
                 accountTotals = accounts.sortedBy { it.name },
-                total = totalAccount,
-                sortedMonths = sortedMonths
+                total = totalAccount
             )
         }
+        val hideZeroTotals = selectedAccounts == null && selectedMonths == null // Filter out zeros
+        // only when no selected months and accounts are sent because that's when the report is
+        // requested for the first time. After that we want to send back totals for whatever
+        // selection even if zero
+        val resultWithNoZeros = if (hideZeroTotals) {
+            val totalAccountMonthsWithNoZeros =
+                result.total.copy(monthAmounts = result.total.monthAmounts.filter {
+                    it.value.compare(BigDecimal.ZERO) != 0
+                })
+            val accountTotalsWithNoZeros = result.accountTotals
+                .filter { accountTotal ->
+                    accountTotal.total.compare(BigDecimal.ZERO) != 0
+                }
+                .map { accountTotal ->
+                    accountTotal.copy(
+                        monthAmounts = accountTotal.monthAmounts
+                            .filter {
+                                totalAccountMonthsWithNoZeros.monthAmounts.keys.contains(
+                                    it.key
+                                )
+                            }
+                    )
+                }
+            result.copy(
+                accountTotals = accountTotalsWithNoZeros,
+                total = totalAccountMonthsWithNoZeros
+            )
+        } else {
+            result
+        }
         return@withContext when (by) {
-            By.FULL -> result
-            By.MONTH -> result.toByMonth()
-            By.ACCOUNT -> result.toByAccount()
+            By.FULL -> resultWithNoZeros
+            By.MONTH -> resultWithNoZeros.toByMonth()
+            By.ACCOUNT -> resultWithNoZeros.toByAccount()
         }
     }
 
@@ -110,20 +138,17 @@ class ExpenseReportCalculator(
 sealed class ExpenseReportView {
     data class Full(
         val accountTotals: List<AccountTotal>,
-        val total: AccountTotal,
-        val sortedMonths: List<Int>
+        val total: AccountTotal
     ) : ExpenseReportView()
 
     data class ByMonth(
         val monthTotals: Map<Int, BigDecimal>,
-        val total: BigDecimal,
-        val sortedMonths: List<Int>
+        val total: BigDecimal
     ) : ExpenseReportView()
 
     data class ByAccount(
         val accountTotals: Map<String, BigDecimal>,
-        val total: BigDecimal,
-        val sortedAccounts: List<String>
+        val total: BigDecimal
     ) : ExpenseReportView()
 }
 
@@ -131,8 +156,7 @@ fun ExpenseReportView.Full.toByMonth(): ExpenseReportView.ByMonth {
     val totalsAccount = this.total
     return ExpenseReportView.ByMonth(
         monthTotals = totalsAccount.monthAmounts,
-        total = totalsAccount.total,
-        sortedMonths = this.sortedMonths
+        total = totalsAccount.total
     )
 }
 
@@ -142,7 +166,6 @@ fun ExpenseReportView.Full.toByAccount(): ExpenseReportView.ByAccount {
         .associate { Pair(it.name, it.total) }
     return ExpenseReportView.ByAccount(
         accountTotals = otherAccounts,
-        total = totalsAccount.total,
-        sortedAccounts = this.accountTotals.map { it.name }.sorted()
+        total = totalsAccount.total
     )
 }

@@ -170,7 +170,7 @@ class MainActivity : ComponentActivity() {
                 TableView(
                     report.accountTotals,
                     report.total,
-                    report.sortedMonths
+                    report.total.monthAmounts.map { it.key }
                 )
             }
 
@@ -223,7 +223,7 @@ class MainActivity : ComponentActivity() {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Divider(
                                         modifier = Modifier.height(1.dp),
-                                        color = MaterialTheme.colorScheme.onBackground
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2F)
                                     )
                                 }
                                 Spacer(modifier = Modifier.weight(0.08F))
@@ -295,7 +295,7 @@ class MainActivity : ComponentActivity() {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Divider(
                                         modifier = Modifier.height(1.dp),
-                                        color = MaterialTheme.colorScheme.onBackground
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2F)
                                     )
                                 }
                                 Spacer(modifier = Modifier.weight(0.08F))
@@ -358,7 +358,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(value),
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primaryContainer
                     )
                 }
             }
@@ -475,7 +475,7 @@ class MainActivity : ComponentActivity() {
                                         .border(
                                             border = BorderStroke(
                                                 1.dp,
-                                                MaterialTheme.colorScheme.onPrimaryContainer
+                                                color = MaterialTheme.colorScheme.onBackground
                                             )
                                         )
                                         .layout { measurable, constraints ->
