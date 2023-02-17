@@ -12,6 +12,16 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         return getString(key, "") ?: ""
     }
 
+    fun setIgnoredExpenseAccounts(ignoredAccounts: List<String>) {
+        val key = Key.IGNORED_EXPENSE_ACCOUNTS
+        putStringList(key, ignoredAccounts)
+    }
+
+    fun getIgnoredExpenseAccounts(): List<String> {
+        val key = Key.IGNORED_EXPENSE_ACCOUNTS
+        return getStringList(key, listOf())
+    }
+
     private fun putString(key: Key, value: String) {
         val keyValueStore = getKeyValueStore(key)
         keyValueStore.putString(key.key, value)
@@ -76,6 +86,7 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
 
         private enum class Key(val key: String, val isSecure: Boolean) {
             SERVER_URL(key = "server_url", isSecure = false),
+            IGNORED_EXPENSE_ACCOUNTS(key = "ignored_expense_accounts", isSecure = false)
         }
     }
 }

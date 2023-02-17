@@ -95,22 +95,9 @@ fun ExpenseReportScreen(
     onNavigateToSettings: () -> Unit
 ) {
     val viewState = viewModel.state.collectAsState().value
-
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-            modifier = modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .displayCutoutPadding(),
-        ) { paddingValues ->
-            ExpenseContent(
-                isLoading = viewState.loading,
-                error = viewState.error,
-                onErrorShown = viewModel::onErrorShown,
+    Scaffold(
+        topBar = {
+            TopRow(
                 years = viewState.years,
                 onYearSelected = viewModel::reportSelected,
                 views = viewState.views,
@@ -118,15 +105,26 @@ fun ExpenseReportScreen(
                 serverUrl = viewState.serverUrl,
                 onUrlSet = viewModel::setServerUrl,
                 onRefreshRequested = viewModel::refresh,
-                accounts = viewState.accounts,
-                onAccountClicked = viewModel::onAccountClicked,
-                months = viewState.months,
-                onMonthClicked = viewModel::onMonthClicked,
-                reportView = viewState.report,
-                onSettingsRequested = onNavigateToSettings,
-                modifier = Modifier.padding(paddingValues)
+                onSettingsRequested = onNavigateToSettings
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .displayCutoutPadding(),
+    ) { paddingValues ->
+        ExpenseContent(
+            isLoading = viewState.loading,
+            error = viewState.error,
+            onErrorShown = viewModel::onErrorShown,
+            accounts = viewState.accounts,
+            onAccountClicked = viewModel::onAccountClicked,
+            months = viewState.months,
+            onMonthClicked = viewModel::onMonthClicked,
+            reportView = viewState.report,
+            modifier = Modifier.padding(paddingValues)
+        )
     }
 }
 
@@ -135,25 +133,17 @@ private fun ExpenseContent(
     isLoading: Boolean,
     error: ErrorCode?,
     onErrorShown: () -> Unit,
-    years: List<Year>,
-    onYearSelected: (Year) -> Unit,
-    views: List<View>,
-    onViewSelected: (View) -> Unit,
-    serverUrl: String,
-    onUrlSet: (String) -> Unit,
-    onRefreshRequested: () -> Unit,
     accounts: List<FilterItem>,
     onAccountClicked: (item: FilterItem) -> Unit,
     months: List<FilterItem>,
     onMonthClicked: (item: FilterItem) -> Unit,
     reportView: ExpenseReportView?,
-    onSettingsRequested: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (isLoading) {
@@ -172,17 +162,6 @@ private fun ExpenseContent(
                 ).show()
                 onErrorShown()
             }
-
-            TopRow(
-                years = years,
-                onYearSelected = onYearSelected,
-                views = views,
-                onViewSelected = onViewSelected,
-                serverUrl = serverUrl,
-                onUrlSet = onUrlSet,
-                onRefreshRequested = onRefreshRequested,
-                onSettingsRequested = onSettingsRequested
-            )
             FilterRow(
                 items = accounts,
                 onItemClicked = onAccountClicked
@@ -572,7 +551,9 @@ private fun TopRow(
     onRefreshRequested: () -> Unit,
     onSettingsRequested: () -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp)) {
         YearSelector(
             years = years,
             onYearSelected = onYearSelected,

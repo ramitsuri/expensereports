@@ -3,6 +3,7 @@
     <string name="app_name">Expense Reports</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="back">Back</string>
 
     <!-- Menu -->
     <string name="home_menu_refresh">Refresh</string>
@@ -35,4 +36,9 @@
 
     <string name="report_year_selector_content_description">Year</string>
     <string name="report_view_selector_content_description">View type</string>
+
+    <!-- Settings/Ignored Expense Accounts -->
+    <string name="settings_ignored_expense_accounts_title">Ignored Expense Accounts</string>
+    <string name="settings_ignored_expense_accounts_empty">None</string>
+
 </resources>

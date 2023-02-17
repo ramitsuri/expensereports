@@ -3,20 +3,21 @@ package com.ramitsuri.expensereports.android
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import com.google.android.material.color.DynamicColors
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.di.AppInfo
 import com.ramitsuri.expensereports.di.initKoin
-import com.ramitsuri.expensereports.network.NetworkProvider
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.viewmodel.ExpenseReportViewModel
+import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        //DynamicColors.applyToActivitiesIfAvailable(this)
+        DynamicColors.applyToActivitiesIfAvailable(this)
         initDependencyInjection()
     }
 
@@ -35,6 +36,12 @@ class MainApplication : Application() {
                     ExpenseReportViewModel(
                         get<ReportsRepository>(),
                         get<DispatcherProvider>(),
+                        get<PrefManager>()
+                    )
+                }
+
+                viewModel {
+                    SettingsViewModel(
                         get<PrefManager>()
                     )
                 }

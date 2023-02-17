@@ -33,7 +33,11 @@ fun NavGraph(
             }
         )
 
-        settingsNavigation()
+        settingsNavigation(
+            onBack = {
+                navController.popBackStack()
+            }
+        )
     }
 }
 
@@ -47,9 +51,9 @@ private fun NavGraphBuilder.expenseNavigation(
 }
 
 @OptIn(ExperimentalAnimationApi::class)
-private fun NavGraphBuilder.settingsNavigation() {
+private fun NavGraphBuilder.settingsNavigation(onBack: () -> Unit) {
     composable(route = SETTINGS_SCREEN_ROUTE) {
-        SettingsScreen()
+        SettingsScreen(onBack = onBack)
     }
 }
 
