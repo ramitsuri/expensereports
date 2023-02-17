@@ -1,9 +1,8 @@
 package com.ramitsuri.expensereports.android.ui
 
 import android.app.Activity
+import android.content.res.Resources
 import android.os.Build
-import android.view.View
-import android.view.WindowInsetsController
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.shapes
@@ -17,6 +16,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 
 private val Purple80 = Color(0xFFD0BCFF)
@@ -41,6 +42,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AppTheme(
+    theme: Resources.Theme,
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
@@ -57,27 +59,13 @@ fun AppTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            if (Build.VERSION.SDK_INT >= 30) {
-                val insetsController = window.insetsController
-                val statusBar = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                val navBar = WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-                if (!darkTheme) {
-                    insetsController?.setSystemBarsAppearance(statusBar, statusBar)
-                    insetsController?.setSystemBarsAppearance(navBar, navBar)
-                } else {
-                    insetsController?.setSystemBarsAppearance(0, statusBar)
-                    insetsController?.setSystemBarsAppearance(0, navBar)
-                }
-            } else {
-                val decorView = window.decorView
-                val flags =
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                decorView.systemUiVisibility = if (!darkTheme) {
-                    decorView.systemUiVisibility or flags
-                } else {
-                    (decorView.systemUiVisibility.inv() or flags).inv()
-                }
-            }
+            val resources = view.resources
+            val transparent = ResourcesCompat.getColor(resources, android.R.color.transparent, theme)
+            window.statusBarColor = transparent
+            window.navigationBarColor = transparent
+            val controller = WindowInsetsControllerCompat(window, view)
+            controller.isAppearanceLightStatusBars = !darkTheme
+            controller.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 

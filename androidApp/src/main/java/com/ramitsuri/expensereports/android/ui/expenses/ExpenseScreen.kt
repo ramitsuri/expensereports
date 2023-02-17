@@ -47,7 +47,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -85,8 +84,6 @@ import com.ramitsuri.expensereports.viewmodel.ViewType
 import com.ramitsuri.expensereports.viewmodel.Year
 import org.koin.androidx.compose.getViewModel
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseReportScreen(
     modifier: Modifier = Modifier,
@@ -95,43 +92,43 @@ fun ExpenseReportScreen(
     onNavigateToSettings: () -> Unit
 ) {
     val viewState = viewModel.state.collectAsState().value
-    Scaffold(
-        topBar = {
-            TopRow(
-                years = viewState.years,
-                onYearSelected = viewModel::reportSelected,
-                views = viewState.views,
-                onViewSelected = viewModel::onViewSelected,
-                serverUrl = viewState.serverUrl,
-                onUrlSet = viewModel::setServerUrl,
-                onRefreshRequested = viewModel::refresh,
-                onSettingsRequested = onNavigateToSettings
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+
+    ExpenseContent(
+        snackbarHostState = snackbarHostState,
+        isLoading = viewState.loading,
+        error = viewState.error,
+        years = viewState.years,
+        onYearSelected = viewModel::reportSelected,
+        views = viewState.views,
+        onViewSelected = viewModel::onViewSelected,
+        serverUrl = viewState.serverUrl,
+        onUrlSet = viewModel::setServerUrl,
+        onRefreshRequested = viewModel::refresh,
+        onSettingsRequested = onNavigateToSettings,
+        onErrorShown = viewModel::onErrorShown,
+        accounts = viewState.accounts,
+        onAccountClicked = viewModel::onAccountClicked,
+        months = viewState.months,
+        onMonthClicked = viewModel::onMonthClicked,
+        reportView = viewState.report,
         modifier = modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .displayCutoutPadding(),
-    ) { paddingValues ->
-        ExpenseContent(
-            isLoading = viewState.loading,
-            error = viewState.error,
-            onErrorShown = viewModel::onErrorShown,
-            accounts = viewState.accounts,
-            onAccountClicked = viewModel::onAccountClicked,
-            months = viewState.months,
-            onMonthClicked = viewModel::onMonthClicked,
-            reportView = viewState.report,
-            modifier = Modifier.padding(paddingValues)
-        )
-    }
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ExpenseContent(
+    snackbarHostState: SnackbarHostState,
     isLoading: Boolean,
     error: ErrorCode?,
+    years: List<Year>,
+    onYearSelected: (Year) -> Unit,
+    views: List<View>,
+    onViewSelected: (View) -> Unit,
+    serverUrl: String,
+    onUrlSet: (String) -> Unit,
+    onRefreshRequested: () -> Unit,
+    onSettingsRequested: () -> Unit,
     onErrorShown: () -> Unit,
     accounts: List<FilterItem>,
     onAccountClicked: (item: FilterItem) -> Unit,
@@ -140,41 +137,61 @@ private fun ExpenseContent(
     reportView: ExpenseReportView?,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    Scaffold(
+        topBar = {
+            TopRow(
+                years = years,
+                onYearSelected = onYearSelected,
+                views = views,
+                onViewSelected = onViewSelected,
+                serverUrl = serverUrl,
+                onUrlSet = onUrlSet,
+                onRefreshRequested = onRefreshRequested,
+                onSettingsRequested = onSettingsRequested
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-        } else {
-            if (error != null) {
-                Toast.makeText(
-                    LocalContext.current,
-                    error.toString(),
-                    Toast.LENGTH_LONG
-                ).show()
-                onErrorShown()
-            }
-            FilterRow(
-                items = accounts,
-                onItemClicked = onAccountClicked
-            )
-            FilterRow(
-                items = months,
-                onItemClicked = onMonthClicked
-            )
-
-            if (reportView == null) {
-                ReportUnavailable()
+            .statusBarsPadding()
+            .displayCutoutPadding(),
+    ) { paddingValues ->
+        Column(
+            modifier = modifier
+                .padding(paddingValues)
+                .padding(horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
             } else {
-                ReportView(report = reportView)
+                if (error != null) {
+                    Toast.makeText(
+                        LocalContext.current,
+                        error.toString(),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    onErrorShown()
+                }
+                FilterRow(
+                    items = accounts,
+                    onItemClicked = onAccountClicked
+                )
+                FilterRow(
+                    items = months,
+                    onItemClicked = onMonthClicked
+                )
+
+                if (reportView == null) {
+                    ReportUnavailable()
+                } else {
+                    ReportView(report = reportView)
+                }
             }
         }
     }
@@ -551,9 +568,11 @@ private fun TopRow(
     onRefreshRequested: () -> Unit,
     onSettingsRequested: () -> Unit
 ) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 16.dp)) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
         YearSelector(
             years = years,
             onYearSelected = onYearSelected,
