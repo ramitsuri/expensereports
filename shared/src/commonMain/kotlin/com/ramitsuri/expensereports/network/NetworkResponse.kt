@@ -17,7 +17,9 @@ inline fun <reified T> NetworkResponse<T>.onFailure(
     }
 }
 
-inline fun <reified T> NetworkResponse<T>.onSuccess(callback: (value: T) -> Unit) {
+inline fun <reified T> NetworkResponse<T>.onSuccess(
+    callback: (value: T) -> Unit
+) {
     if (this is NetworkResponse.Success) {
         callback(data)
     }

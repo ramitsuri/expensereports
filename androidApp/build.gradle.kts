@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.multiplatformSettings.common)
     implementation(libs.kotlinx.dateTime)
     implementation(libs.koin.android)
+    implementation(libs.koin.compose)
     implementation(libs.kotlin.bignum)
     testImplementation(libs.junit)
 }
