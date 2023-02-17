@@ -9,6 +9,7 @@
     <string name="home_menu_restart">Restart</string>
     <string name="home_menu_set_server">Set Server</string>
     <string name="home_menu_server_set">Server Set</string>
+    <string name="home_menu_settings">Settings</string>
     <string name="menu_content_description">Menu</string>
 
     <!-- View Type -->

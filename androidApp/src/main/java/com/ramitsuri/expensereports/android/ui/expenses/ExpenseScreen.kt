@@ -91,7 +91,8 @@ import org.koin.androidx.compose.getViewModel
 fun ExpenseReportScreen(
     modifier: Modifier = Modifier,
     viewModel: ExpenseReportViewModel = getViewModel(),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onNavigateToSettings: () -> Unit
 ) {
     val viewState = viewModel.state.collectAsState().value
 
@@ -122,6 +123,7 @@ fun ExpenseReportScreen(
                 months = viewState.months,
                 onMonthClicked = viewModel::onMonthClicked,
                 reportView = viewState.report,
+                onSettingsRequested = onNavigateToSettings,
                 modifier = Modifier.padding(paddingValues)
             )
         }
@@ -129,7 +131,7 @@ fun ExpenseReportScreen(
 }
 
 @Composable
-fun ExpenseContent(
+private fun ExpenseContent(
     isLoading: Boolean,
     error: ErrorCode?,
     onErrorShown: () -> Unit,
@@ -145,6 +147,7 @@ fun ExpenseContent(
     months: List<FilterItem>,
     onMonthClicked: (item: FilterItem) -> Unit,
     reportView: ExpenseReportView?,
+    onSettingsRequested: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -177,7 +180,8 @@ fun ExpenseContent(
                 onViewSelected = onViewSelected,
                 serverUrl = serverUrl,
                 onUrlSet = onUrlSet,
-                onRefreshRequested = onRefreshRequested
+                onRefreshRequested = onRefreshRequested,
+                onSettingsRequested = onSettingsRequested
             )
             FilterRow(
                 items = accounts,
@@ -198,7 +202,7 @@ fun ExpenseContent(
 }
 
 @Composable
-fun ReportView(
+private fun ReportView(
     report: ExpenseReportView
 ) {
     when (report) {
@@ -483,7 +487,7 @@ private fun TableView(
 }
 
 @Composable
-fun Table(
+private fun Table(
     modifier: Modifier = Modifier,
     rowModifier: Modifier = Modifier,
     verticalLazyListState: LazyListState = rememberLazyListState(),
@@ -540,7 +544,7 @@ fun Table(
 
 
 @Composable
-fun TableCell(
+private fun TableCell(
     text: String,
     isHeader: Boolean = false
 ) {
@@ -553,19 +557,20 @@ fun TableCell(
 }
 
 @Composable
-fun ReportUnavailable() {
+private fun ReportUnavailable() {
 
 }
 
 @Composable
-fun TopRow(
+private fun TopRow(
     years: List<Year>,
     onYearSelected: (Year) -> Unit,
     views: List<View>,
     onViewSelected: (View) -> Unit,
     serverUrl: String,
     onUrlSet: (String) -> Unit,
-    onRefreshRequested: () -> Unit
+    onRefreshRequested: () -> Unit,
+    onSettingsRequested: () -> Unit
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
         YearSelector(
@@ -581,14 +586,15 @@ fun TopRow(
         MoreMenu(
             serverUrl = serverUrl,
             onUrlSet = onUrlSet,
-            onRefreshRequested = onRefreshRequested
+            onRefreshRequested = onRefreshRequested,
+            onSettingsRequested = onSettingsRequested
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun YearSelector(years: List<Year>, onYearSelected: (Year) -> Unit, modifier: Modifier) {
+private fun YearSelector(years: List<Year>, onYearSelected: (Year) -> Unit, modifier: Modifier) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         FilterChip(
@@ -625,7 +631,7 @@ fun YearSelector(years: List<Year>, onYearSelected: (Year) -> Unit, modifier: Mo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewSelector(
+private fun ViewSelector(
     views: List<View>,
     onViewSelected: (View) -> Unit,
     modifier: Modifier
@@ -666,7 +672,7 @@ fun ViewSelector(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterRow(
+private fun FilterRow(
     items: List<FilterItem>,
     onItemClicked: (item: FilterItem) -> Unit,
     modifier: Modifier = Modifier
@@ -686,10 +692,11 @@ fun FilterRow(
 }
 
 @Composable
-fun MoreMenu(
+private fun MoreMenu(
     serverUrl: String,
     onUrlSet: (String) -> Unit,
-    onRefreshRequested: () -> Unit
+    onRefreshRequested: () -> Unit,
+    onSettingsRequested: () -> Unit
 ) {
     val dialogState = rememberSaveable { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
@@ -763,6 +770,13 @@ fun MoreMenu(
                     }
                 )
             }
+            DropdownMenuItem(
+                text = { Text(stringResource(id = HomeMenuItem.SETTINGS.textResId)) },
+                onClick = {
+                    expanded = false
+                    onSettingsRequested()
+                }
+            )
         }
     }
 }
@@ -816,6 +830,7 @@ enum class HomeMenuItem(val id: Int, @StringRes val textResId: Int) {
     SET_SERVER(2, R.string.home_menu_set_server),
     SERVER_SET(3, R.string.home_menu_server_set),
     RESTART(4, R.string.home_menu_restart),
+    SETTINGS(5, R.string.home_menu_settings)
 }
 
 @StringRes
