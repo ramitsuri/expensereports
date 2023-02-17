@@ -3,7 +3,7 @@ package com.ramitsuri.expensereports.android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.ramitsuri.expensereports.android.expenses.ExpenseReportScreen
+import com.ramitsuri.expensereports.android.ui.expenses.ExpenseReportScreen
 
 class MainActivity : ComponentActivity() {
 

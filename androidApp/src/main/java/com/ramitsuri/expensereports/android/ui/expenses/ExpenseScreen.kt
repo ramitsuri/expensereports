@@ -1,4 +1,4 @@
-package com.ramitsuri.expensereports.android.expenses
+package com.ramitsuri.expensereports.android.ui.expenses
 
 import android.widget.Toast
 import androidx.annotation.StringRes
