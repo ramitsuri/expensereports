@@ -1,5 +1,6 @@
 package com.ramitsuri.expensereports.network
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -8,8 +9,12 @@ data class ExpenseReportDto(
     @SerialName("name")
     val name: String,
 
-    @SerialName("account_totals")
-    val accountTotals: List<AccountTotalDto>
+    @Serializable(with = InstantSerializer::class)
+    @SerialName("time")
+    val time: Instant,
+
+    @SerialName("account_total")
+    val accountTotal: AccountTotalDto
 )
 
 @Serializable

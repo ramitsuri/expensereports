@@ -40,5 +40,6 @@
     <!-- Settings/Ignored Expense Accounts -->
     <string name="settings_ignored_expense_accounts_title">Ignored Expense Accounts</string>
     <string name="settings_ignored_expense_accounts_empty">None</string>
+    <string name="report_unavailable">Unavailable</string>
 
 </resources>

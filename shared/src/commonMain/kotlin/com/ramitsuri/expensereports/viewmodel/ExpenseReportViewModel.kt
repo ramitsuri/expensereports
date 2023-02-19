@@ -152,7 +152,8 @@ class ExpenseReportViewModel(
     }
 
     private suspend fun onReportAvailableForFirstTime(initialReport: ExpenseReport) {
-        calculator = ExpenseReportCalculator(initialReport, dispatchers.default)
+        val ignoredAccounts = prefManager.getIgnoredExpenseAccounts()
+        calculator = ExpenseReportCalculator(initialReport, ignoredAccounts, dispatchers.default)
         val calculatedReport =
             calculator.calculate(by = ExpenseReportCalculator.By.FULL) as? ExpenseReportView.Full
         if (calculatedReport == null) {
@@ -161,8 +162,8 @@ class ExpenseReportViewModel(
             }
             return
         }
-        val monthsFromInitialReport = initialReport.accountTotals.first().monthAmounts
-            .map { (monthNumber, _) ->
+        val monthsFromInitialReport = calculator.getMonths()
+            .map { monthNumber ->
                 Month(
                     month = monthNumber,
                     selected = calculatedReport.total.monthAmounts.keys.contains(monthNumber),
@@ -177,12 +178,11 @@ class ExpenseReportViewModel(
             )
         ) + monthsFromInitialReport
 
-        val accountsFromInitialReport = initialReport.accountTotals
-            .sortedBy { it.name }
-            .mapIndexed { index, accountTotal ->
+        val accountsFromInitialReport = calculator.getAccounts()
+            .mapIndexed { index, accountName ->
                 Account(
-                    accountTotal.name,
-                    selected = calculatedReport.accountTotals.count { it.name == accountTotal.name } != 0,
+                    accountName,
+                    selected = calculatedReport.accountTotals.count { it.name == accountName } != 0,
                     id = index
                 )
             }

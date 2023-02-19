@@ -11,7 +11,7 @@ internal class ReportApiImpl(
 ) : ReportApi {
 
     override suspend fun getExpenseReport(year: Int): NetworkResponse<ExpenseReportDto> {
-        val url = "$baseUrl/${year}_Expenses_Filtered.json"
+        val url = "$baseUrl/${year}_Expenses_All.json"
         return apiRequest(dispatcherProvider.io) { client.get(url) }
     }
 }

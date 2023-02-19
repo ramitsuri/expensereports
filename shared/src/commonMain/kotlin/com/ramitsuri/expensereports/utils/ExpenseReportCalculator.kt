@@ -7,26 +7,39 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 class ExpenseReportCalculator(
-    private val initialReport: ExpenseReport,
+    initialReport: ExpenseReport,
+    ignoredExpenseAccounts: List<String>,
     private val defaultDispatcher: CoroutineDispatcher
 ) {
+    private lateinit var filteredReport: ExpenseReport
+
+    init {
+        val accountTotal = removeIgnoredAccounts(initialReport.accountTotal, ignoredExpenseAccounts)
+        if (accountTotal != null) {
+            filteredReport = ExpenseReport(initialReport.name, initialReport.time, accountTotal)
+        }
+    }
+
     suspend fun calculate(
         selectedMonths: List<Int>? = null,
         selectedAccounts: List<String>? = null,
         by: By = By.FULL
     ): ExpenseReportView = withContext(defaultDispatcher) {
+        if (reportNotInitialized()) {
+            return@withContext ExpenseReportView.InvalidReport
+        }
         val result = withContext(defaultDispatcher) {
             val accounts = mutableListOf<AccountTotal>()
             val totalsAccountMonthAmounts = mutableMapOf<Int, BigDecimal>()
             // Filter the month-amounts for selected months and accounts only
-            for (account in initialReport.accountTotals) {
-                if (account.notSelected(selectedAccounts)) {
+            for (account in filteredReport.accountTotal.children) {
+                if (account.isNotIn(selectedAccounts)) {
                     continue
                 }
                 val resultAccountMonthAmounts = mutableMapOf<Int, BigDecimal>()
                 var resultAccountTotal = BigDecimal.ZERO
                 for ((month, amount) in account.monthAmounts) {
-                    if (month.notSelected(selectedMonths)) {
+                    if (month.isNotIn(selectedMonths)) {
                         continue
                     }
                     resultAccountMonthAmounts[month] = amount
@@ -37,6 +50,7 @@ class ExpenseReportCalculator(
                 }
                 val resultAccount = AccountTotal(
                     name = account.name,
+                    fullName = account.fullName,
                     children = listOf(),
                     monthAmounts = resultAccountMonthAmounts,
                     total = resultAccountTotal
@@ -56,13 +70,15 @@ class ExpenseReportCalculator(
             }
             val totalAccount = AccountTotal(
                 name = TOTAL,
+                fullName = TOTAL,
                 children = listOf(),
                 monthAmounts = totalsAccountMonthAmounts,
                 total = totalAccountTotal
             )
             ExpenseReportView.Full(
                 accountTotals = accounts.sortedBy { it.name },
-                total = totalAccount
+                total = totalAccount,
+                generatedAt = filteredReport.time.toString()
             )
         }
         val hideZeroTotals = selectedAccounts == null && selectedMonths == null // Filter out zeros
@@ -102,26 +118,74 @@ class ExpenseReportCalculator(
         }
     }
 
-    private fun AccountTotal.selected(selectedAccountNames: List<String>?): Boolean {
+    fun getAccounts(): List<String> {
+        if (reportNotInitialized()) {
+            return emptyList()
+        }
+
+        return filteredReport.accountTotal.children.map { it.name }.sortedBy { it }
+    }
+
+    fun getMonths(): List<Int> {
+        if (reportNotInitialized()) {
+            return emptyList()
+        }
+
+        return filteredReport.accountTotal.monthAmounts.map { (month, _) -> month }
+    }
+
+    private fun removeIgnoredAccounts(
+        rootAccountTotal: AccountTotal,
+        ignoredExpenseAccounts: List<String>
+    ): AccountTotal? {
+        val children =
+            rootAccountTotal.children.mapNotNull {
+                removeIgnoredAccounts(it, ignoredExpenseAccounts)
+            }
+        if (children.isEmpty() && rootAccountTotal.children.isNotEmpty()) {
+            return null
+        }
+        val accountTotal = AccountTotal.fromAccountTotalAndChildren(rootAccountTotal, children)
+        if (rootAccountTotal.isIn(ignoredExpenseAccounts, fullName = true)) {
+            return null
+        }
+        return accountTotal
+    }
+
+    private fun reportNotInitialized(): Boolean {
+        return !::filteredReport.isInitialized
+    }
+
+    private fun AccountTotal.isIn(
+        selectedAccountNames: List<String>?,
+        fullName: Boolean = false
+    ): Boolean {
         if (selectedAccountNames == null) {
             return true
         }
-        return selectedAccountNames.contains(this.name)
+        return if (fullName) {
+            selectedAccountNames.contains(this.fullName)
+        } else {
+            selectedAccountNames.contains(this.name)
+        }
     }
 
-    private fun AccountTotal.notSelected(selectedAccountNames: List<String>?): Boolean {
-        return !selected(selectedAccountNames)
+    private fun AccountTotal.isNotIn(
+        selectedAccountNames: List<String>?,
+        fullName: Boolean = false
+    ): Boolean {
+        return !isIn(selectedAccountNames, fullName)
     }
 
-    private fun Int.selected(selectedMonths: List<Int>?): Boolean {
+    private fun Int.isIn(selectedMonths: List<Int>?): Boolean {
         if (selectedMonths == null) {
             return true
         }
         return selectedMonths.contains(this)
     }
 
-    private fun Int.notSelected(selectedMonths: List<Int>?): Boolean {
-        return !selected(selectedMonths)
+    private fun Int.isNotIn(selectedMonths: List<Int>?): Boolean {
+        return !isIn(selectedMonths)
     }
 
     enum class By {
@@ -138,25 +202,31 @@ class ExpenseReportCalculator(
 sealed class ExpenseReportView {
     data class Full(
         val accountTotals: List<AccountTotal>,
-        val total: AccountTotal
+        val total: AccountTotal,
+        val generatedAt: String
     ) : ExpenseReportView()
 
     data class ByMonth(
         val monthTotals: Map<Int, BigDecimal>,
-        val total: BigDecimal
+        val total: BigDecimal,
+        val generatedAt: String
     ) : ExpenseReportView()
 
     data class ByAccount(
         val accountTotals: Map<String, BigDecimal>,
-        val total: BigDecimal
+        val total: BigDecimal,
+        val generatedAt: String
     ) : ExpenseReportView()
+
+    object InvalidReport : ExpenseReportView()
 }
 
 fun ExpenseReportView.Full.toByMonth(): ExpenseReportView.ByMonth {
     val totalsAccount = this.total
     return ExpenseReportView.ByMonth(
         monthTotals = totalsAccount.monthAmounts,
-        total = totalsAccount.total
+        total = totalsAccount.total,
+        generatedAt = this.generatedAt
     )
 }
 
@@ -166,6 +236,7 @@ fun ExpenseReportView.Full.toByAccount(): ExpenseReportView.ByAccount {
         .associate { Pair(it.name, it.total) }
     return ExpenseReportView.ByAccount(
         accountTotals = otherAccounts,
-        total = totalsAccount.total
+        total = totalsAccount.total,
+        generatedAt = this.generatedAt
     )
 }

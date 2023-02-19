@@ -50,6 +50,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -203,6 +204,10 @@ private fun ReportView(
 ) {
     when (report) {
         is ExpenseReportView.Full -> {
+            val context = LocalContext.current
+            LaunchedEffect(key1 = report) {
+                Toast.makeText(context, report.generatedAt, Toast.LENGTH_SHORT).show()
+            }
             TableView(
                 report.accountTotals,
                 report.total,
@@ -217,7 +222,9 @@ private fun ReportView(
         is ExpenseReportView.ByAccount -> {
             BarChartAccount(report.accountTotals, report.total)
         }
-        else -> {}
+        else -> {
+            ReportUnavailable()
+        }
     }
 }
 
@@ -553,8 +560,14 @@ private fun TableCell(
 }
 
 @Composable
-private fun ReportUnavailable() {
-
+private fun ReportUnavailable(modifier: Modifier = Modifier) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        Text(text = stringResource(id = R.string.report_unavailable))
+    }
 }
 
 @Composable
