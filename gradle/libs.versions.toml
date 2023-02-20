@@ -55,7 +55,6 @@ compose-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "co
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 compose-material = { module = "androidx.compose.material3:material3", version.ref = "compose-m3" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
-accompanist-navigation-animation = { group = "com.google.accompanist", name = "accompanist-navigation-animation", version.ref = "accompanist" }
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
 
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -115,7 +114,6 @@ app-ui = [
     "android-material",
     "compose-activity",
     "google-accompanist-swipeRefresh",
-    "accompanist-navigation-animation",
     "compose-navigation"
 ]
 ktor-common = ["ktor-client-core", "ktor-client-logging", "ktor-client-serialization", "ktor-client-contentNegotiation"]

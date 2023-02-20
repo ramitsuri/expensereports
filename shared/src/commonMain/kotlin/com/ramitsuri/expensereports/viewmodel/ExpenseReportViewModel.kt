@@ -26,8 +26,7 @@ class ExpenseReportViewModel(
     private val prefManager: PrefManager
 ) : ViewModel(), KoinComponent {
 
-    private val _state: MutableStateFlow<ReportsViewState> =
-        MutableStateFlow(ReportsViewState(serverUrl = getServerUrl()))
+    private val _state: MutableStateFlow<ReportsViewState> = MutableStateFlow(ReportsViewState())
     val state: StateFlow<ReportsViewState> = _state
 
     private lateinit var calculator: ExpenseReportCalculator
@@ -39,12 +38,6 @@ class ExpenseReportViewModel(
     fun onErrorShown() {
         _state.update {
             it.copy(error = null)
-        }
-    }
-
-    fun refresh() {
-        _state.value.years.firstOrNull { it.selected }?.let { selectedYear ->
-            reportSelected(selectedYear)
         }
     }
 
@@ -113,13 +106,6 @@ class ExpenseReportViewModel(
             })
         }
         refreshReport()
-    }
-
-    fun setServerUrl(url: String) {
-        prefManager.setServerUrl(url)
-        _state.update {
-            it.copy(serverUrl = url)
-        }
     }
 
     private fun refreshReport() {
@@ -202,8 +188,6 @@ class ExpenseReportViewModel(
         }
     }
 
-    private fun getServerUrl() = prefManager.getServerUrl()
-
     companion object {
         private const val TAG = "ReportsVM"
     }
@@ -211,7 +195,6 @@ class ExpenseReportViewModel(
 
 data class ReportsViewState(
     val loading: Boolean = false,
-    val serverUrl: String = "",
     val years: List<Year> = listOf(
         Year(2023),
         Year(2022),

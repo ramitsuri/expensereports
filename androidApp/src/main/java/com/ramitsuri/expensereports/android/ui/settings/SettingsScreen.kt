@@ -44,6 +44,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.ramitsuri.expensereports.android.R
+import com.ramitsuri.expensereports.android.extensions.shutdown
 import com.ramitsuri.expensereports.viewmodel.IgnoredExpenseAccounts
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
 import kotlinx.coroutines.delay
@@ -69,6 +71,8 @@ fun SettingsScreen(
         snackbarHostState = snackbarHostState,
         ignoredExpenseAccounts = viewState.ignoredExpenseAccounts,
         onIgnoredExpenseAccountsSet = viewModel::setIgnoredExpenseAccounts,
+        serverUrl = viewState.serverUrl.url,
+        onUrlSet = viewModel::setServerUrl,
         onBack = onBack,
         modifier = modifier
     )
@@ -80,6 +84,8 @@ private fun SettingsContent(
     snackbarHostState: SnackbarHostState,
     ignoredExpenseAccounts: IgnoredExpenseAccounts,
     onIgnoredExpenseAccountsSet: (List<String>) -> Unit,
+    serverUrl: String,
+    onUrlSet: (String) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -115,10 +121,104 @@ private fun SettingsContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item {
+                    ServerUrlItem(
+                        serverUrl = serverUrl,
+                        onUrlSet = onUrlSet
+                    )
+                }
+                item {
                     IgnoredExpenseAccountsItem(
                         ignoredExpenseAccounts = ignoredExpenseAccounts,
                         onIgnoredExpenseAccountsSet = onIgnoredExpenseAccountsSet
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ServerUrlItem(
+    serverUrl: String,
+    onUrlSet: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val dialogState = rememberSaveable { mutableStateOf(false) }
+    var serverSet by rememberSaveable { mutableStateOf(false) }
+    val subtitle = if (serverSet) {
+        stringResource(id = R.string.settings_server_url_restart)
+    } else if (serverUrl.isEmpty()) {
+        stringResource(id = R.string.settings_server_url_server_not_set)
+    } else {
+        serverUrl
+    }
+    SettingsItem(
+        title = stringResource(id = R.string.settings_server_url_title),
+        subtitle = subtitle,
+        onClick = {
+            if (serverSet) {
+                context.shutdown()
+            } else {
+                dialogState.value = true
+            }
+        },
+        modifier = modifier
+    )
+    if (dialogState.value) {
+        SetApiUrlDialog(
+            previousUrl = serverUrl,
+            onPositiveClick = { url ->
+                dialogState.value = false
+                onUrlSet(url)
+                serverSet = true
+            },
+            onNegativeClick = {
+                dialogState.value = false
+            },
+            dialogState = dialogState
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SetApiUrlDialog(
+    previousUrl: String,
+    onPositiveClick: (String) -> Unit,
+    onNegativeClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    dialogState: MutableState<Boolean>
+) {
+    var text by rememberSaveable { mutableStateOf(previousUrl.ifEmpty { "http://" }) }
+    Dialog(
+        onDismissRequest = { dialogState.value = false },
+        properties = DialogProperties(dismissOnClickOutside = true)
+    ) {
+        Card {
+            Column(modifier = modifier.padding(8.dp)) {
+                OutlinedTextField(
+                    value = text,
+                    singleLine = true,
+                    onValueChange = { text = it },
+                    modifier = modifier.fillMaxWidth()
+                )
+                Spacer(modifier = modifier.height(16.dp))
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = {
+                        onNegativeClick()
+                    }) {
+                        Text(text = stringResource(id = R.string.cancel))
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    TextButton(onClick = {
+                        onPositiveClick(text)
+                    }) {
+                        Text(text = stringResource(id = R.string.ok))
+                    }
                 }
             }
         }

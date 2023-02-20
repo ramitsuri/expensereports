@@ -12,7 +12,8 @@ class SettingsViewModel(
 
     private val _state = MutableStateFlow(
         SettingsViewState(
-            ignoredExpenseAccounts = IgnoredExpenseAccounts(getIgnoredExpenseAccounts())
+            ignoredExpenseAccounts = IgnoredExpenseAccounts(getIgnoredExpenseAccounts()),
+            serverUrl = ServerUrl(getServerUrl())
         )
     )
     val state: StateFlow<SettingsViewState> = _state
@@ -28,13 +29,25 @@ class SettingsViewModel(
         }
     }
 
+    fun setServerUrl(url: String) {
+        prefManager.setServerUrl(url)
+        _state.update {
+            it.copy(serverUrl = ServerUrl(url))
+        }
+    }
+
     private fun getIgnoredExpenseAccounts(): List<String> {
         return prefManager.getIgnoredExpenseAccounts()
     }
+
+    private fun getServerUrl() = prefManager.getServerUrl()
 }
 
 data class SettingsViewState(
-    val ignoredExpenseAccounts: IgnoredExpenseAccounts = IgnoredExpenseAccounts()
+    val ignoredExpenseAccounts: IgnoredExpenseAccounts = IgnoredExpenseAccounts(),
+    val serverUrl: ServerUrl = ServerUrl()
 )
 
 data class IgnoredExpenseAccounts(val accounts: List<String> = listOf())
+
+data class ServerUrl(val url: String = "")
