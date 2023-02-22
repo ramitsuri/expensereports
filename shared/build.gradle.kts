@@ -102,7 +102,7 @@ kotlin {
 }
 
 sqldelight {
-    database("ExpenseReportsDb") {
+    database("ReportsDb") {
         packageName = "com.ramitsuri.expensereports.db"
     }
 }

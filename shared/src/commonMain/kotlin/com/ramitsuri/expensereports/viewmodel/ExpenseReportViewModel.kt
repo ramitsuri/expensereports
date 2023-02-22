@@ -1,10 +1,9 @@
 package com.ramitsuri.expensereports.viewmodel
 
+import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.ReportWithTotal
+import com.ramitsuri.expensereports.data.Response
 import com.ramitsuri.expensereports.data.prefs.PrefManager
-import com.ramitsuri.expensereports.network.ErrorCode
-import com.ramitsuri.expensereports.network.onFailure
-import com.ramitsuri.expensereports.network.onSuccess
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.ui.Account
 import com.ramitsuri.expensereports.ui.FilterItem
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import com.ramitsuri.expensereports.data.Error
 
 class ExpenseReportViewModel(
     private val repository: ReportsRepository,
@@ -51,15 +51,18 @@ class ExpenseReportViewModel(
             it.copy(loading = true)
         }
         viewModelScope.launch {
-            val response = repository.getExpenseReport(selectedYear.year)
-            response.onSuccess { report ->
-                onReportAvailableForFirstTime(report)
-            }
+            repository.getReportWithTotal(selectedYear.year, reportType).collect { response ->
+                when (response) {
+                    is Response.Success -> {
+                        onReportAvailableForFirstTime(response.data)
+                    }
 
-            response.onFailure { error, throwable ->
-                LogHelper.e(TAG, "Error: $error, message: ${throwable?.message}")
-                _state.update {
-                    it.copy(loading = false, error = error)
+                    is Response.Failure -> {
+                        LogHelper.e(TAG, "Error: ${response.error}")
+                        _state.update {
+                            it.copy(loading = false)
+                        }
+                    }
                 }
             }
         }
@@ -77,7 +80,7 @@ class ExpenseReportViewModel(
         _state.update {
             it.copy(months = newMonths)
         }
-        refreshReport()
+        recalculate()
     }
 
     fun onAccountClicked(account: FilterItem) {
@@ -93,7 +96,7 @@ class ExpenseReportViewModel(
         _state.update {
             it.copy(accounts = newAccounts)
         }
-        refreshReport()
+        recalculate()
     }
 
     fun onViewSelected(selectedView: View) {
@@ -105,10 +108,10 @@ class ExpenseReportViewModel(
                 chart.copy(selected = chart.type == selectedView.type)
             })
         }
-        refreshReport()
+        recalculate()
     }
 
-    private fun refreshReport() {
+    private fun recalculate() {
         viewModelScope.launch {
             val selectedMonths = _state.value.months
                 .filter { !it.isAllFilterItem && it.selected }
@@ -190,6 +193,8 @@ class ExpenseReportViewModel(
 
     companion object {
         private const val TAG = "ReportsVM"
+
+        private val reportType = ReportType.EXPENSE
     }
 }
 
@@ -208,7 +213,7 @@ data class ReportsViewState(
     val months: List<FilterItem> = listOf(),
     val accounts: List<FilterItem> = listOf(),
     val report: ExpenseReportView? = null,
-    val error: ErrorCode? = null
+    val error: Error? = null
 )
 
 data class Year(val year: Int, val selected: Boolean = year == DEFAULT_YEAR)

@@ -60,7 +60,7 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.data.AccountTotalWithTotal
-import com.ramitsuri.expensereports.network.ErrorCode
+import com.ramitsuri.expensereports.data.Error
 import com.ramitsuri.expensereports.ui.FilterItem
 import com.ramitsuri.expensereports.utils.ExpenseReportView
 import com.ramitsuri.expensereports.viewmodel.ExpenseReportViewModel
@@ -96,7 +96,7 @@ fun ExpensesScreen(
 @Composable
 private fun ExpenseContent(
     isLoading: Boolean,
-    error: ErrorCode?,
+    error: Error?,
     years: List<Year>,
     onYearSelected: (Year) -> Unit,
     views: List<View>,

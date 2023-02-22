@@ -1,5 +1,7 @@
 package com.ramitsuri.expensereports.di
 
+import com.ramitsuri.expensereports.data.db.Database
+import com.ramitsuri.expensereports.data.db.ReportDao
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.network.NetworkProvider
 import com.ramitsuri.expensereports.repository.ReportsRepository
@@ -7,6 +9,8 @@ import com.ramitsuri.expensereports.utils.DispatcherProvider
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.datetime.Clock
+import kotlinx.serialization.json.Json
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -28,16 +32,37 @@ private val coreModule = module {
         NetworkProvider(
             get<DispatcherProvider>(),
             get<PrefManager>(),
+            get<Json>(),
             get<HttpClientEngine>()
         )
     }
 
     factory<ReportsRepository> {
-        ReportsRepository(get<NetworkProvider>().reportApi())
+        ReportsRepository(
+            get<NetworkProvider>().reportApi(),
+            get<ReportDao>(),
+            get<Clock>(),
+            get<PrefManager>()
+        )
     }
 
     single<CoroutineScope> {
         CoroutineScope(SupervisorJob())
+    }
+
+    factory<ReportDao> {
+        get<Database>().reportDao
+    }
+
+    single<Json> {
+        Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
+    }
+
+    single<Clock> {
+        Clock.System
     }
 }
 

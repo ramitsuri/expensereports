@@ -1,41 +1,25 @@
 package com.ramitsuri.expensereports.network
 
+import com.ramitsuri.expensereports.data.ReportType
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
-internal class DummyReportApiImpl : ReportApi {
-    private val json = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
+internal class DummyReportApiImpl(private val json: Json) : ReportApi {
+
+    override suspend fun getWithTotal(
+        year: Int,
+        type: ReportType
+    ): NetworkResponse<ReportWithTotalDto> {
+        val dto = json.decodeFromString<ReportWithTotalDto>(getReportJson(year))
+        return NetworkResponse.Success(dto)
     }
 
-    override suspend fun getExpenseDetailReport(year: Int): NetworkResponse<ReportWithTotalDto> {
-        val expenseReportDto = json.decodeFromString<ReportWithTotalDto>(getReportJson(year))
-        return NetworkResponse.Success(expenseReportDto)
-    }
-
-    override suspend fun getAssetsDetailReport(year: Int): NetworkResponse<ReportWithoutTotalDto> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getLiabilitiesDetailReport(year: Int): NetworkResponse<ReportWithoutTotalDto> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getIncomeDetailReport(year: Int): NetworkResponse<ReportWithTotalDto> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getNetWorthDetailReport(year: Int): NetworkResponse<ReportWithoutTotalDto> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getSavingsDetailReport(year: Int): NetworkResponse<ReportWithTotalDto> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getExpenseAfterDeductionReport(year: Int): NetworkResponse<ReportWithTotalDto> {
-        TODO("Not yet implemented")
+    override suspend fun getWithoutTotal(
+        year: Int,
+        type: ReportType
+    ): NetworkResponse<ReportWithoutTotalDto> {
+        val dto = json.decodeFromString<ReportWithoutTotalDto>(getReportJson(year))
+        return NetworkResponse.Success(dto)
     }
 }
 

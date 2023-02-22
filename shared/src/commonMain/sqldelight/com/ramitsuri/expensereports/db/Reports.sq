@@ -1,0 +1,27 @@
+import com.ramitsuri.expensereports.data.ReportType;
+import kotlinx.datetime.Instant;
+
+CREATE TABLE IF NOT EXISTS ReportEntity(
+    name TEXT NOT NULL PRIMARY KEY,
+    year INTEGER NOT NULL,
+    type INTEGER AS ReportType NOT NULL,
+    generatedAt TEXT AS Instant NOT NULL,
+    content TEXT NOT NULL
+);
+
+getReport:
+SELECT * FROM ReportEntity
+WHERE year = :year AND type = :type;
+
+updateReport:
+UPDATE ReportEntity
+SET content = ?, generatedAt = ?
+WHERE year = :year AND type = :type;
+
+insertReport:
+INSERT OR REPLACE INTO
+ReportEntity(name, year, type,  generatedAt, content)
+VALUES (?, ?, ?, ?, ?);
+
+deleteReports:
+DELETE FROM ReportEntity;

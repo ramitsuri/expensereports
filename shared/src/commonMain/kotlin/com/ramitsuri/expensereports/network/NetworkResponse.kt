@@ -4,13 +4,13 @@ sealed class NetworkResponse<out T> {
     data class Success<T>(val data: T) : NetworkResponse<T>()
 
     data class Failure(
-        val error: ErrorCode,
+        val error: NetworkError,
         val throwable: Throwable?
     ) : NetworkResponse<Nothing>()
 }
 
 inline fun <reified T> NetworkResponse<T>.onFailure(
-    callback: (error: ErrorCode, throwable: Throwable?) -> Unit
+    callback: (error: NetworkError, throwable: Throwable?) -> Unit
 ) {
     if (this is NetworkResponse.Failure) {
         callback(error, throwable)
@@ -25,7 +25,7 @@ inline fun <reified T> NetworkResponse<T>.onSuccess(
     }
 }
 
-enum class ErrorCode {
+enum class NetworkError {
     INVALID_REQUEST,
     SERVER,
     NETWORK,

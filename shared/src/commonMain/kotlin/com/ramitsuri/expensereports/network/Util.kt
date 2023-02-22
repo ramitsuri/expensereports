@@ -28,19 +28,19 @@ suspend inline fun <reified T> apiRequest(
                 NetworkResponse.Success(data)
             }
             exception is ClientRequestException -> {
-                NetworkResponse.Failure(ErrorCode.INVALID_REQUEST, exception)
+                NetworkResponse.Failure(NetworkError.INVALID_REQUEST, exception)
             }
             exception is ServerResponseException -> {
-                NetworkResponse.Failure(ErrorCode.SERVER, exception)
+                NetworkResponse.Failure(NetworkError.SERVER, exception)
             }
             exception is IOException -> {
-                NetworkResponse.Failure(ErrorCode.NETWORK, exception)
+                NetworkResponse.Failure(NetworkError.NETWORK, exception)
             }
             exception is SerializationException -> {
-                NetworkResponse.Failure(ErrorCode.SERIALIZATION, exception)
+                NetworkResponse.Failure(NetworkError.SERIALIZATION, exception)
             }
             else -> {
-                NetworkResponse.Failure(ErrorCode.UNKNOWN, exception)
+                NetworkResponse.Failure(NetworkError.UNKNOWN, exception)
             }
         }
     }

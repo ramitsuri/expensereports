@@ -22,6 +22,7 @@ import io.ktor.client.plugins.logging.Logger as KtorLogger
 class NetworkProvider(
     private val dispatcherProvider: DispatcherProvider,
     private val prefManager: PrefManager,
+    private val json: Json,
     clientEngine: HttpClientEngine
 ) {
     private val log: KermitLogger = KermitLogger(
@@ -31,11 +32,7 @@ class NetworkProvider(
 
     private val client = HttpClient(clientEngine) {
         install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-            })
+            json(json)
         }
 
         install(HttpTimeout) {
@@ -62,7 +59,7 @@ class NetworkProvider(
 
     fun reportApi(): ReportApi {
         return if (prefManager.getServerUrl().isEmpty()) {
-            DummyReportApiImpl()
+            DummyReportApiImpl(json)
         } else {
             ReportApiImpl(client, prefManager.getServerUrl(), dispatcherProvider)
         }
