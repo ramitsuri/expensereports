@@ -1,33 +1,35 @@
 package com.ramitsuri.expensereports.data
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ramitsuri.expensereports.network.AccountTotalDto
-import com.ramitsuri.expensereports.network.ExpenseReportDto
+import com.ramitsuri.expensereports.network.AccountTotalWithTotalDto
+import com.ramitsuri.expensereports.network.AccountTotalWithoutTotalDto
+import com.ramitsuri.expensereports.network.ReportWithTotalDto
+import com.ramitsuri.expensereports.network.ReportWithoutTotalDto
 import kotlinx.datetime.Instant
 
-data class ExpenseReport(
+data class ReportWithTotal(
     val name: String,
     val time: Instant,
-    val accountTotal: AccountTotal
+    val accountTotal: AccountTotalWithTotal
 ) {
-    constructor(dto: ExpenseReportDto) : this(
+    constructor(dto: ReportWithTotalDto) : this(
         dto.name,
         dto.time,
-        AccountTotal(dto.accountTotal)
+        AccountTotalWithTotal(dto.accountTotal)
     )
 }
 
-data class AccountTotal(
+data class AccountTotalWithTotal(
     val name: String,
     val fullName: String,
-    val children: List<AccountTotal>,
+    val children: List<AccountTotalWithTotal>,
     val monthAmounts: Map<Int, BigDecimal>,
     val total: BigDecimal = BigDecimal.ZERO
 ) {
-    constructor(dto: AccountTotalDto) : this(
+    constructor(dto: AccountTotalWithTotalDto) : this(
         dto.name,
         dto.fullName,
-        dto.children.map { AccountTotal(it) },
+        dto.children.map { AccountTotalWithTotal(it) },
         dto.balances.associateBy(
             keySelector = { it.month },
             valueTransform = { BigDecimal.parseString(it.amount) })
@@ -35,9 +37,9 @@ data class AccountTotal(
 
     companion object {
         fun fromAccountTotalAndChildren(
-            accountTotal: AccountTotal,
-            children: List<AccountTotal>
-        ): AccountTotal {
+            accountTotal: AccountTotalWithTotal,
+            children: List<AccountTotalWithTotal>
+        ): AccountTotalWithTotal {
             var total = BigDecimal.ZERO
             val monthAmounts = if (children.isEmpty()) {
                 accountTotal.monthAmounts
@@ -51,7 +53,7 @@ data class AccountTotal(
                 }
                 monthAmounts
             }
-            return AccountTotal(
+            return AccountTotalWithTotal(
                 name = accountTotal.name,
                 fullName = accountTotal.fullName,
                 children = children,
@@ -60,4 +62,33 @@ data class AccountTotal(
             )
         }
     }
+}
+
+data class ReportWithoutTotal(
+    val name: String,
+    val time: Instant,
+    val accountTotal: AccountTotalWithoutTotal
+) {
+    constructor(dto: ReportWithoutTotalDto) : this(
+        dto.name,
+        dto.time,
+        AccountTotalWithoutTotal(dto.accountTotal)
+    )
+}
+
+data class AccountTotalWithoutTotal(
+    val name: String,
+    val fullName: String,
+    val children: List<AccountTotalWithoutTotal>,
+    val monthAmounts: Map<Int, BigDecimal>,
+    val total: BigDecimal = BigDecimal.ZERO
+) {
+    constructor(dto: AccountTotalWithoutTotalDto) : this(
+        dto.name,
+        dto.fullName,
+        dto.children.map { AccountTotalWithoutTotal(it) },
+        dto.balances.associateBy(
+            keySelector = { it.month },
+            valueTransform = { BigDecimal.parseString(it.amount) })
+    )
 }

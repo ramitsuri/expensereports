@@ -9,9 +9,33 @@ internal class DummyReportApiImpl : ReportApi {
         ignoreUnknownKeys = true
     }
 
-    override suspend fun getExpenseReport(year: Int): NetworkResponse<ExpenseReportDto> {
-        val expenseReportDto = json.decodeFromString<ExpenseReportDto>(getReportJson(year))
+    override suspend fun getExpenseDetailReport(year: Int): NetworkResponse<ReportWithTotalDto> {
+        val expenseReportDto = json.decodeFromString<ReportWithTotalDto>(getReportJson(year))
         return NetworkResponse.Success(expenseReportDto)
+    }
+
+    override suspend fun getAssetsDetailReport(year: Int): NetworkResponse<ReportWithoutTotalDto> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getLiabilitiesDetailReport(year: Int): NetworkResponse<ReportWithoutTotalDto> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getIncomeDetailReport(year: Int): NetworkResponse<ReportWithTotalDto> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getNetWorthDetailReport(year: Int): NetworkResponse<ReportWithoutTotalDto> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getSavingsDetailReport(year: Int): NetworkResponse<ReportWithTotalDto> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getExpenseAfterDeductionReport(year: Int): NetworkResponse<ReportWithTotalDto> {
+        TODO("Not yet implemented")
     }
 }
 

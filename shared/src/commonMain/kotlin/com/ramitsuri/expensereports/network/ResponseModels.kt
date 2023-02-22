@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ExpenseReportDto(
+data class ReportWithTotalDto(
     @SerialName("name")
     val name: String,
 
@@ -14,11 +14,11 @@ data class ExpenseReportDto(
     val time: Instant,
 
     @SerialName("account_total")
-    val accountTotal: AccountTotalDto
+    val accountTotal: AccountTotalWithTotalDto
 )
 
 @Serializable
-data class AccountTotalDto(
+data class AccountTotalWithTotalDto(
     @SerialName("name")
     val name: String,
 
@@ -26,13 +26,41 @@ data class AccountTotalDto(
     val fullName: String,
 
     @SerialName("children")
-    val children: List<AccountTotalDto>,
+    val children: List<AccountTotalWithTotalDto>,
 
     @SerialName("balances")
     val balances: List<BalanceDto>,
 
     @SerialName("total")
     val total: String
+)
+
+@Serializable
+data class ReportWithoutTotalDto(
+    @SerialName("name")
+    val name: String,
+
+    @Serializable(with = InstantSerializer::class)
+    @SerialName("time")
+    val time: Instant,
+
+    @SerialName("account_total")
+    val accountTotal: AccountTotalWithoutTotalDto
+)
+
+@Serializable
+data class AccountTotalWithoutTotalDto(
+    @SerialName("name")
+    val name: String,
+
+    @SerialName("fullname")
+    val fullName: String,
+
+    @SerialName("children")
+    val children: List<AccountTotalWithoutTotalDto>,
+
+    @SerialName("balances")
+    val balances: List<BalanceDto>
 )
 
 @Serializable

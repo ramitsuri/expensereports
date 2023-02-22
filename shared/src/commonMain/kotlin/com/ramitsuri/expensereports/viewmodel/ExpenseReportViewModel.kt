@@ -1,6 +1,6 @@
 package com.ramitsuri.expensereports.viewmodel
 
-import com.ramitsuri.expensereports.data.ExpenseReport
+import com.ramitsuri.expensereports.data.ReportWithTotal
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.network.ErrorCode
 import com.ramitsuri.expensereports.network.onFailure
@@ -137,7 +137,7 @@ class ExpenseReportViewModel(
         }
     }
 
-    private suspend fun onReportAvailableForFirstTime(initialReport: ExpenseReport) {
+    private suspend fun onReportAvailableForFirstTime(initialReport: ReportWithTotal) {
         val ignoredAccounts = prefManager.getIgnoredExpenseAccounts()
         calculator = ExpenseReportCalculator(initialReport, ignoredAccounts, dispatchers.default)
         val calculatedReport =

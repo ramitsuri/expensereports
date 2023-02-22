@@ -1,8 +1,8 @@
 package com.ramitsuri.expensereports.utils
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ramitsuri.expensereports.data.AccountTotal
-import com.ramitsuri.expensereports.data.ExpenseReport
+import com.ramitsuri.expensereports.data.AccountTotalWithTotal
+import com.ramitsuri.expensereports.data.ReportWithTotal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -1244,15 +1244,15 @@ class ExpenseReportCalculatorTest {
      *     | Account 2 |    7    |    8    |    9    |   10    |
      *     | Account 3 |   14    |   15    |   16    |   17    |
      */
-    private fun getSimpleReport(): ExpenseReport {
-        return ExpenseReport(
+    private fun getSimpleReport(): ReportWithTotal {
+        return ReportWithTotal(
             name = "Report",
             time = Clock.System.now(),
-            accountTotal = AccountTotal(
+            accountTotal = AccountTotalWithTotal(
                 name = "Expenses",
                 fullName = "Expenses",
                 children = listOf(
-                    AccountTotal(
+                    AccountTotalWithTotal(
                         name = "Account1",
                         fullName = "Account1",
                         children = listOf(),
@@ -1263,7 +1263,7 @@ class ExpenseReportCalculatorTest {
                             4 to BigDecimal.parseString("4")
                         )
                     ),
-                    AccountTotal(
+                    AccountTotalWithTotal(
                         name = "Account2",
                         fullName = "Account2",
                         children = listOf(),
@@ -1275,7 +1275,7 @@ class ExpenseReportCalculatorTest {
 
                         )
                     ),
-                    AccountTotal(
+                    AccountTotalWithTotal(
                         name = "Account3",
                         fullName = "Account3",
                         children = listOf(),
@@ -1307,19 +1307,19 @@ class ExpenseReportCalculatorTest {
      *     |  - Account 31 |   12    |    8    |   12    |   10    |
      *     |  - Account 32 |   15    |   23    |   28    |   19    |
      */
-    private fun getComplexReport(): ExpenseReport {
-        return ExpenseReport(
+    private fun getComplexReport(): ReportWithTotal {
+        return ReportWithTotal(
             name = "Report",
             time = Clock.System.now(),
-            accountTotal = AccountTotal(
+            accountTotal = AccountTotalWithTotal(
                 name = "Expenses",
                 fullName = "Expenses",
                 children = listOf(
-                    AccountTotal(
+                    AccountTotalWithTotal(
                         name = "Account1",
                         fullName = "Account1",
                         children = listOf(
-                            AccountTotal(
+                            AccountTotalWithTotal(
                                 name = "Account11",
                                 fullName = "Account11",
                                 children = listOf(),
@@ -1329,7 +1329,7 @@ class ExpenseReportCalculatorTest {
                                     3 to BigDecimal.parseString("8"),
                                     4 to BigDecimal.parseString("33")
                                 )
-                            ), AccountTotal(
+                            ), AccountTotalWithTotal(
                                 name = "Account12",
                                 fullName = "Account12",
                                 children = listOf(),
@@ -1348,11 +1348,11 @@ class ExpenseReportCalculatorTest {
                             4 to BigDecimal.parseString("45")
                         )
                     ),
-                    AccountTotal(
+                    AccountTotalWithTotal(
                         name = "Account2",
                         fullName = "Account2",
                         children = listOf(
-                            AccountTotal(
+                            AccountTotalWithTotal(
                                 name = "Account21",
                                 fullName = "Account21",
                                 children = listOf(),
@@ -1373,11 +1373,11 @@ class ExpenseReportCalculatorTest {
 
                         )
                     ),
-                    AccountTotal(
+                    AccountTotalWithTotal(
                         name = "Account3",
                         fullName = "Account3",
                         children = listOf(
-                            AccountTotal(
+                            AccountTotalWithTotal(
                                 name = "Account31",
                                 fullName = "Account31",
                                 children = listOf(),
@@ -1387,7 +1387,7 @@ class ExpenseReportCalculatorTest {
                                     3 to BigDecimal.parseString("12"),
                                     4 to BigDecimal.parseString("10")
                                 )
-                            ), AccountTotal(
+                            ), AccountTotalWithTotal(
                                 name = "Account32",
                                 fullName = "Account32",
                                 children = listOf(),
