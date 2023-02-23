@@ -43,5 +43,6 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
     implementation(libs.kotlin.bignum)
+    implementation(libs.android.work)
     testImplementation(libs.junit)
 }
