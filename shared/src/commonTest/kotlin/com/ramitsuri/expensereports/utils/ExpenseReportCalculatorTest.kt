@@ -2,7 +2,7 @@ package com.ramitsuri.expensereports.utils
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.data.AccountTotalWithTotal
-import com.ramitsuri.expensereports.data.ReportWithTotal
+import com.ramitsuri.expensereports.data.Report
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -1244,10 +1244,11 @@ class ExpenseReportCalculatorTest {
      *     | Account 2 |    7    |    8    |    9    |   10    |
      *     | Account 3 |   14    |   15    |   16    |   17    |
      */
-    private fun getSimpleReport(): ReportWithTotal {
-        return ReportWithTotal(
+    private fun getSimpleReport(): Report {
+        return Report(
             name = "Report",
-            time = Clock.System.now(),
+            generatedAt = Clock.System.now(),
+            fetchedAt = Clock.System.now(),
             accountTotal = AccountTotalWithTotal(
                 name = "Expenses",
                 fullName = "Expenses",
@@ -1307,10 +1308,11 @@ class ExpenseReportCalculatorTest {
      *     |  - Account 31 |   12    |    8    |   12    |   10    |
      *     |  - Account 32 |   15    |   23    |   28    |   19    |
      */
-    private fun getComplexReport(): ReportWithTotal {
-        return ReportWithTotal(
+    private fun getComplexReport(): Report {
+        return Report(
             name = "Report",
-            time = Clock.System.now(),
+            generatedAt = Clock.System.now(),
+            fetchedAt = Clock.System.now(),
             accountTotal = AccountTotalWithTotal(
                 name = "Expenses",
                 fullName = "Expenses",

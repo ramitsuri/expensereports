@@ -18,6 +18,7 @@ class Database(
         driver = driver,
         ReportEntityAdapter = ReportEntity.Adapter(
             generatedAtAdapter = instantConverter,
+            fetchedAtAdapter = instantConverter,
             typeAdapter = reportTypeConverter
         )
     )

@@ -41,8 +41,7 @@ private val coreModule = module {
         ReportsRepository(
             get<NetworkProvider>().reportApi(),
             get<ReportDao>(),
-            get<Clock>(),
-            get<PrefManager>()
+            get<Clock>()
         )
     }
 

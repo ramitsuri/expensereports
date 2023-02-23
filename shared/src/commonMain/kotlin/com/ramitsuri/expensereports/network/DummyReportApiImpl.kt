@@ -6,19 +6,11 @@ import kotlinx.serialization.json.Json
 
 internal class DummyReportApiImpl(private val json: Json) : ReportApi {
 
-    override suspend fun getWithTotal(
+    override suspend fun get(
         year: Int,
         type: ReportType
-    ): NetworkResponse<ReportWithTotalDto> {
-        val dto = json.decodeFromString<ReportWithTotalDto>(getReportJson(year))
-        return NetworkResponse.Success(dto)
-    }
-
-    override suspend fun getWithoutTotal(
-        year: Int,
-        type: ReportType
-    ): NetworkResponse<ReportWithoutTotalDto> {
-        val dto = json.decodeFromString<ReportWithoutTotalDto>(getReportJson(year))
+    ): NetworkResponse<ReportDto> {
+        val dto = json.decodeFromString<ReportDto>(getReportJson(year))
         return NetworkResponse.Success(dto)
     }
 }

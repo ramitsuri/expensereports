@@ -1,63 +1,101 @@
 package com.ramitsuri.expensereports.data
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ramitsuri.expensereports.network.AccountTotalWithTotalDto
-import com.ramitsuri.expensereports.network.AccountTotalWithoutTotalDto
+import com.ramitsuri.expensereports.network.AccountTotalDto
 import com.ramitsuri.expensereports.network.BigDecimalSerializer
 import com.ramitsuri.expensereports.network.IntBigDecimalMapSerializer
-import com.ramitsuri.expensereports.network.ReportWithTotalDto
-import com.ramitsuri.expensereports.network.ReportWithoutTotalDto
+import com.ramitsuri.expensereports.network.ReportDto
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ReportWithTotal(
+data class Report(
     val name: String,
-    val time: Instant,
-    val accountTotal: AccountTotalWithTotal
+    val generatedAt: Instant,
+    val fetchedAt: Instant,
+    val accountTotal: AccountTotal
 ) {
-    constructor(dto: ReportWithTotalDto) : this(
-        dto.name,
-        dto.time,
-        AccountTotalWithTotal(dto.accountTotal)
+    constructor(dto: ReportDto, fetchedAt: Instant, withTotal: Boolean) : this(
+        name = dto.name,
+        generatedAt = dto.time,
+        fetchedAt = fetchedAt,
+        accountTotal = if (withTotal) {
+            AccountTotalWithTotal(dto.accountTotal)
+        } else {
+            AccountTotalWithoutTotal(dto.accountTotal)
+        }
     )
 }
 
 @Serializable
 data class AccountTotalWithTotal(
     @SerialName("name")
-    val name: String,
+    override val name: String,
 
     @SerialName("fullName")
-    val fullName: String,
+    override val fullName: String,
 
     @SerialName("children")
-    val children: List<AccountTotalWithTotal>,
+    override val children: List<AccountTotalWithTotal>,
 
     @Serializable(with = IntBigDecimalMapSerializer::class)
     @SerialName("monthAmounts")
-    val monthAmounts: Map<Int, @Contextual BigDecimal>,
+    override val monthAmounts: Map<Int, @Contextual BigDecimal>,
 
     @Serializable(with = BigDecimalSerializer::class)
     @SerialName("total")
     val total: BigDecimal = BigDecimal.ZERO
-) {
-    constructor(dto: AccountTotalWithTotalDto) : this(
+) : AccountTotal {
+    constructor(dto: AccountTotalDto) : this(
         dto.name,
         dto.fullName,
         dto.children.map { AccountTotalWithTotal(it) },
         dto.balances.associateBy(
             keySelector = { it.month },
+            valueTransform = { BigDecimal.parseString(it.amount) }),
+        total = BigDecimal.parseString(dto.total)
+    )
+}
+
+@Serializable
+data class AccountTotalWithoutTotal(
+    @SerialName("name")
+    override val name: String,
+
+    @SerialName("fullName")
+    override val fullName: String,
+
+    @SerialName("children")
+    override val children: List<AccountTotalWithoutTotal>,
+
+    @Serializable(with = IntBigDecimalMapSerializer::class)
+    @SerialName("monthAmounts")
+    override val monthAmounts: Map<Int, @Contextual BigDecimal>
+) : AccountTotal {
+    constructor(dto: AccountTotalDto) : this(
+        dto.name,
+        dto.fullName,
+        dto.children.map { AccountTotalWithoutTotal(it) },
+        dto.balances.associateBy(
+            keySelector = { it.month },
             valueTransform = { BigDecimal.parseString(it.amount) })
     )
+}
+
+@Serializable
+sealed interface AccountTotal {
+    val name: String
+    val fullName: String
+    val children: List<AccountTotal>
+    val monthAmounts: Map<Int, BigDecimal>
 
     companion object {
         fun fromAccountTotalAndChildren(
-            accountTotal: AccountTotalWithTotal,
-            children: List<AccountTotalWithTotal>
-        ): AccountTotalWithTotal {
+            accountTotal: AccountTotal,
+            children: List<AccountTotal>
+        ): AccountTotal {
             var total = BigDecimal.ZERO
             val monthAmounts = if (children.isEmpty()) {
                 accountTotal.monthAmounts
@@ -71,75 +109,23 @@ data class AccountTotalWithTotal(
                 }
                 monthAmounts
             }
-            return AccountTotalWithTotal(
-                name = accountTotal.name,
-                fullName = accountTotal.fullName,
-                children = children,
-                monthAmounts = monthAmounts,
-                total = total
-            )
-        }
-    }
-}
-
-data class ReportWithoutTotal(
-    val name: String,
-    val time: Instant,
-    val accountTotal: AccountTotalWithoutTotal
-) {
-    constructor(dto: ReportWithoutTotalDto) : this(
-        dto.name,
-        dto.time,
-        AccountTotalWithoutTotal(dto.accountTotal)
-    )
-}
-
-@Serializable
-data class AccountTotalWithoutTotal(
-    @SerialName("name")
-    val name: String,
-
-    @SerialName("fullName")
-    val fullName: String,
-
-    @SerialName("children")
-    val children: List<AccountTotalWithoutTotal>,
-
-    @Serializable(with = IntBigDecimalMapSerializer::class)
-    @SerialName("monthAmounts")
-    val monthAmounts: Map<Int, @Contextual BigDecimal>
-) {
-    constructor(dto: AccountTotalWithoutTotalDto) : this(
-        dto.name,
-        dto.fullName,
-        dto.children.map { AccountTotalWithoutTotal(it) },
-        dto.balances.associateBy(
-            keySelector = { it.month },
-            valueTransform = { BigDecimal.parseString(it.amount) })
-    )
-
-    companion object {
-        fun fromAccountTotalAndChildren(
-            accountTotal: AccountTotalWithoutTotal,
-            children: List<AccountTotalWithoutTotal>
-        ): AccountTotalWithoutTotal {
-            val monthAmounts = if (children.isEmpty()) {
-                accountTotal.monthAmounts
+            return if (accountTotal is AccountTotalWithTotal) {
+                AccountTotalWithTotal(
+                    name = accountTotal.name,
+                    fullName = accountTotal.fullName,
+                    children = children.map { it as AccountTotalWithTotal },
+                    monthAmounts = monthAmounts,
+                    total = total
+                )
             } else {
-                val monthAmounts = mutableMapOf<Int, BigDecimal>()
-                for (month in (1..12)) {
-                    var monthTotal = BigDecimal.ZERO
-                    children.forEach { monthTotal += it.monthAmounts[month] ?: BigDecimal.ZERO }
-                    monthAmounts[month] = monthTotal
-                }
-                monthAmounts
+                AccountTotalWithoutTotal(
+                    name = accountTotal.name,
+                    fullName = accountTotal.fullName,
+                    children = children.map { it as AccountTotalWithoutTotal },
+                    monthAmounts = monthAmounts
+                )
             }
-            return AccountTotalWithoutTotal(
-                name = accountTotal.name,
-                fullName = accountTotal.fullName,
-                children = children,
-                monthAmounts = monthAmounts
-            )
+
         }
     }
 }

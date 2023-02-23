@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS ReportEntity(
     year INTEGER NOT NULL,
     type INTEGER AS ReportType NOT NULL,
     generatedAt TEXT AS Instant NOT NULL,
+    fetchedAt TEXT AS Instant NOT NULL,
     content TEXT NOT NULL
 );
 
@@ -15,13 +16,13 @@ WHERE year = :year AND type = :type;
 
 updateReport:
 UPDATE ReportEntity
-SET content = ?, generatedAt = ?
+SET content = ?, generatedAt = ?, fetchedAt = ?
 WHERE year = :year AND type = :type;
 
 insertReport:
 INSERT OR REPLACE INTO
-ReportEntity(name, year, type,  generatedAt, content)
-VALUES (?, ?, ?, ?, ?);
+ReportEntity(name, year, type,  generatedAt, fetchedAt, content)
+VALUES (?, ?, ?, ?,?, ?);
 
 deleteReports:
 DELETE FROM ReportEntity;

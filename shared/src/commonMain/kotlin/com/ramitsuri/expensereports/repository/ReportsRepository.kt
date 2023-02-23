@@ -1,12 +1,10 @@
 package com.ramitsuri.expensereports.repository
 
 import com.ramitsuri.expensereports.data.Error
+import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.ReportType
-import com.ramitsuri.expensereports.data.ReportWithTotal
-import com.ramitsuri.expensereports.data.ReportWithoutTotal
 import com.ramitsuri.expensereports.data.Response
 import com.ramitsuri.expensereports.data.db.ReportDao
-import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.network.NetworkResponse
 import com.ramitsuri.expensereports.network.ReportApi
 import com.ramitsuri.expensereports.utils.LogHelper
@@ -17,25 +15,22 @@ import kotlinx.datetime.Clock
 class ReportsRepository(
     private val api: ReportApi,
     private val dao: ReportDao,
-    private val clock: Clock,
-    private val prefManager: PrefManager
+    private val clock: Clock
 ) {
 
-    suspend fun getReportWithTotal(
+    suspend fun getReport(
         year: Int,
         type: ReportType,
         refresh: Boolean = false
-    ): Flow<Response<ReportWithTotal>> {
-        val shouldRefresh = refresh || shouldRefreshReport(type)
-        if (shouldRefresh) {
-            refreshWithTotal(year, type)
-        }
-        return dao.getWithTotal(year, type).map { report ->
+    ): Flow<Response<Report>> {
+        return dao.get(year, type).map { reportFromDb ->
+            val getFromNetwork = reportFromDb == null || refresh || isStale(reportFromDb)
+            val report = if (getFromNetwork) {
+                getFromNetwork(year, type)
+            } else {
+                reportFromDb
+            }
             if (report == null) {
-                LogHelper.d(TAG, "Report not in local storage")
-                if (!shouldRefresh) { // Refresh only if not already tried
-                    refreshWithTotal(year, type)
-                }
                 Response.Failure(Error.UNAVAILABLE)
             } else {
                 Response.Success(report)
@@ -43,121 +38,31 @@ class ReportsRepository(
         }
     }
 
-    suspend fun getReportWithoutTotal(
-        year: Int,
-        type: ReportType,
-        refresh: Boolean = false
-    ): Flow<Response<ReportWithoutTotal>> {
-        val shouldRefresh = refresh || shouldRefreshReport(type)
-        if (shouldRefresh) {
-            refreshWithTotal(year, type)
-        }
-        return dao.getWithoutTotal(year, type).map { report ->
-            if (report == null) {
-                LogHelper.d(TAG, "Report not in local storage")
-                if (!shouldRefresh) { // Refresh only if not already tried
-                    refreshWithTotal(year, type)
-                }
-                Response.Failure(Error.UNAVAILABLE)
-            } else {
-                Response.Success(report)
-            }
-        }
-    }
-
-    private suspend fun refreshWithTotal(
+    private suspend fun getFromNetwork(
         year: Int,
         type: ReportType
-    ) {
-        when (val response = api.getWithTotal(year, type)) {
+    ): Report? {
+        LogHelper.d(TAG, "Getting $type for $year from network")
+        return when (val response = api.get(year, type)) {
             is NetworkResponse.Failure -> {
                 LogHelper.e(TAG, "Error: $response.error, message: ${response.throwable?.message}")
+                null
             }
             is NetworkResponse.Success -> {
-                saveReportFetchTimestamp(type)
-                val report = ReportWithTotal(response.data)
+                val report = Report(response.data, fetchedAt = clock.now(), type.hasTotal)
                 dao.insert(year, type, report)
+                report
             }
         }
     }
 
-    private suspend fun refreshWithoutTotal(
-        year: Int,
-        type: ReportType
-    ) {
-        when (val response = api.getWithoutTotal(year, type)) {
-            is NetworkResponse.Failure -> {
-                LogHelper.e(TAG, "Error: $response.error, message: ${response.throwable?.message}")
-            }
-            is NetworkResponse.Success -> {
-                saveReportFetchTimestamp(type)
-                val report = ReportWithoutTotal(response.data)
-                dao.insert(year, type, report)
-            }
-        }
-    }
-
-    private fun shouldRefreshReport(type: ReportType): Boolean {
-        val lastFetchTimestamp = when (type) {
-            ReportType.NONE -> {
-                clock.now()
-            }
-            ReportType.EXPENSE -> {
-                prefManager.getExpenseReportFetchTimestamp()
-            }
-            ReportType.EXPENSE_AFTER_DEDUCTION -> {
-                clock.now()
-            }
-            ReportType.ASSETS -> {
-                clock.now()
-            }
-            ReportType.LIABILITIES -> {
-                clock.now()
-            }
-            ReportType.INCOME -> {
-                clock.now()
-            }
-            ReportType.NET_WORTH -> {
-                clock.now()
-            }
-            ReportType.SAVINGS -> {
-                clock.now()
-            }
-        }
-        return clock.now().minus(lastFetchTimestamp).inWholeHours >= REFRESH_THRESHOLD_HOURS
-    }
-
-    private fun saveReportFetchTimestamp(type: ReportType) {
-        when (type) {
-            ReportType.NONE -> {
-                // TODO
-            }
-            ReportType.EXPENSE -> {
-                prefManager.setExpenseReportFetchTimestamp(clock.now())
-            }
-            ReportType.EXPENSE_AFTER_DEDUCTION -> {
-                // TODO
-            }
-            ReportType.ASSETS -> {
-                // TODO
-            }
-            ReportType.LIABILITIES -> {
-                // TODO
-            }
-            ReportType.INCOME -> {
-                // TODO
-            }
-            ReportType.NET_WORTH -> {
-                // TODO
-            }
-            ReportType.SAVINGS -> {
-                // TODO
-            }
-        }
+    private fun isStale(report: Report): Boolean {
+        val lastFetchTimestamp = report.fetchedAt
+        return clock.now().minus(lastFetchTimestamp).inWholeMilliseconds >= REFRESH_THRESHOLD_MS
     }
 
     companion object {
         private const val TAG = "ReportsRepo"
-        private const val REFRESH_THRESHOLD_HOURS = 6
+        private const val REFRESH_THRESHOLD_MS = 6 * 60 * 60 * 20_000 // 6 Hours
     }
 }

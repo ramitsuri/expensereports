@@ -1,22 +1,28 @@
 package com.ramitsuri.expensereports.utils
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.AccountTotalWithTotal
-import com.ramitsuri.expensereports.data.ReportWithTotal
+import com.ramitsuri.expensereports.data.Report
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 class ExpenseReportCalculator(
-    initialReport: ReportWithTotal,
+    initialReport: Report,
     ignoredExpenseAccounts: List<String>,
     private val defaultDispatcher: CoroutineDispatcher
 ) {
-    private lateinit var filteredReport: ReportWithTotal
+    private lateinit var filteredReport: Report
 
     init {
         val accountTotal = removeIgnoredAccounts(initialReport.accountTotal, ignoredExpenseAccounts)
         if (accountTotal != null) {
-            filteredReport = ReportWithTotal(initialReport.name, initialReport.time, accountTotal)
+            filteredReport = Report(
+                name = initialReport.name,
+                generatedAt = initialReport.generatedAt,
+                fetchedAt = initialReport.fetchedAt,
+                accountTotal = accountTotal
+            )
         }
     }
 
@@ -78,7 +84,7 @@ class ExpenseReportCalculator(
             ExpenseReportView.Full(
                 accountTotals = accounts.sortedBy { it.name },
                 total = totalAccount,
-                generatedAt = filteredReport.time.toString()
+                generatedAt = filteredReport.generatedAt.toString()
             )
         }
         val hideZeroTotals = selectedAccounts == null && selectedMonths == null // Filter out zeros
@@ -135,9 +141,9 @@ class ExpenseReportCalculator(
     }
 
     private fun removeIgnoredAccounts(
-        rootAccountTotal: AccountTotalWithTotal,
+        rootAccountTotal: AccountTotal,
         ignoredExpenseAccounts: List<String>
-    ): AccountTotalWithTotal? {
+    ): AccountTotal? {
         val children =
             rootAccountTotal.children.mapNotNull {
                 removeIgnoredAccounts(it, ignoredExpenseAccounts)
@@ -145,7 +151,7 @@ class ExpenseReportCalculator(
         if (children.isEmpty() && rootAccountTotal.children.isNotEmpty()) {
             return null
         }
-        val accountTotal = AccountTotalWithTotal.fromAccountTotalAndChildren(rootAccountTotal, children)
+        val accountTotal = AccountTotal.fromAccountTotalAndChildren(rootAccountTotal, children)
         if (rootAccountTotal.isIn(ignoredExpenseAccounts, fullName = true)) {
             return null
         }
@@ -156,7 +162,7 @@ class ExpenseReportCalculator(
         return !::filteredReport.isInitialized
     }
 
-    private fun AccountTotalWithTotal.isIn(
+    private fun AccountTotal.isIn(
         selectedAccountNames: List<String>?,
         fullName: Boolean = false
     ): Boolean {
@@ -170,7 +176,7 @@ class ExpenseReportCalculator(
         }
     }
 
-    private fun AccountTotalWithTotal.isNotIn(
+    private fun AccountTotal.isNotIn(
         selectedAccountNames: List<String>?,
         fullName: Boolean = false
     ): Boolean {

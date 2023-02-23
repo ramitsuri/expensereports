@@ -1,7 +1,5 @@
 package com.ramitsuri.expensereports.data.prefs
 
-import kotlinx.datetime.Instant
-
 class PrefManager(private val keyValueStore: KeyValueStore) {
 
     fun setServerUrl(server: String) {
@@ -22,21 +20,6 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
     fun getIgnoredExpenseAccounts(): List<String> {
         val key = Key.IGNORED_EXPENSE_ACCOUNTS
         return getStringList(key, listOf())
-    }
-
-    fun setExpenseReportFetchTimestamp(fetchTimestamp: Instant) {
-        val key = Key.EXPENSE_REPORT_FETCH_TIMESTAMP
-        putString(key, fetchTimestamp.toString())
-    }
-
-    fun getExpenseReportFetchTimestamp(): Instant {
-        val key = Key.EXPENSE_REPORT_FETCH_TIMESTAMP
-        val timestamp = getString(key, null) ?: return Instant.DISTANT_PAST
-        return try {
-            Instant.parse(timestamp)
-        } catch (e: Exception) {
-            Instant.DISTANT_PAST
-        }
     }
 
     private fun putString(key: Key, value: String) {
@@ -109,11 +92,6 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
 
             IGNORED_EXPENSE_ACCOUNTS(
                 key = "ignored_expense_accounts",
-                isSecure = false
-            ),
-
-            EXPENSE_REPORT_FETCH_TIMESTAMP(
-                key = "last_expense_report_fetch_timestamp",
                 isSecure = false
             )
         }

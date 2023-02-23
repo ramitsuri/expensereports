@@ -1,7 +1,8 @@
 package com.ramitsuri.expensereports.viewmodel
 
+import com.ramitsuri.expensereports.data.Error
+import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.ReportType
-import com.ramitsuri.expensereports.data.ReportWithTotal
 import com.ramitsuri.expensereports.data.Response
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.repository.ReportsRepository
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import com.ramitsuri.expensereports.data.Error
 
 class ExpenseReportViewModel(
     private val repository: ReportsRepository,
@@ -51,7 +51,7 @@ class ExpenseReportViewModel(
             it.copy(loading = true)
         }
         viewModelScope.launch {
-            repository.getReportWithTotal(selectedYear.year, reportType).collect { response ->
+            repository.getReport(selectedYear.year, reportType).collect { response ->
                 when (response) {
                     is Response.Success -> {
                         onReportAvailableForFirstTime(response.data)
@@ -140,7 +140,7 @@ class ExpenseReportViewModel(
         }
     }
 
-    private suspend fun onReportAvailableForFirstTime(initialReport: ReportWithTotal) {
+    private suspend fun onReportAvailableForFirstTime(initialReport: Report) {
         val ignoredAccounts = prefManager.getIgnoredExpenseAccounts()
         calculator = ExpenseReportCalculator(initialReport, ignoredAccounts, dispatchers.default)
         val calculatedReport =
