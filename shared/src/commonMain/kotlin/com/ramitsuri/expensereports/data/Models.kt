@@ -5,6 +5,7 @@ import com.ramitsuri.expensereports.network.AccountTotalDto
 import com.ramitsuri.expensereports.network.BigDecimalSerializer
 import com.ramitsuri.expensereports.network.IntBigDecimalMapSerializer
 import com.ramitsuri.expensereports.network.ReportDto
+import com.ramitsuri.expensereports.utils.Constants
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
@@ -27,6 +28,10 @@ data class Report(
             AccountTotalWithoutTotal(dto.accountTotal)
         }
     )
+}
+
+fun Report.isStale(now: Instant): Boolean {
+    return now.minus(fetchedAt).inWholeMilliseconds >= Constants.REFRESH_THRESHOLD_MS
 }
 
 @Serializable

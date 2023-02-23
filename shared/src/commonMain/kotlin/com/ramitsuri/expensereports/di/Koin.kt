@@ -6,6 +6,7 @@ import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.network.NetworkProvider
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
+import com.ramitsuri.expensereports.utils.ReportsDownloader
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -39,8 +40,16 @@ private val coreModule = module {
 
     factory<ReportsRepository> {
         ReportsRepository(
-            get<NetworkProvider>().reportApi(),
+            get<ReportsDownloader>(),
             get<ReportDao>(),
+            get<Clock>()
+        )
+    }
+
+    factory<ReportsDownloader> {
+        ReportsDownloader(
+            get<ReportDao>(),
+            get<NetworkProvider>().reportApi(),
             get<Clock>()
         )
     }
