@@ -21,7 +21,9 @@ class ExpenseReportCalculator(
                 name = initialReport.name,
                 generatedAt = initialReport.generatedAt,
                 fetchedAt = initialReport.fetchedAt,
-                accountTotal = accountTotal
+                accountTotal = accountTotal,
+                type = initialReport.type,
+                year = initialReport.year
             )
         }
     }

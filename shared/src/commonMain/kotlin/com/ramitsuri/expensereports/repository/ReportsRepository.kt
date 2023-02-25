@@ -44,6 +44,10 @@ class ReportsRepository(
         }
     }
 
+    suspend fun get(years: List<Int>, types: List<ReportType>): List<Report> {
+        return dao.get(years, types)
+    }
+
     private suspend fun getFromNetwork(
         year: Int,
         type: ReportType

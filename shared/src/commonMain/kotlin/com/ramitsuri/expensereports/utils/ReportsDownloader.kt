@@ -33,7 +33,8 @@ class ReportsDownloader(
                 null
             }
             is NetworkResponse.Success -> {
-                val report = Report(response.data, fetchedAt = clock.now(), type.hasTotal)
+                val report =
+                    Report(response.data, fetchedAt = clock.now(), type.hasTotal, type, year)
                 dao.insert(year, type, report)
                 report
             }

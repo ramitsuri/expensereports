@@ -49,4 +49,11 @@
     <string name="settings_server_url_restart">Tap to restart to set server URL</string>
     <string name="settings_server_url_server_not_set">http://</string>
 
+    <!-- Home -->
+    <string name="home_net_worth">Net Worth</string>
+    <string name="home_savings">Savings</string>
+    <string name="home_expenses">Expenses</string>
+    <string name="home_this_month">This month</string>
+    <string name="home_last_month">Last month</string>
+
 </resources>

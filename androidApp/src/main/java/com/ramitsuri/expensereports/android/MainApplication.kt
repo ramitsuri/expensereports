@@ -15,7 +15,9 @@ import com.ramitsuri.expensereports.di.initKoin
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.viewmodel.ExpenseReportViewModel
+import com.ramitsuri.expensereports.viewmodel.HomeViewModel
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
+import kotlinx.datetime.Clock
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -64,6 +66,13 @@ class MainApplication : Application(), LifecycleEventObserver {
                         get<ReportsRepository>(),
                         get<DispatcherProvider>(),
                         get<PrefManager>()
+                    )
+                }
+
+                viewModel {
+                    HomeViewModel(
+                        get<ReportsRepository>(),
+                        get<Clock>()
                     )
                 }
 

@@ -3,6 +3,7 @@ package com.ramitsuri.expensereports.utils
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.data.AccountTotalWithTotal
 import com.ramitsuri.expensereports.data.Report
+import com.ramitsuri.expensereports.data.ReportType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -1290,7 +1291,9 @@ class ExpenseReportCalculatorTest {
                 ),
                 monthAmounts = mapOf<Int, BigDecimal>(),
                 total = BigDecimal.ZERO
-            )
+            ),
+            type = ReportType.EXPENSE,
+            year = 2023
         )
     }
 
@@ -1411,7 +1414,9 @@ class ExpenseReportCalculatorTest {
                 ),
                 monthAmounts = mapOf<Int, BigDecimal>(),
                 total = BigDecimal.ZERO
-            )
+            ),
+            type = ReportType.EXPENSE,
+            year = 2023
         )
     }
 }

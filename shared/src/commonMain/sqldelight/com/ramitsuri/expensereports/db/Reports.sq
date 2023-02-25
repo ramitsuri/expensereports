@@ -14,6 +14,10 @@ getReport:
 SELECT * FROM ReportEntity
 WHERE year = :year AND type = :type;
 
+getReports:
+SELECT * FROM ReportEntity
+WHERE year IN :years AND type IN :types;
+
 updateReport:
 UPDATE ReportEntity
 SET content = ?, generatedAt = ?, fetchedAt = ?

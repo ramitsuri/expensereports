@@ -16,9 +16,17 @@ data class Report(
     val name: String,
     val generatedAt: Instant,
     val fetchedAt: Instant,
-    val accountTotal: AccountTotal
+    val accountTotal: AccountTotal,
+    val type: ReportType,
+    val year: Int
 ) {
-    constructor(dto: ReportDto, fetchedAt: Instant, withTotal: Boolean) : this(
+    constructor(
+        dto: ReportDto,
+        fetchedAt: Instant,
+        withTotal: Boolean,
+        type: ReportType,
+        year: Int
+    ) : this(
         name = dto.name,
         generatedAt = dto.time,
         fetchedAt = fetchedAt,
@@ -26,7 +34,9 @@ data class Report(
             AccountTotalWithTotal(dto.accountTotal)
         } else {
             AccountTotalWithoutTotal(dto.accountTotal)
-        }
+        },
+        type = type,
+        year = year
     )
 }
 
