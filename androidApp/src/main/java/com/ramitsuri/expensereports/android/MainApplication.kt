@@ -73,6 +73,7 @@ class MainApplication : Application(), LifecycleEventObserver {
                 viewModel {
                     HomeViewModel(
                         get<ReportsRepository>(),
+                        get<PrefManager>(),
                         get<Clock>()
                     )
                 }

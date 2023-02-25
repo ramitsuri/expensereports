@@ -1,5 +1,6 @@
 package com.ramitsuri.expensereports.android.ui.home
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
@@ -50,10 +51,8 @@ import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.homeMonthYear
 import com.ramitsuri.expensereports.android.utils.monthYear
-import com.ramitsuri.expensereports.viewmodel.Expense
+import com.ramitsuri.expensereports.viewmodel.MainAccountBalance
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
-import com.ramitsuri.expensereports.viewmodel.NetWorth
-import com.ramitsuri.expensereports.viewmodel.Saving
 import org.koin.androidx.compose.getViewModel
 
 @Composable
@@ -65,15 +64,17 @@ fun HomeScreen(
     HomeContent(
         netWorth = viewState.netWorth,
         savings = viewState.savings,
-        expenses = viewState.expenses
+        expenses = viewState.expenses,
+        incomes = viewState.incomes
     )
 }
 
 @Composable
 private fun HomeContent(
-    netWorth: List<NetWorth>,
-    savings: List<Saving>,
-    expenses: List<Expense>,
+    netWorth: List<MainAccountBalance>,
+    savings: List<MainAccountBalance>,
+    expenses: List<MainAccountBalance>,
+    incomes: List<MainAccountBalance>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -81,19 +82,31 @@ private fun HomeContent(
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        NetWorthContent(netWorth, modifier = modifier.weight(0.5F))
+        NetWorthContent(netWorth, modifier = modifier.weight(0.4F))
         Spacer(modifier = modifier.height(8.dp))
-        SavingsContent(savings, modifier = modifier.weight(0.25F))
+        MainAccountContent(
+            titleRes = R.string.home_savings,
+            accountBalances = savings,
+            modifier = modifier.weight(0.2F)
+        )
         Spacer(modifier = modifier.height(8.dp))
-        ExpensesContent(expenses, modifier = modifier.weight(0.25F))
-
-
+        MainAccountContent(
+            titleRes = R.string.home_expenses,
+            accountBalances = expenses,
+            modifier = modifier.weight(0.2F)
+        )
+        Spacer(modifier = modifier.height(8.dp))
+        MainAccountContent(
+            titleRes = R.string.home_incomes,
+            accountBalances = incomes,
+            modifier = modifier.weight(0.2F)
+        )
     }
 }
 
 @Composable
 private fun NetWorthContent(
-    netWorth: List<NetWorth>,
+    netWorth: List<MainAccountBalance>,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -125,7 +138,11 @@ private fun NetWorthContent(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SavingsContent(savings: List<Saving>, modifier: Modifier = Modifier) {
+private fun MainAccountContent(
+    @StringRes titleRes: Int,
+    accountBalances: List<MainAccountBalance>,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier
             .fillMaxSize()
@@ -136,13 +153,13 @@ private fun SavingsContent(savings: List<Saving>, modifier: Modifier = Modifier)
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(id = R.string.home_savings),
+                text = stringResource(id = titleRes),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(8.dp)
             )
             val pagerState = rememberPagerState()
             PagerWithIndicator(
-                count = savings.size,
+                count = accountBalances.size,
                 pagerState = pagerState,
                 modifier = Modifier.weight(1f)
             ) { page ->
@@ -152,60 +169,14 @@ private fun SavingsContent(savings: List<Saving>, modifier: Modifier = Modifier)
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = savings[page].value.format(),
+                        text = accountBalances[page].balance.format(),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = savings[page].date.homeMonthYear(),
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ExpensesContent(expenses: List<Expense>, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-        Column(
-            modifier = modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(id = R.string.home_expenses),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(8.dp)
-            )
-            val pagerState = rememberPagerState()
-            PagerWithIndicator(
-                count = expenses.size,
-                pagerState = pagerState,
-                modifier = Modifier.weight(1f)
-            ) { page ->
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = expenses[page].value.format(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = expenses[page].date.homeMonthYear(),
+                        text = accountBalances[page].date.homeMonthYear(),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
@@ -306,11 +277,11 @@ private fun PageIndicator(
 
 @Composable
 private fun LineChart(
-    netWorth: List<NetWorth>,
+    netWorth: List<MainAccountBalance>,
     graphColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val data = netWorth.map { it.value.doubleValue(exactRequired = false) }
+    val data = netWorth.map { it.balance.doubleValue(exactRequired = false) }
     if (data.size < 2) {
         return
     }

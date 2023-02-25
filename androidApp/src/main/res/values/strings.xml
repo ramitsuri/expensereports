@@ -54,6 +54,7 @@
     <string name="home_net_worth">Net Worth</string>
     <string name="home_savings">Savings</string>
     <string name="home_expenses">Expenses</string>
+    <string name="home_incomes">Incomes</string>
     <string name="home_this_month">This month</string>
     <string name="home_last_month">Last month</string>
 
