@@ -18,13 +18,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
 
 class ExpenseReportViewModel(
     private val repository: ReportsRepository,
     private val dispatchers: DispatcherProvider,
     private val prefManager: PrefManager
-) : ViewModel(), KoinComponent {
+) : ViewModel() {
 
     private val _state: MutableStateFlow<ReportsViewState> = MutableStateFlow(ReportsViewState())
     val state: StateFlow<ReportsViewState> = _state
@@ -192,7 +191,7 @@ class ExpenseReportViewModel(
     }
 
     companion object {
-        private const val TAG = "ReportsVM"
+        private const val TAG = "ExpensesVM"
 
         private val reportType = ReportType.EXPENSE
     }

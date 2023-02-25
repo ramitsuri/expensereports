@@ -22,6 +22,26 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         return getStringList(key, listOf())
     }
 
+    fun setAssetAccounts(assetAccounts: List<String>) {
+        val key = Key.ASSET_ACCOUNTS
+        putStringList(key, assetAccounts)
+    }
+
+    fun getAssetAccounts(): List<String> {
+        val key = Key.ASSET_ACCOUNTS
+        return getStringList(key, listOf())
+    }
+
+    fun setLiabilityAccounts(liabilityAccounts: List<String>) {
+        val key = Key.LIABILITY_ACCOUNTS
+        putStringList(key, liabilityAccounts)
+    }
+
+    fun getLiabilityAccounts(): List<String> {
+        val key = Key.LIABILITY_ACCOUNTS
+        return getStringList(key, listOf())
+    }
+
     private fun putString(key: Key, value: String) {
         val keyValueStore = getKeyValueStore(key)
         keyValueStore.putString(key.key, value)
@@ -92,6 +112,16 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
 
             IGNORED_EXPENSE_ACCOUNTS(
                 key = "ignored_expense_accounts",
+                isSecure = false
+            ),
+
+            ASSET_ACCOUNTS(
+                key = "asset_accounts",
+                isSecure = false
+            ),
+
+            LIABILITY_ACCOUNTS(
+                key = "liability_accounts",
                 isSecure = false
             )
         }

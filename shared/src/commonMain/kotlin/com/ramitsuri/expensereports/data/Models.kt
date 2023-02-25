@@ -144,3 +144,25 @@ sealed interface AccountTotal {
         }
     }
 }
+
+
+fun AccountTotal.isIn(
+    selectedAccountNames: List<String>?,
+    fullName: Boolean = false
+): Boolean {
+    if (selectedAccountNames == null) {
+        return true
+    }
+    return if (fullName) {
+        selectedAccountNames.contains(this.fullName)
+    } else {
+        selectedAccountNames.contains(this.name)
+    }
+}
+
+fun AccountTotal.isNotIn(
+    selectedAccountNames: List<String>?,
+    fullName: Boolean = false
+): Boolean {
+    return !isIn(selectedAccountNames, fullName)
+}

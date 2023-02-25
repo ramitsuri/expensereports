@@ -47,6 +47,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ramitsuri.expensereports.android.ui.AppTheme
 import com.ramitsuri.expensereports.android.ui.SettingsNavGraph
+import com.ramitsuri.expensereports.android.ui.accounts.AccountsScreen
 import com.ramitsuri.expensereports.android.ui.expenses.ExpensesScreen
 import com.ramitsuri.expensereports.android.ui.home.HomeScreen
 
@@ -226,11 +227,6 @@ val bottomNavItems = listOf(
 
 enum class HomeMenuItem(val id: Int, @StringRes val textResId: Int) {
     SETTINGS(1, R.string.home_menu_settings)
-}
-
-@Composable
-fun AccountsScreen() {
-    Text(text = "Accounts")
 }
 
 @Composable

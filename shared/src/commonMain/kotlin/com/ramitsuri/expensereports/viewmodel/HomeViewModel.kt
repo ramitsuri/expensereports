@@ -14,18 +14,20 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
-import org.koin.core.component.KoinComponent
 
 class HomeViewModel(
     private val repository: ReportsRepository,
     private val clock: Clock
-) : ViewModel(), KoinComponent {
-    private val dateTime = clock.now().toLocalDateTime(TimeZone.currentSystemDefault())
+) : ViewModel() {
+
+    private val timeZone = TimeZone.currentSystemDefault()
+    private val now = clock.now().toLocalDateTime(timeZone)
+
     private val _state: MutableStateFlow<HomeViewState> = MutableStateFlow(HomeViewState())
     val state: StateFlow<HomeViewState> = _state
 
     init {
-        val currentYear = dateTime.year
+        val currentYear = now.year
         val years = listOf(currentYear, currentYear - 1)
         val reportTypes = listOf(reportTypeExpenses, reportTypeSavings, reportTypeNetWorth)
         viewModelScope.launch {
@@ -82,7 +84,7 @@ class HomeViewModel(
     }
 
     private fun getLastThreeMonths(): List<LocalDate> {
-        val firstMonth = clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val firstMonth = clock.now().toLocalDateTime(timeZone).date
         val secondMonth = firstMonth.minus(DatePeriod(months = 1))
         val thirdMonth = secondMonth.minus(DatePeriod(months = 1))
         return listOf(firstMonth, secondMonth, thirdMonth)
@@ -90,7 +92,7 @@ class HomeViewModel(
 
     private fun getLastOneYear(): List<LocalDate> {
         val dates = mutableListOf<LocalDate>()
-        var previousMonth = clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        var previousMonth = clock.now().toLocalDateTime(timeZone).date
         repeat(12) {
             dates.add(previousMonth)
             previousMonth = previousMonth.minus(DatePeriod(months = 1))
@@ -99,7 +101,7 @@ class HomeViewModel(
     }
 
     companion object {
-        private const val TAG = "ReportsVM"
+        private const val TAG = "HomeVM"
 
         private val reportTypeNetWorth = ReportType.NET_WORTH
         private val reportTypeSavings = ReportType.SAVINGS

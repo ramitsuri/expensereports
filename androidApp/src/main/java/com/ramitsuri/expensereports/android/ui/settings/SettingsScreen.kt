@@ -1,5 +1,6 @@
 package com.ramitsuri.expensereports.android.ui.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -53,7 +54,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.extensions.shutdown
-import com.ramitsuri.expensereports.viewmodel.IgnoredExpenseAccounts
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.getViewModel
@@ -71,6 +71,10 @@ fun SettingsScreen(
         snackbarHostState = snackbarHostState,
         ignoredExpenseAccounts = viewState.ignoredExpenseAccounts,
         onIgnoredExpenseAccountsSet = viewModel::setIgnoredExpenseAccounts,
+        liabilityAccounts = viewState.liabilityAccounts,
+        onLiabilityAccountsSet = viewModel::setLiabilityAccounts,
+        assetAccounts = viewState.assetAccounts,
+        onAssetAccountsSet = viewModel::setAssetAccounts,
         serverUrl = viewState.serverUrl.url,
         onUrlSet = viewModel::setServerUrl,
         onBack = onBack,
@@ -82,8 +86,12 @@ fun SettingsScreen(
 @Composable
 private fun SettingsContent(
     snackbarHostState: SnackbarHostState,
-    ignoredExpenseAccounts: IgnoredExpenseAccounts,
+    ignoredExpenseAccounts: List<String>,
     onIgnoredExpenseAccountsSet: (List<String>) -> Unit,
+    liabilityAccounts: List<String>,
+    onLiabilityAccountsSet: (List<String>) -> Unit,
+    assetAccounts: List<String>,
+    onAssetAccountsSet: (List<String>) -> Unit,
     serverUrl: String,
     onUrlSet: (String) -> Unit,
     onBack: () -> Unit,
@@ -127,9 +135,24 @@ private fun SettingsContent(
                     )
                 }
                 item {
-                    IgnoredExpenseAccountsItem(
-                        ignoredExpenseAccounts = ignoredExpenseAccounts,
-                        onIgnoredExpenseAccountsSet = onIgnoredExpenseAccountsSet
+                    AccountsItem(
+                        titleRes = R.string.settings_ignored_expense_accounts_title,
+                        accounts = ignoredExpenseAccounts,
+                        onAccountsSet = onIgnoredExpenseAccountsSet
+                    )
+                }
+                item {
+                    AccountsItem(
+                        titleRes = R.string.settings_asset_accounts_title,
+                        accounts = assetAccounts,
+                        onAccountsSet = onAssetAccountsSet
+                    )
+                }
+                item {
+                    AccountsItem(
+                        titleRes = R.string.settings_liability_accounts_title,
+                        accounts = liabilityAccounts,
+                        onAccountsSet = onLiabilityAccountsSet
                     )
                 }
             }
@@ -226,18 +249,19 @@ private fun SetApiUrlDialog(
 }
 
 @Composable
-private fun IgnoredExpenseAccountsItem(
-    ignoredExpenseAccounts: IgnoredExpenseAccounts,
-    onIgnoredExpenseAccountsSet: (List<String>) -> Unit,
+private fun AccountsItem(
+    @StringRes titleRes: Int,
+    accounts: List<String>,
+    onAccountsSet: (List<String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val dialogState = rememberSaveable { mutableStateOf(false) }
     SettingsItem(
-        title = stringResource(id = R.string.settings_ignored_expense_accounts_title),
-        subtitle = if (ignoredExpenseAccounts.accounts.isEmpty()) {
-            stringResource(id = R.string.settings_ignored_expense_accounts_empty)
+        title = stringResource(id = titleRes),
+        subtitle = if (accounts.isEmpty()) {
+            stringResource(id = R.string.settings_accounts_empty)
         } else {
-            ignoredExpenseAccounts.accounts.joinToString(separator = ", ")
+            accounts.joinToString(separator = ", ")
         },
         onClick = {
             dialogState.value = !dialogState.value
@@ -245,11 +269,11 @@ private fun IgnoredExpenseAccountsItem(
         modifier = modifier
     )
     if (dialogState.value) {
-        SetIgnoredExpenseAccounts(
-            previousIgnoredAccounts = ignoredExpenseAccounts.accounts,
+        AccountsEntryView(
+            previousAccounts = accounts,
             onPositiveClick = { values ->
                 dialogState.value = !dialogState.value
-                onIgnoredExpenseAccountsSet(values)
+                onAccountsSet(values)
             },
             onNegativeClick = {
                 dialogState.value = !dialogState.value
@@ -261,16 +285,15 @@ private fun IgnoredExpenseAccountsItem(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-private fun SetIgnoredExpenseAccounts(
-    previousIgnoredAccounts: List<String>,
+private fun AccountsEntryView(
+    previousAccounts: List<String>,
     onPositiveClick: (List<String>) -> Unit,
     onNegativeClick: () -> Unit,
     modifier: Modifier = Modifier,
     dialogState: MutableState<Boolean>
 ) {
     var text by rememberSaveable {
-        mutableStateOf(
-            previousIgnoredAccounts.joinToString("\n").ifEmpty { "" })
+        mutableStateOf(previousAccounts.joinToString("\n").ifEmpty { "" })
     }
 
     val focusRequester = remember { FocusRequester() }

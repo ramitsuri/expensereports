@@ -4,6 +4,8 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.AccountTotalWithTotal
 import com.ramitsuri.expensereports.data.Report
+import com.ramitsuri.expensereports.data.isIn
+import com.ramitsuri.expensereports.data.isNotIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -162,27 +164,6 @@ class ExpenseReportCalculator(
 
     private fun reportNotInitialized(): Boolean {
         return !::filteredReport.isInitialized
-    }
-
-    private fun AccountTotal.isIn(
-        selectedAccountNames: List<String>?,
-        fullName: Boolean = false
-    ): Boolean {
-        if (selectedAccountNames == null) {
-            return true
-        }
-        return if (fullName) {
-            selectedAccountNames.contains(this.fullName)
-        } else {
-            selectedAccountNames.contains(this.name)
-        }
-    }
-
-    private fun AccountTotal.isNotIn(
-        selectedAccountNames: List<String>?,
-        fullName: Boolean = false
-    ): Boolean {
-        return !isIn(selectedAccountNames, fullName)
     }
 
     private fun Int.isIn(selectedMonths: List<Int>?): Boolean {

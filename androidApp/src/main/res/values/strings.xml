@@ -40,9 +40,11 @@
     <string name="report_year_selector_content_description">Year</string>
     <string name="report_view_selector_content_description">View type</string>
 
-    <!-- Settings/Ignored Expense Accounts -->
+    <!-- Settings/Accounts entry -->
     <string name="settings_ignored_expense_accounts_title">Ignored Expense Accounts</string>
-    <string name="settings_ignored_expense_accounts_empty">None</string>
+    <string name="settings_asset_accounts_title">Asset Accounts</string>
+    <string name="settings_liability_accounts_title">Liability Accounts</string>
+    <string name="settings_accounts_empty">None</string>
 
     <!-- Settings/Server Url -->
     <string name="settings_server_url_title">Server URL</string>
@@ -55,5 +57,12 @@
     <string name="home_expenses">Expenses</string>
     <string name="home_this_month">This month</string>
     <string name="home_last_month">Last month</string>
+
+    <!-- Accounts -->
+    <string name="accounts_assets_title">Assets</string>
+    <string name="accounts_liabilities_title">Liabilities</string>
+    <string name="accounts_as_of_yesterday_format">As of %1$s today</string>
+    <string name="accounts_as_of_today_format">As of %1$s yesterday</string>
+    <string name="accounts_as_of_date_format">As of %1$s</string>
 
 </resources>

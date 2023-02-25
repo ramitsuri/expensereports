@@ -222,7 +222,7 @@ private fun BarChartAccount(accounts: Map<String, BigDecimal>, total: BigDecimal
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Divider(
                                     modifier = Modifier.height(1.dp),
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2F)
+                                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2F)
                                 )
                             }
                             Spacer(modifier = Modifier.weight(0.08F))
@@ -293,7 +293,7 @@ private fun BarChartMonth(months: Map<Int, BigDecimal>, total: BigDecimal) {
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Divider(
                                     modifier = Modifier.height(1.dp),
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2F)
+                                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2F)
                                 )
                             }
                             Spacer(modifier = Modifier.weight(0.08F))
@@ -356,7 +356,7 @@ private fun BarChartBar(value: Float, label1: String, label2: String) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(value),
-                    color = MaterialTheme.colorScheme.primaryContainer
+                    color = MaterialTheme.colorScheme.secondaryContainer
                 )
             }
         }
@@ -478,7 +478,7 @@ private fun Table(
                 Column {
                     Row(
                         modifier = if (rowIndex % 2 == 0) {
-                            rowModifier.then(Modifier.background(MaterialTheme.colorScheme.primaryContainer))
+                            rowModifier.then(Modifier.background(MaterialTheme.colorScheme.secondaryContainer))
                         } else {
                             rowModifier
                         }
