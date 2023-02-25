@@ -14,6 +14,7 @@ import com.ramitsuri.expensereports.di.AppInfo
 import com.ramitsuri.expensereports.di.initKoin
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
+import com.ramitsuri.expensereports.utils.ReportsDownloader
 import com.ramitsuri.expensereports.viewmodel.AccountsViewModel
 import com.ramitsuri.expensereports.viewmodel.ExpenseReportViewModel
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
@@ -88,7 +89,8 @@ class MainApplication : Application(), LifecycleEventObserver {
 
                 viewModel {
                     SettingsViewModel(
-                        get<PrefManager>()
+                        get<PrefManager>(),
+                        get<ReportsDownloader>()
                     )
                 }
             }

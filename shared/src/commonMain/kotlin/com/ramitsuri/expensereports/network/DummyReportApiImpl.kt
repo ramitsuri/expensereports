@@ -13,11 +13,13 @@ internal class DummyReportApiImpl(private val json: Json) : ReportApi {
         val dto = json.decodeFromString<ReportDto>(getReportJson(year))
         return NetworkResponse.Success(dto)
     }
+
+    override val allowsCaching: Boolean = false
 }
 
 fun getReportJson(year: Int) = """
     {
-      "name": "{$year}_Expenses_All",
+      "name": "$year Expenses",
       "time": "2023-02-19T13:55:15Z",
       "account_total": {
         "name": "Expenses",

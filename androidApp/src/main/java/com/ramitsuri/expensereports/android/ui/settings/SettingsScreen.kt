@@ -24,6 +24,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -54,6 +55,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.extensions.shutdown
+import com.ramitsuri.expensereports.android.utils.timeDateMonthYear
+import com.ramitsuri.expensereports.viewmodel.DownloadViewState
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.getViewModel
@@ -77,6 +80,8 @@ fun SettingsScreen(
         onAssetAccountsSet = viewModel::setAssetAccounts,
         serverUrl = viewState.serverUrl.url,
         onUrlSet = viewModel::setServerUrl,
+        downloadViewState = viewState.downloadViewState,
+        onDownloadClicked = viewModel::downloadReports,
         onBack = onBack,
         modifier = modifier
     )
@@ -94,6 +99,8 @@ private fun SettingsContent(
     onAssetAccountsSet: (List<String>) -> Unit,
     serverUrl: String,
     onUrlSet: (String) -> Unit,
+    downloadViewState: DownloadViewState,
+    onDownloadClicked: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -132,6 +139,12 @@ private fun SettingsContent(
                     ServerUrlItem(
                         serverUrl = serverUrl,
                         onUrlSet = onUrlSet
+                    )
+                }
+                item {
+                    DownloadReportsItem(
+                        downloadViewState = downloadViewState,
+                        onClick = onDownloadClicked
                     )
                 }
                 item {
@@ -202,6 +215,29 @@ fun ServerUrlItem(
             dialogState = dialogState
         )
     }
+}
+
+@Composable
+fun DownloadReportsItem(
+    downloadViewState: DownloadViewState,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val downloadTime = downloadViewState.lastDownloadTime
+    SettingsItem(
+        title = stringResource(id = R.string.settings_download_title),
+        subtitle = if (downloadTime == null) {
+            stringResource(id = R.string.settings_download_never_downloaded)
+        } else {
+            stringResource(
+                id = R.string.settings_download_last_download_time_format,
+                downloadTime.timeDateMonthYear()
+            )
+        },
+        onClick = onClick,
+        showProgress = downloadViewState.isLoading,
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -358,7 +394,8 @@ private fun SettingsItem(
     title: String,
     subtitle: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showProgress: Boolean = false
 ) {
     Column(
         modifier = modifier
@@ -373,13 +410,18 @@ private fun SettingsItem(
             style = MaterialTheme.typography.bodyMedium,
             modifier = modifier.padding(4.dp)
         )
-        Text(
-            text = subtitle,
-            maxLines = 1,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = modifier
-                .padding(horizontal = 4.dp)
-                .basicMarquee()
-        )
+        if (showProgress) {
+            Spacer(modifier = modifier.height(8.dp))
+            LinearProgressIndicator(modifier = modifier.fillMaxWidth())
+        } else {
+            Text(
+                text = subtitle,
+                maxLines = 1,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = modifier
+                    .padding(horizontal = 4.dp)
+                    .basicMarquee()
+            )
+        }
     }
 }

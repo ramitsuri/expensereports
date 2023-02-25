@@ -53,6 +53,11 @@
     <string name="settings_server_url_restart">Tap to restart to set server URL</string>
     <string name="settings_server_url_server_not_set">http://</string>
 
+    <!-- Settings/Download -->
+    <string name="settings_download_title">Download all</string>
+    <string name="settings_download_last_download_time_format">Last downloaded at: %1$s</string>
+    <string name="settings_download_never_downloaded">Never downloaded</string>
+
     <!-- Home -->
     <string name="home_net_worth">Net Worth</string>
     <string name="home_savings">Savings</string>

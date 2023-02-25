@@ -157,29 +157,31 @@ private fun MainAccountContent(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(8.dp)
             )
-            val pagerState = rememberPagerState()
-            PagerWithIndicator(
-                count = accountBalances.size,
-                pagerState = pagerState,
-                modifier = Modifier.weight(1f)
-            ) { page ->
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = accountBalances[page].balance.format(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = accountBalances[page].date.homeMonthYear(),
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
+            if (accountBalances.isNotEmpty()) {
+                val pagerState = rememberPagerState()
+                PagerWithIndicator(
+                    count = accountBalances.size,
+                    pagerState = pagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = accountBalances[page].balance.format(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = accountBalances[page].date.homeMonthYear(),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    }
                 }
             }
         }

@@ -3,6 +3,7 @@ package com.ramitsuri.expensereports.utils
 import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.db.ReportDao
+import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.network.NetworkResponse
 import com.ramitsuri.expensereports.network.ReportApi
 import kotlinx.datetime.Clock
@@ -11,6 +12,7 @@ class ReportsDownloader(
     private val dao: ReportDao,
     private val api: ReportApi,
     private val clock: Clock,
+    private val prefManager: PrefManager
 ) {
     suspend fun downloadAndSaveAll() {
         val reportTypes = ReportType.values()
@@ -22,6 +24,8 @@ class ReportsDownloader(
             for (year in years) {
                 downloadAndSave(year, reportType)
             }
+
+            prefManager.setLastDownloadTime(clock.now())
         }
     }
 
@@ -35,7 +39,9 @@ class ReportsDownloader(
             is NetworkResponse.Success -> {
                 val report =
                     Report(response.data, fetchedAt = clock.now(), type.hasTotal, type, year)
-                dao.insert(year, type, report)
+                if (api.allowsCaching) {
+                    dao.insert(year, type, report)
+                }
                 report
             }
         }

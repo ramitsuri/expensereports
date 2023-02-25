@@ -1,5 +1,7 @@
 package com.ramitsuri.expensereports.data.prefs
 
+import kotlinx.datetime.Instant
+
 class PrefManager(private val keyValueStore: KeyValueStore) {
 
     fun setServerUrl(server: String) {
@@ -40,6 +42,21 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
     fun getLiabilityAccounts(): List<String> {
         val key = Key.LIABILITY_ACCOUNTS
         return getStringList(key, listOf())
+    }
+
+    fun setLastDownloadTime(time: Instant) {
+        val key = Key.LAST_DOWNLOAD_TIME
+        putString(key, time.toString())
+    }
+
+    fun getLastDownloadTime(): Instant? {
+        val key = Key.LAST_DOWNLOAD_TIME
+        val timestamp = getString(key, null) ?: return null
+        return try {
+            Instant.parse(timestamp)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun putString(key: Key, value: String) {
@@ -122,6 +139,11 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
 
             LIABILITY_ACCOUNTS(
                 key = "liability_accounts",
+                isSecure = false
+            ),
+
+            LAST_DOWNLOAD_TIME(
+                key = "last_download_time",
                 isSecure = false
             )
         }

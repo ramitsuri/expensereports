@@ -17,9 +17,13 @@ internal class ReportApiImpl(
         val apiUrl = "$baseUrl/${year}_${type.reportName}.json"
         return apiRequest(dispatcherProvider.io) { client.get(apiUrl) }
     }
+
+    override val allowsCaching: Boolean = true
 }
 
 interface ReportApi {
 
     suspend fun get(year: Int, type: ReportType): NetworkResponse<ReportDto>
+
+    val allowsCaching: Boolean
 }

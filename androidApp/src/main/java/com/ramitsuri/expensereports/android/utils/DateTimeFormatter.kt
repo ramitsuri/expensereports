@@ -74,9 +74,8 @@ fun LocalDateTime.timeAndDay(
 }
 
 /**
- * 4 PM Aug 10
- * 4:30 PM Aug 10
- * 4:30 PM Aug 10, 2021
+ * 4 PM
+ * 4:30 PM
  */
 fun LocalDateTime.timeOnly(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
@@ -96,6 +95,11 @@ fun LocalDateTime.timeOnly(
     )
 }
 
+/**
+ * 4 PM Aug 10
+ * 4:30 PM Aug 10
+ * 4:30 PM Aug 10, 2021
+ */
 fun LocalDateTime.timeDateMonthYear(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     now: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
