@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
+import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.data.AccountTotalWithTotal
 import com.ramitsuri.expensereports.data.Error
 import com.ramitsuri.expensereports.ui.FilterItem
@@ -192,7 +193,7 @@ private fun BarChartAccount(accounts: Map<String, BigDecimal>, total: BigDecimal
             .fillMaxSize()
     ) {
         Text(
-            text = "Total: ${total.toStringExpanded()}",
+            text = stringResource(id = R.string.total_format, total.format()),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(8.dp)
         )
@@ -244,7 +245,7 @@ private fun BarChartAccount(accounts: Map<String, BigDecimal>, total: BigDecimal
                                 BarChartBar(
                                     value = value,
                                     label1 = account,
-                                    label2 = amount.toStringExpanded()
+                                    label2 = amount.format()
                                 )
                             }
                         }
@@ -263,7 +264,7 @@ private fun BarChartMonth(months: Map<Int, BigDecimal>, total: BigDecimal) {
             .fillMaxSize()
     ) {
         Text(
-            text = "Total: ${total.toStringExpanded()}",
+            text = stringResource(id = R.string.total_format, total.format()),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(8.dp)
         )
@@ -318,7 +319,7 @@ private fun BarChartMonth(months: Map<Int, BigDecimal>, total: BigDecimal) {
                                 BarChartBar(
                                     value = value,
                                     label1 = stringResource(id = month.string()),
-                                    label2 = amount.toStringExpanded()
+                                    label2 = amount.format()
                                 )
                             }
                         }
@@ -404,10 +405,16 @@ private fun TableView(
                     0 -> { // Headers
                         when (columnIndex) {
                             0 -> {
-                                TableCell(text = "Accounts", isHeader = true)
+                                TableCell(
+                                    text = stringResource(id = R.string.accounts),
+                                    isHeader = true
+                                )
                             }
                             columns - 1 -> {
-                                TableCell(text = "Total", isHeader = true)
+                                TableCell(
+                                    text = stringResource(id = R.string.total),
+                                    isHeader = true
+                                )
                             }
                             else -> {
                                 TableCell(
@@ -420,15 +427,18 @@ private fun TableView(
                     1 -> { // Totals Account row
                         when (columnIndex) {
                             0 -> {
-                                TableCell(text = "Total", isHeader = true)
+                                TableCell(
+                                    text = stringResource(id = R.string.total),
+                                    isHeader = true
+                                )
                             }
                             columns - 1 -> {
-                                TableCell(text = total.total.toStringExpanded(), isHeader = true)
+                                TableCell(text = total.total.format(), isHeader = true)
                             }
                             else -> {
                                 val month = sortedMonths[columnIndex - 1]
                                 TableCell(
-                                    text = total.monthAmounts[month]?.toStringExpanded() ?: "0.0",
+                                    text = (total.monthAmounts[month] ?: BigDecimal.ZERO).format(),
                                     isHeader = true
                                 )
                             }
@@ -442,14 +452,15 @@ private fun TableView(
                             }
                             columns - 1 -> {
                                 TableCell(
-                                    text = account.total.toStringExpanded(),
+                                    text = account.total.format(),
                                     isHeader = true
                                 )
                             }
                             else -> {
                                 val month = sortedMonths[columnIndex - 1]
                                 TableCell(
-                                    text = account.monthAmounts[month]?.toStringExpanded() ?: "0.0",
+                                    text = (account.monthAmounts[month]
+                                        ?: BigDecimal.ZERO).format(),
                                     isHeader = false
                                 )
                             }

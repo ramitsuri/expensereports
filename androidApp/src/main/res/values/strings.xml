@@ -5,6 +5,9 @@
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
     <string name="report_unavailable">Unavailable</string>
+    <string name="total">Total</string>
+    <string name="total_format">Total: %1$s</string>
+    <string name="accounts">Accounts</string>
 
     <!-- Bottom nav -->
     <string name="bottom_nav_home">Home</string>
