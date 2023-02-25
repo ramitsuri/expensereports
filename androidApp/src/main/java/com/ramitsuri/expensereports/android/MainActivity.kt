@@ -12,11 +12,9 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -95,7 +93,6 @@ private fun BottomNavGraph(navController: NavHostController, onSettingsRequested
         ) {
             composable(BottomNav.Home.route) { HomeScreen() }
             composable(BottomNav.Accounts.route) { AccountsScreen() }
-            composable(BottomNav.Savings.route) { SavingsScreen() }
             composable(BottomNav.Expenses.route) { ExpensesScreen() }
         }
     }
@@ -203,13 +200,6 @@ sealed class BottomNav(
         selectedIcon = Icons.Filled.AccountBox
     )
 
-    object Savings : BottomNav(
-        route = "savings",
-        resourceId = R.string.bottom_nav_savings,
-        unselectedIcon = Icons.Outlined.ThumbUp,
-        selectedIcon = Icons.Filled.ThumbUp
-    )
-
     object Expenses : BottomNav(
         route = "expenses",
         resourceId = R.string.bottom_nav_expenses,
@@ -221,15 +211,9 @@ sealed class BottomNav(
 val bottomNavItems = listOf(
     BottomNav.Home,
     BottomNav.Accounts,
-    BottomNav.Savings,
     BottomNav.Expenses
 )
 
 enum class HomeMenuItem(val id: Int, @StringRes val textResId: Int) {
     SETTINGS(1, R.string.home_menu_settings)
-}
-
-@Composable
-fun SavingsScreen() {
-    Text(text = "Savings")
 }

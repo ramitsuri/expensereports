@@ -9,7 +9,6 @@
     <!-- Bottom nav -->
     <string name="bottom_nav_home">Home</string>
     <string name="bottom_nav_accounts">Accounts</string>
-    <string name="bottom_nav_savings">Savings</string>
     <string name="bottom_nav_expenses">Expenses</string>
 
     <!-- Menu -->
