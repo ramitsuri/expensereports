@@ -1,5 +1,7 @@
 package com.ramitsuri.expensereports.android.ui.home
 
+
+import android.graphics.PointF
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -7,6 +9,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -43,16 +48,18 @@ import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.utils.format
+import com.ramitsuri.expensereports.android.utils.formatRounded
 import com.ramitsuri.expensereports.android.utils.homeMonthYear
 import com.ramitsuri.expensereports.android.utils.monthYear
-import com.ramitsuri.expensereports.viewmodel.MainAccountBalance
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
+import com.ramitsuri.expensereports.viewmodel.MainAccountBalance
 import org.koin.androidx.compose.getViewModel
 
 @Composable
@@ -287,101 +294,115 @@ private fun LineChart(
     if (data.size < 2) {
         return
     }
-
-    val transparentGraphColor = remember(key1 = graphColor) {
-        graphColor.copy(alpha = 0.5f)
+    val xValueToBalanceMap = remember(netWorth) {
+        mutableMapOf<Float, MainAccountBalance>()
     }
-
-    val (lowerValue, upperValue) = remember(key1 = data) {
-        Pair(
-            data.min(),
-            data.max()
-        )
+    var verticalLineXValue by remember(netWorth) {
+        mutableStateOf<Float?>(null)
+    }
+    val transparentGraphColor = remember(graphColor) {
+        graphColor.copy(alpha = 0.5f)
     }
     val animationProgress = remember {
         Animatable(0f)
     }
-    LaunchedEffect(key1 = netWorth, block = {
+    LaunchedEffect(netWorth, block = {
         animationProgress.animateTo(1f, tween(3000))
     })
-    Column(modifier = modifier) {
+    Column(modifier = modifier
+        .pointerInput(Unit) {
+            detectHorizontalDragGestures(onDragEnd = {
+                verticalLineXValue = null
+            }
+            ) { change, _ ->
+                change.consume()
+                val gestureXPosition = change.position.x
+                var matchingXValue: Float? = null
+                for (xValueFromMap in xValueToBalanceMap.keys) {
+                    if (matchingXValue == null) {
+                        matchingXValue = xValueFromMap
+                    }
+                    if (xValueFromMap > gestureXPosition) {
+                        break
+                    } else {
+                        matchingXValue = xValueFromMap
+                    }
+                }
+                verticalLineXValue = matchingXValue
+            }
+        }
+    ) {
         Canvas(
             modifier = Modifier
                 .fillMaxHeight(0.8f)
                 .fillMaxWidth()
         ) {
-            val spacePerHour = size.width / data.size
-            var lastX = 0f
-            var firstY = 0f
-            val strokePath = Path().apply {
-                val height = size.height
-                for (i in data.indices) {
-                    val info = data[i]
-                    val nextInfo = data.getOrNull(i + 1) ?: data.last()
-                    val leftRatio =
-                        (info - lowerValue) / (upperValue - lowerValue)
-                    val rightRatio =
-                        (nextInfo - lowerValue) / (upperValue - lowerValue)
+            val mainPath = Path()
+            val pathContainerHeight = size.height
+            val pathContainerWidth = size.width
 
-                    val x1 = i * spacePerHour
-                    val y1 = height - (leftRatio * height).toFloat()
+            val numberOfEntries = netWorth.size - 1
+            val widthPerDataPoint = pathContainerWidth / numberOfEntries
 
-                    if (i == 0) {
-                        firstY = y1
-                    }
+            val maxValue = netWorth.maxBy { it.balance }.balance.doubleValue(false)
+            val minValue = netWorth.minBy { it.balance }.balance.doubleValue(false)
+            val range = maxValue - minValue
 
-                    val x2 = (i + 1) * spacePerHour
-                    val y2 = height - (rightRatio * height).toFloat()
-                    if (i == 0) {
-                        moveTo(x1, y1)
-                    }
-                    lastX = if (i == data.lastIndex) {
-                        size.width
-                    } else {
-                        (x1 + x2) / 2f
-                    }
-                    quadraticBezierTo(
-                        x1, y1, lastX, (y1 + y2) / 2f
-                    )
+            val heightPxPerValuePoint = pathContainerHeight / range
+
+            var previousX = 0f
+            var previousY = pathContainerHeight
+            netWorth.forEachIndexed { index, value ->
+                val newX = index * widthPerDataPoint
+                val newY = (pathContainerHeight - (value.balance.doubleValue(false) - minValue) *
+                        heightPxPerValuePoint).toFloat()
+
+                if (index == 0) {
+                    mainPath.moveTo(0f, newY)
                 }
+                val controlPoint1 = PointF((newX + previousX) / 2f, previousY)
+                val controlPoint2 = PointF((newX + previousX) / 2f, newY)
+                mainPath.cubicTo(
+                    controlPoint1.x, controlPoint1.y,
+                    controlPoint2.x, controlPoint2.y,
+                    newX, newY
+                )
+                xValueToBalanceMap[newX] = value
+                previousX = newX
+                previousY = newY
             }
-
-            val fillPath = android.graphics.Path(strokePath.asAndroidPath())
+            val gradientPath = android.graphics.Path(mainPath.asAndroidPath())
                 .asComposePath()
                 .apply {
-                    lineTo(lastX, size.height)
-                    lineTo(0f, size.height)
+                    lineTo(previousX, pathContainerHeight)
+                    lineTo(0f, pathContainerHeight)
                     close()
                 }
             clipRect(
-                top = -40f,
-                bottom = size.height + 40f,
-                right = size.width * animationProgress.value
+                top = -(8.dp.toPx()),
+                bottom = pathContainerHeight + 8.dp.toPx(),
+                right = pathContainerWidth * animationProgress.value
             ) {
+                drawPath(mainPath, graphColor, style = Stroke(2.dp.toPx()))
                 drawPath(
-                    path = fillPath,
+                    path = gradientPath,
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             transparentGraphColor,
                             Color.Transparent
                         ),
-                        endY = size.height
+                        endY = pathContainerHeight
                     ),
                 )
-                drawPath(
-                    path = strokePath,
-                    color = graphColor,
-                    style = Stroke(
-                        width = 2.dp.toPx(),
-                        cap = StrokeCap.Round
-                    )
-                )
-                val dottedPath = Path().apply {
-                    moveTo(0f, firstY)
-                    lineTo(lastX, firstY)
+            }
+            val verticalX = verticalLineXValue
+            if (verticalX != null) {
+                val verticalPath = Path().apply {
+                    moveTo(verticalX, 0f)
+                    lineTo(verticalX, pathContainerHeight)
                 }
                 drawPath(
-                    path = dottedPath,
+                    path = verticalPath,
                     color = graphColor.copy(alpha = .8f),
                     style = Stroke(
                         width = 1.5.dp.toPx(),
@@ -401,6 +422,16 @@ private fun LineChart(
                 text = netWorth.first().date.monthYear(),
                 style = MaterialTheme.typography.labelSmall
             )
+            val verticalX = verticalLineXValue
+            if (verticalX != null) {
+                val value = xValueToBalanceMap[verticalX]
+                if (value != null) {
+                    Text(
+                        text = "${value.date.monthYear()}: ${value.balance.formatRounded()}",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
             Text(
                 text = netWorth.last().date.monthYear(),
                 style = MaterialTheme.typography.labelSmall

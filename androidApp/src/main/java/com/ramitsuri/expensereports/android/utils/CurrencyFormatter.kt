@@ -17,6 +17,17 @@ fun BigDecimal.format(stripZeros: Boolean = true, locale: Locale = Locale.US): S
     }
 }
 
+fun BigDecimal.formatRounded(stripZeros: Boolean = true, locale: Locale = Locale.US): String {
+    val value = format(stripZeros, locale)
+    return if (this < thousand) {
+        return value
+    } else if (this >= thousand && this < million) {
+        "${this.divide(thousand).format(stripZeros, locale)}K"
+    } else {
+        "${this.divide(million).format(stripZeros, locale)}M"
+    }
+}
+
 private fun roundForCalculation(amount: BigDecimal, locale: Locale): JvmBigDecimal {
     val jvmBigDecimal = amount.toJvm()
     val newScale = currencyFormatter(locale).maximumFractionDigits
@@ -28,3 +39,6 @@ private fun BigDecimal.toJvm() = JvmBigDecimal(this.toPlainString())
 private fun currencyFormatter(locale: Locale): DecimalFormat {
     return NumberFormat.getCurrencyInstance(locale) as DecimalFormat
 }
+
+private val thousand = BigDecimal.parseString("1000")
+private val million = thousand.multiply(thousand)
