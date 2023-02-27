@@ -206,9 +206,11 @@ fun ConsumedBar(
     helpText: String,
     fillPercent: Float,
     modifier: Modifier = Modifier,
-    height: Dp = 12.dp,
+    barHeight: Dp = 12.dp,
     cornerRadius: Dp = 8.dp,
     color: Color,
+    segments: Int = 0,
+    segmentColor: Color = Color.White
 ) {
     val fill = if (fillPercent < 0f) {
         0f
@@ -233,7 +235,7 @@ fun ConsumedBar(
                 .fillMaxWidth()
         ) {
             val measuredText = textMeasurer.measure(AnnotatedString(consumedText))
-            val minOffset = 4.dp.toPx()
+            val minOffset = 4.dp.toPx() // Left padding
             val maxOffset = size.width - measuredText.size.width - 4.dp.toPx()
             var offset = size.width * fill - (measuredText.size.width / 2)
             if (offset > maxOffset) {
@@ -256,22 +258,43 @@ fun ConsumedBar(
                 .fillMaxWidth()
                 .fillMaxHeight(0.3f)
         ) {
+            val containerHeight = size.height
+            val containerWidth = size.width
+            val outlineStrokeWidth = 2.dp.toPx()
             drawRoundRect(
                 color = color,
-                topLeft = Offset(x = 0f, y = (size.height - height.toPx()) / 2),
-                size = size.copy(height = height.toPx()),
+                topLeft = Offset(x = 0f, y = (containerHeight - barHeight.toPx()) / 2),
+                size = size.copy(height = barHeight.toPx()),
                 cornerRadius = CornerRadius(cornerRadius.toPx()),
-                style = Stroke(width = 2.dp.toPx())
+                style = Stroke(width = outlineStrokeWidth)
             )
             drawRoundRect(
                 color = color,
-                topLeft = Offset(x = 0f, y = (size.height - height.toPx()) / 2),
+                topLeft = Offset(x = 0f, y = (containerHeight - barHeight.toPx()) / 2),
                 size = Size(
-                    width = animationProgress.value * this.size.width,
-                    height = height.toPx()
+                    width = animationProgress.value * containerWidth,
+                    height = barHeight.toPx()
                 ),
                 cornerRadius = CornerRadius(cornerRadius.toPx()),
             )
+            if (segments > 0) {
+                val segmentWidth = containerWidth / segments
+                repeat(segments - 1) { segment ->
+                    val xOffset = (segment + 1) * segmentWidth
+                    drawLine(
+                        color = segmentColor,
+                        start = Offset(
+                            x = xOffset,
+                            y = (containerHeight - barHeight.toPx() + outlineStrokeWidth) / 2
+                        ),
+                        end = Offset(
+                            x = xOffset,
+                            y = (containerHeight + barHeight.toPx() - outlineStrokeWidth) / 2
+                        ),
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
+            }
         }
         Row(
             modifier = Modifier
