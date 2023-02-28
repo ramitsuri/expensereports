@@ -50,7 +50,11 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ramitsuri.expensereports.android.R
@@ -133,7 +137,7 @@ private fun NetWorthContent(
             )
             LineChart(
                 netWorth = netWorth,
-                graphColor = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1F)
@@ -191,6 +195,95 @@ private fun MainAccountContent(
                     }
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalTextApi::class)
+@Composable
+fun ConsumedBar(
+    consumedText: String,
+    helpText: String,
+    fillPercent: Float,
+    modifier: Modifier = Modifier,
+    height: Dp = 12.dp,
+    cornerRadius: Dp = 8.dp,
+    color: Color,
+) {
+    val fill = if (fillPercent < 0f) {
+        0f
+    } else if (fillPercent > 1f) {
+        1f
+    } else {
+        fillPercent
+    }
+    val animationProgress = remember {
+        Animatable(0f)
+    }
+    LaunchedEffect(fill, block = {
+        animationProgress.animateTo(fill, tween(3000))
+    })
+    val textMeasurer = rememberTextMeasurer()
+
+    Column(modifier = modifier.padding(8.dp)) {
+        val textStyle = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Light)
+        Canvas(
+            modifier = Modifier
+                .fillMaxHeight(0.2f)
+                .fillMaxWidth()
+        ) {
+            val measuredText = textMeasurer.measure(AnnotatedString(consumedText))
+            val minOffset = 4.dp.toPx()
+            val maxOffset = size.width - measuredText.size.width - 4.dp.toPx()
+            var offset = size.width * fill - (measuredText.size.width / 2)
+            if (offset > maxOffset) {
+                offset = maxOffset
+            } else if (offset < minOffset) {
+                offset = minOffset
+            }
+            drawText(
+                textMeasurer,
+                consumedText,
+                style = textStyle,
+                topLeft = Offset(
+                    x = offset,
+                    y = (size.height - measuredText.size.height) / 2
+                )
+            )
+        }
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.3f)
+        ) {
+            drawRoundRect(
+                color = color,
+                topLeft = Offset(x = 0f, y = (size.height - height.toPx()) / 2),
+                size = size.copy(height = height.toPx()),
+                cornerRadius = CornerRadius(cornerRadius.toPx()),
+                style = Stroke(width = 2.dp.toPx())
+            )
+            drawRoundRect(
+                color = color,
+                topLeft = Offset(x = 0f, y = (size.height - height.toPx()) / 2),
+                size = Size(
+                    width = animationProgress.value * this.size.width,
+                    height = height.toPx()
+                ),
+                cornerRadius = CornerRadius(cornerRadius.toPx()),
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = helpText,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp),
+                style = MaterialTheme.typography.labelSmall
+            )
         }
     }
 }
@@ -287,7 +380,7 @@ private fun PageIndicator(
 @Composable
 private fun LineChart(
     netWorth: List<MainAccountBalance>,
-    graphColor: Color,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
     val data = netWorth.map { it.balance.doubleValue(exactRequired = false) }
@@ -300,8 +393,8 @@ private fun LineChart(
     var verticalLineXValue by remember(netWorth) {
         mutableStateOf<Float?>(null)
     }
-    val transparentGraphColor = remember(graphColor) {
-        graphColor.copy(alpha = 0.5f)
+    val transparentGraphColor = remember(color) {
+        color.copy(alpha = 0.5f)
     }
     val animationProgress = remember {
         Animatable(0f)
@@ -383,7 +476,7 @@ private fun LineChart(
                 bottom = pathContainerHeight + 8.dp.toPx(),
                 right = pathContainerWidth * animationProgress.value
             ) {
-                drawPath(mainPath, graphColor, style = Stroke(2.dp.toPx()))
+                drawPath(mainPath, color, style = Stroke(2.dp.toPx()))
                 drawPath(
                     path = gradientPath,
                     brush = Brush.verticalGradient(
@@ -403,7 +496,7 @@ private fun LineChart(
                 }
                 drawPath(
                     path = verticalPath,
-                    color = graphColor.copy(alpha = .8f),
+                    color = color.copy(alpha = .8f),
                     style = Stroke(
                         width = 1.5.dp.toPx(),
                         cap = StrokeCap.Round,
