@@ -5,6 +5,7 @@ import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.Response
 import com.ramitsuri.expensereports.data.prefs.PrefManager
+import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.ui.Account
 import com.ramitsuri.expensereports.ui.FilterItem
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 class ExpenseReportViewModel(
     private val repository: ReportsRepository,
     private val dispatchers: DispatcherProvider,
-    private val prefManager: PrefManager
+    private val configRepository: ConfigRepository
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<ReportsViewState> = MutableStateFlow(ReportsViewState())
@@ -140,7 +141,7 @@ class ExpenseReportViewModel(
     }
 
     private suspend fun onReportAvailableForFirstTime(initialReport: Report) {
-        val ignoredAccounts = prefManager.getIgnoredExpenseAccounts()
+        val ignoredAccounts = configRepository.getIgnoredExpenseAccounts()
         calculator = ExpenseReportCalculator(initialReport, ignoredAccounts, dispatchers.default)
         val calculatedReport =
             calculator.calculate(by = ExpenseReportCalculator.By.FULL) as? ExpenseReportView.Full

@@ -65,6 +65,14 @@ class NetworkProvider(
         }
     }
 
+    fun configApi(): ConfigApi {
+        return if (prefManager.getServerUrl().isEmpty()) {
+            DummyConfigApiImpl(json)
+        } else {
+            ConfigApiImpl(client, prefManager.getServerUrl(), dispatcherProvider)
+        }
+    }
+
     companion object {
         const val API_TIME_OUT: Long = 30_000
     }

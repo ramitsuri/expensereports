@@ -12,6 +12,7 @@ import com.ramitsuri.expensereports.android.work.ReportDownloadWorker
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.di.AppInfo
 import com.ramitsuri.expensereports.di.initKoin
+import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.utils.ReportsDownloader
@@ -67,7 +68,7 @@ class MainApplication : Application(), LifecycleEventObserver {
                     ExpenseReportViewModel(
                         get<ReportsRepository>(),
                         get<DispatcherProvider>(),
-                        get<PrefManager>()
+                        get<ConfigRepository>()
                     )
                 }
 
@@ -82,7 +83,7 @@ class MainApplication : Application(), LifecycleEventObserver {
                 viewModel {
                     AccountsViewModel(
                         get<ReportsRepository>(),
-                        get<PrefManager>(),
+                        get<ConfigRepository>(),
                         get<Clock>()
                     )
                 }

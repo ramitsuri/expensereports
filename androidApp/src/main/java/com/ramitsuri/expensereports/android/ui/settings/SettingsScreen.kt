@@ -1,6 +1,5 @@
 package com.ramitsuri.expensereports.android.ui.settings
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -34,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,14 +39,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -58,7 +50,6 @@ import com.ramitsuri.expensereports.android.extensions.shutdown
 import com.ramitsuri.expensereports.android.utils.timeDateMonthYear
 import com.ramitsuri.expensereports.viewmodel.DownloadViewState
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
-import kotlinx.coroutines.delay
 import org.koin.androidx.compose.getViewModel
 
 @Composable
@@ -72,12 +63,6 @@ fun SettingsScreen(
 
     SettingsContent(
         snackbarHostState = snackbarHostState,
-        ignoredExpenseAccounts = viewState.ignoredExpenseAccounts,
-        onIgnoredExpenseAccountsSet = viewModel::setIgnoredExpenseAccounts,
-        liabilityAccounts = viewState.liabilityAccounts,
-        onLiabilityAccountsSet = viewModel::setLiabilityAccounts,
-        assetAccounts = viewState.assetAccounts,
-        onAssetAccountsSet = viewModel::setAssetAccounts,
         serverUrl = viewState.serverUrl.url,
         onUrlSet = viewModel::setServerUrl,
         downloadViewState = viewState.downloadViewState,
@@ -91,12 +76,6 @@ fun SettingsScreen(
 @Composable
 private fun SettingsContent(
     snackbarHostState: SnackbarHostState,
-    ignoredExpenseAccounts: List<String>,
-    onIgnoredExpenseAccountsSet: (List<String>) -> Unit,
-    liabilityAccounts: List<String>,
-    onLiabilityAccountsSet: (List<String>) -> Unit,
-    assetAccounts: List<String>,
-    onAssetAccountsSet: (List<String>) -> Unit,
     serverUrl: String,
     onUrlSet: (String) -> Unit,
     downloadViewState: DownloadViewState,
@@ -145,27 +124,6 @@ private fun SettingsContent(
                     DownloadReportsItem(
                         downloadViewState = downloadViewState,
                         onClick = onDownloadClicked
-                    )
-                }
-                item {
-                    AccountsItem(
-                        titleRes = R.string.settings_ignored_expense_accounts_title,
-                        accounts = ignoredExpenseAccounts,
-                        onAccountsSet = onIgnoredExpenseAccountsSet
-                    )
-                }
-                item {
-                    AccountsItem(
-                        titleRes = R.string.settings_asset_accounts_title,
-                        accounts = assetAccounts,
-                        onAccountsSet = onAssetAccountsSet
-                    )
-                }
-                item {
-                    AccountsItem(
-                        titleRes = R.string.settings_liability_accounts_title,
-                        accounts = liabilityAccounts,
-                        onAccountsSet = onLiabilityAccountsSet
                     )
                 }
             }
@@ -275,110 +233,6 @@ private fun SetApiUrlDialog(
                     Spacer(modifier = Modifier.width(16.dp))
                     TextButton(onClick = {
                         onPositiveClick(text)
-                    }) {
-                        Text(text = stringResource(id = R.string.ok))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AccountsItem(
-    @StringRes titleRes: Int,
-    accounts: List<String>,
-    onAccountsSet: (List<String>) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val dialogState = rememberSaveable { mutableStateOf(false) }
-    SettingsItem(
-        title = stringResource(id = titleRes),
-        subtitle = if (accounts.isEmpty()) {
-            stringResource(id = R.string.settings_accounts_empty)
-        } else {
-            accounts.joinToString(separator = ", ")
-        },
-        onClick = {
-            dialogState.value = !dialogState.value
-        },
-        modifier = modifier
-    )
-    if (dialogState.value) {
-        AccountsEntryView(
-            previousAccounts = accounts,
-            onPositiveClick = { values ->
-                dialogState.value = !dialogState.value
-                onAccountsSet(values)
-            },
-            onNegativeClick = {
-                dialogState.value = !dialogState.value
-            },
-            dialogState = dialogState
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
-@Composable
-private fun AccountsEntryView(
-    previousAccounts: List<String>,
-    onPositiveClick: (List<String>) -> Unit,
-    onNegativeClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    dialogState: MutableState<Boolean>
-) {
-    var text by rememberSaveable {
-        mutableStateOf(previousAccounts.joinToString("\n").ifEmpty { "" })
-    }
-
-    val focusRequester = remember { FocusRequester() }
-    val showKeyboard by remember { mutableStateOf(true) }
-    val keyboard = LocalSoftwareKeyboardController.current
-
-    LaunchedEffect(focusRequester) {
-        if (showKeyboard) {
-            delay(100)
-            focusRequester.requestFocus()
-            keyboard?.show()
-        }
-    }
-    Dialog(
-        onDismissRequest = { dialogState.value = false },
-        properties = DialogProperties(dismissOnClickOutside = true)
-    ) {
-        Card(
-            modifier = modifier
-                .height(320.dp)
-        ) {
-            Column(
-                modifier = modifier
-                    .padding(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .focusRequester(focusRequester = focusRequester)
-                )
-                Spacer(modifier = modifier.height(16.dp))
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = modifier.fillMaxWidth()
-                ) {
-                    TextButton(onClick = {
-                        onNegativeClick()
-                    }) {
-                        Text(text = stringResource(id = R.string.cancel))
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    TextButton(onClick = {
-                        onPositiveClick(text.split("\n"))
                     }) {
                         Text(text = stringResource(id = R.string.ok))
                     }

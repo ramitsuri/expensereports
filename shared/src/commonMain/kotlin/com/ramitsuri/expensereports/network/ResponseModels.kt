@@ -43,3 +43,24 @@ data class BalanceDto(
     @SerialName("amount")
     val amount: String
 )
+
+@Serializable
+data class ConfigDto(
+    @SerialName("ignored_expense_accounts")
+    val ignoredExpenseAccounts: List<String>,
+
+    @SerialName("main_asset_accounts")
+    val mainAssetAccounts: List<String>,
+
+    @SerialName("main_liability_accounts")
+    val mainLiabilityAccounts: List<String>,
+
+    @SerialName("main_income_accounts")
+    val mainIncomeAccounts: List<String>,
+
+    @SerialName("annual_budget")
+    val annualBudget: String,
+
+    @SerialName("annual_savings_target")
+    val annualSavingsTarget: String
+)

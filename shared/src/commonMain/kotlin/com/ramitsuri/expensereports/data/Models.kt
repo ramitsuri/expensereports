@@ -3,6 +3,7 @@ package com.ramitsuri.expensereports.data
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.network.AccountTotalDto
 import com.ramitsuri.expensereports.network.BigDecimalSerializer
+import com.ramitsuri.expensereports.network.ConfigDto
 import com.ramitsuri.expensereports.network.IntBigDecimalMapSerializer
 import com.ramitsuri.expensereports.network.ReportDto
 import com.ramitsuri.expensereports.utils.Constants
@@ -165,4 +166,34 @@ fun AccountTotal.isNotIn(
     fullName: Boolean = false
 ): Boolean {
     return !isIn(selectedAccountNames, fullName)
+}
+
+
+@Serializable
+data class Config(
+    val ignoredExpenseAccounts: List<String>,
+    val mainAssetAccounts: List<String>,
+    val mainLiabilityAccounts: List<String>,
+    val mainIncomeAccounts: List<String>,
+    @Serializable(with = BigDecimalSerializer::class)
+    val annualBudget: BigDecimal,
+    @Serializable(with = BigDecimalSerializer::class)
+    val annualSavingsTarget: BigDecimal
+) {
+    constructor(dto: ConfigDto) : this(
+        ignoredExpenseAccounts = dto.ignoredExpenseAccounts,
+        mainAssetAccounts = dto.mainAssetAccounts,
+        mainLiabilityAccounts = dto.mainLiabilityAccounts,
+        mainIncomeAccounts = dto.mainIncomeAccounts,
+        annualBudget = try {
+            BigDecimal.parseString(dto.annualBudget)
+        } catch (e: Exception) {
+            BigDecimal.ZERO
+        },
+        annualSavingsTarget = try {
+            BigDecimal.parseString(dto.annualSavingsTarget)
+        } catch (e: Exception) {
+            BigDecimal.ZERO
+        },
+    )
 }

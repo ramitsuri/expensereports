@@ -4,7 +4,7 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.isIn
-import com.ramitsuri.expensereports.data.prefs.PrefManager
+import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ import kotlinx.datetime.toLocalDateTime
 
 class AccountsViewModel(
     private val repository: ReportsRepository,
-    private val prefManager: PrefManager,
+    private val configRepository: ConfigRepository,
     clock: Clock
 ) : ViewModel() {
 
@@ -41,7 +41,7 @@ class AccountsViewModel(
                 val accountBalances = getFilteredAccounts(
                     accountTotal = liabilityReport.accountTotal,
                     month = month,
-                    includeAccounts = prefManager.getLiabilityAccounts()
+                    includeAccounts = configRepository.getLiabilityAccounts()
                 )
                 val liabilityAccount = Account(
                     asOf = liabilityReport.generatedAt.toLocalDateTime(timeZone),
@@ -60,7 +60,7 @@ class AccountsViewModel(
                 val accountBalances = getFilteredAccounts(
                     accountTotal = assetReport.accountTotal,
                     month = month,
-                    includeAccounts = prefManager.getAssetAccounts()
+                    includeAccounts = configRepository.getAssetAccounts()
                 )
                 val assetAccount = Account(
                     asOf = assetReport.generatedAt.toLocalDateTime(timeZone),

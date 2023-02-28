@@ -4,6 +4,7 @@ import com.ramitsuri.expensereports.data.db.Database
 import com.ramitsuri.expensereports.data.db.ReportDao
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.network.NetworkProvider
+import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.utils.ReportsDownloader
@@ -43,6 +44,14 @@ private val coreModule = module {
             get<ReportsDownloader>(),
             get<ReportDao>(),
             get<Clock>()
+        )
+    }
+
+    factory<ConfigRepository> {
+        ConfigRepository(
+            get<NetworkProvider>().configApi(),
+            get<Json>(),
+            get<PrefManager>()
         )
     }
 

@@ -14,36 +14,6 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         return getString(key, "") ?: ""
     }
 
-    fun setIgnoredExpenseAccounts(ignoredAccounts: List<String>) {
-        val key = Key.IGNORED_EXPENSE_ACCOUNTS
-        putStringList(key, ignoredAccounts)
-    }
-
-    fun getIgnoredExpenseAccounts(): List<String> {
-        val key = Key.IGNORED_EXPENSE_ACCOUNTS
-        return getStringList(key, listOf())
-    }
-
-    fun setAssetAccounts(assetAccounts: List<String>) {
-        val key = Key.ASSET_ACCOUNTS
-        putStringList(key, assetAccounts)
-    }
-
-    fun getAssetAccounts(): List<String> {
-        val key = Key.ASSET_ACCOUNTS
-        return getStringList(key, listOf())
-    }
-
-    fun setLiabilityAccounts(liabilityAccounts: List<String>) {
-        val key = Key.LIABILITY_ACCOUNTS
-        putStringList(key, liabilityAccounts)
-    }
-
-    fun getLiabilityAccounts(): List<String> {
-        val key = Key.LIABILITY_ACCOUNTS
-        return getStringList(key, listOf())
-    }
-
     fun setLastDownloadTime(time: Instant) {
         val key = Key.LAST_DOWNLOAD_TIME
         putString(key, time.toString())
@@ -57,6 +27,16 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         } catch (e: Exception) {
             null
         }
+    }
+
+    fun setConfigJson(config: String) {
+        val key = Key.CONFIG
+        putString(key, config)
+    }
+
+    fun getConfigJson(): String? {
+        val key = Key.CONFIG
+        return getString(key, null)
     }
 
     private fun putString(key: Key, value: String) {
@@ -121,30 +101,17 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         private const val KV = "KV"
         private const val SKV = "SKV"
 
-        private enum class Key(val key: String, val isSecure: Boolean) {
+        private enum class Key(val key: String, val isSecure: Boolean = false) {
             SERVER_URL(
-                key = "server_url",
-                isSecure = false
-            ),
-
-            IGNORED_EXPENSE_ACCOUNTS(
-                key = "ignored_expense_accounts",
-                isSecure = false
-            ),
-
-            ASSET_ACCOUNTS(
-                key = "asset_accounts",
-                isSecure = false
-            ),
-
-            LIABILITY_ACCOUNTS(
-                key = "liability_accounts",
-                isSecure = false
+                key = "server_url"
             ),
 
             LAST_DOWNLOAD_TIME(
-                key = "last_download_time",
-                isSecure = false
+                key = "last_download_time"
+            ),
+
+            CONFIG(
+                key = "config"
             )
         }
     }
