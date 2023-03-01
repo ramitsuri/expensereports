@@ -71,7 +71,7 @@ import com.ramitsuri.expensereports.viewmodel.Year
 import org.koin.androidx.compose.getViewModel
 
 @Composable
-fun ExpensesScreen(
+fun DetailsScreen(
     modifier: Modifier = Modifier,
     viewModel: ExpenseReportViewModel = getViewModel()
 ) {

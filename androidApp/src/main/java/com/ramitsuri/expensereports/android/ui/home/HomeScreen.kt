@@ -3,12 +3,9 @@ package com.ramitsuri.expensereports.android.ui.home
 
 import android.graphics.PointF
 import androidx.annotation.StringRes
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,10 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -57,13 +52,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.formatRounded
-import com.ramitsuri.expensereports.android.utils.homeMonthYear
 import com.ramitsuri.expensereports.android.utils.monthYear
+import com.ramitsuri.expensereports.viewmodel.AccountBalance
+import com.ramitsuri.expensereports.viewmodel.Balance
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
-import com.ramitsuri.expensereports.viewmodel.MainAccountBalance
+import com.ramitsuri.expensereports.viewmodel.MonthAccountBalance
 import org.koin.androidx.compose.getViewModel
 
 @Composable
@@ -74,18 +72,22 @@ fun HomeScreen(
 
     HomeContent(
         netWorth = viewState.netWorth,
-        savings = viewState.savings,
-        expenses = viewState.expenses,
-        incomes = viewState.incomes
+        expenseBalance = viewState.expenses,
+        savingsBalance = viewState.savings,
+        salary = viewState.monthSalary,
+        liabilityAccountBalances = viewState.liabilityAccountBalances,
+        assetAccountBalances = viewState.assetAccountBalances
     )
 }
 
 @Composable
 private fun HomeContent(
-    netWorth: List<MainAccountBalance>,
-    savings: List<MainAccountBalance>,
-    expenses: List<MainAccountBalance>,
-    incomes: List<MainAccountBalance>,
+    netWorth: List<MonthAccountBalance>,
+    expenseBalance: Balance,
+    savingsBalance: Balance,
+    salary: BigDecimal,
+    assetAccountBalances: List<AccountBalance>,
+    liabilityAccountBalances: List<AccountBalance>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -93,31 +95,37 @@ private fun HomeContent(
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        NetWorthContent(netWorth, modifier = modifier.weight(0.4F))
-        Spacer(modifier = modifier.height(8.dp))
+        NetWorthContent(netWorth, modifier = modifier.weight(0.3F))
+        Spacer(modifier = modifier.height(4.dp))
         MainAccountContent(
             titleRes = R.string.home_savings,
-            accountBalances = savings,
-            modifier = modifier.weight(0.2F)
+            monthRes = R.string.home_savings_this_month_format,
+            annualRes = R.string.home_savings_this_year_format,
+            balance = savingsBalance,
+            modifier = modifier.weight(0.25F)
         )
-        Spacer(modifier = modifier.height(8.dp))
+        Spacer(modifier = modifier.height(4.dp))
         MainAccountContent(
             titleRes = R.string.home_expenses,
-            accountBalances = expenses,
-            modifier = modifier.weight(0.2F)
+            monthRes = R.string.home_expense_this_month_format,
+            annualRes = R.string.home_expense_this_year_format,
+            balance = expenseBalance,
+            modifier = modifier.weight(0.25F)
         )
-        Spacer(modifier = modifier.height(8.dp))
-        MainAccountContent(
-            titleRes = R.string.home_incomes,
-            accountBalances = incomes,
-            modifier = modifier.weight(0.2F)
+        Spacer(modifier = modifier.height(4.dp))
+        AccountBalancesContent(
+            salary = salary,
+            assetAccountBalances = assetAccountBalances,
+            liabilityAccountBalances = liabilityAccountBalances,
+            modifier = modifier
+                .weight(0.2f)
         )
     }
 }
 
 @Composable
 private fun NetWorthContent(
-    netWorth: List<MainAccountBalance>,
+    netWorth: List<MonthAccountBalance>,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -132,8 +140,8 @@ private fun NetWorthContent(
         ) {
             Text(
                 text = stringResource(id = R.string.home_net_worth),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(8.dp)
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(top = 4.dp)
             )
             LineChart(
                 netWorth = netWorth,
@@ -147,11 +155,12 @@ private fun NetWorthContent(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MainAccountContent(
     @StringRes titleRes: Int,
-    accountBalances: List<MainAccountBalance>,
+    @StringRes monthRes: Int,
+    @StringRes annualRes: Int,
+    balance: Balance,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -165,35 +174,115 @@ private fun MainAccountContent(
         ) {
             Text(
                 text = stringResource(id = titleRes),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(8.dp)
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(top = 4.dp)
             )
-            if (accountBalances.isNotEmpty()) {
-                val pagerState = rememberPagerState()
-                PagerWithIndicator(
-                    count = accountBalances.size,
-                    pagerState = pagerState,
-                    modifier = Modifier.weight(1f)
-                ) { page ->
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = accountBalances[page].balance.format(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = accountBalances[page].date.homeMonthYear(),
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-                    }
-                }
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Month
+                ConsumedBar(
+                    consumedText = balance.month.format(),
+                    helpText = stringResource(id = monthRes, balance.monthMax.format()),
+                    fillPercent = if (balance.monthMax != BigDecimal.ZERO) {
+                        balance.month.divide(balance.monthMax, DecimalMode.US_CURRENCY)
+                            .floatValue(exactRequired = false)
+                    } else {
+                        BigDecimal.ZERO.floatValue(exactRequired = false)
+                    },
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                // Annual
+                ConsumedBar(
+                    consumedText = balance.annual.format(),
+                    helpText = stringResource(id = annualRes, balance.annualMax.format()),
+                    fillPercent = if (balance.annualMax != BigDecimal.ZERO) {
+                        balance.annual.divide(balance.annualMax, DecimalMode.US_CURRENCY)
+                            .floatValue(exactRequired = false)
+                    } else {
+                        BigDecimal.ZERO.floatValue(exactRequired = false)
+                    },
+                    color = MaterialTheme.colorScheme.onBackground,
+                    segments = 12,
+                    segmentColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountBalancesContent(
+    salary: BigDecimal,
+    assetAccountBalances: List<AccountBalance>,
+    liabilityAccountBalances: List<AccountBalance>,
+    modifier: Modifier = Modifier
+) {
+    LazyHorizontalGrid(
+        rows = GridCells.Fixed(2),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        item {
+            AccountItem(
+                name = stringResource(id = R.string.home_account_salary_name),
+                balance = salary
+            )
+        }
+        assetAccountBalances.forEach { account ->
+            item {
+                AccountItem(
+                    name = account.name,
+                    balance = account.balance
+                )
+            }
+        }
+        liabilityAccountBalances.forEach { account ->
+            item {
+                AccountItem(
+                    name = account.name,
+                    balance = account.balance
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountItem(
+    name: String,
+    balance: BigDecimal,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+    ) {
+        Card(
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = balance.format(),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
             }
         }
     }
@@ -201,12 +290,12 @@ private fun MainAccountContent(
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
-fun ConsumedBar(
+private fun ConsumedBar(
     consumedText: String,
     helpText: String,
     fillPercent: Float,
     modifier: Modifier = Modifier,
-    barHeight: Dp = 12.dp,
+    barHeight: Dp = 8.dp,
     cornerRadius: Dp = 8.dp,
     color: Color,
     segments: Int = 0,
@@ -227,11 +316,17 @@ fun ConsumedBar(
     })
     val textMeasurer = rememberTextMeasurer()
 
-    Column(modifier = modifier.padding(8.dp)) {
-        val textStyle = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Light)
+    Column(
+        modifier = modifier
+            .padding(horizontal = 8.dp)
+    ) {
+        val textStyle = MaterialTheme.typography.labelSmall.copy(
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Light
+        )
         Canvas(
             modifier = Modifier
-                .fillMaxHeight(0.2f)
+                .height(12.dp)
                 .fillMaxWidth()
         ) {
             val measuredText = textMeasurer.measure(AnnotatedString(consumedText))
@@ -255,12 +350,12 @@ fun ConsumedBar(
         }
         Canvas(
             modifier = Modifier
+                .height(16.dp)
                 .fillMaxWidth()
-                .fillMaxHeight(0.3f)
         ) {
             val containerHeight = size.height
             val containerWidth = size.width
-            val outlineStrokeWidth = 2.dp.toPx()
+            val outlineStrokeWidth = 1.dp.toPx()
             drawRoundRect(
                 color = color,
                 topLeft = Offset(x = 0f, y = (containerHeight - barHeight.toPx()) / 2),
@@ -311,98 +406,9 @@ fun ConsumedBar(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun PagerWithIndicator(
-    count: Int,
-    pagerState: PagerState,
-    modifier: Modifier = Modifier,
-    pageContent: @Composable (page: Int) -> Unit
-) {
-    HorizontalPager(
-        pageCount = count,
-        state = pagerState,
-        modifier = modifier
-    ) { page ->
-        pageContent(page)
-    }
-    PageIndicator(
-        numberOfPages = count,
-        modifier = Modifier.padding(8.dp),
-        selectedPage = pagerState.currentPage,
-        defaultRadius = 8.dp,
-        selectedLength = 12.dp,
-        space = 8.dp,
-        animationDurationInMillis = 300,
-    )
-}
-
-@Composable
-private fun PageIndicator(
-    numberOfPages: Int,
-    modifier: Modifier = Modifier,
-    selectedPage: Int = 0,
-    selectedColor: Color = MaterialTheme.colorScheme.onBackground,
-    defaultColor: Color = MaterialTheme.colorScheme.inverseOnSurface,
-    defaultRadius: Dp = 20.dp,
-    selectedLength: Dp = 60.dp,
-    space: Dp = 30.dp,
-    animationDurationInMillis: Int = 300,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(space),
-        modifier = modifier,
-    ) {
-        for (i in 0 until numberOfPages) {
-            val isSelected = i == selectedPage
-            val color: Color by animateColorAsState(
-                targetValue = if (isSelected) {
-                    selectedColor
-                } else {
-                    defaultColor
-                },
-                animationSpec = tween(
-                    durationMillis = animationDurationInMillis,
-                )
-            )
-            val width: Dp by animateDpAsState(
-                targetValue = if (isSelected) {
-                    selectedLength
-                } else {
-                    defaultRadius
-                },
-                animationSpec = tween(
-                    durationMillis = animationDurationInMillis,
-                )
-            )
-            Canvas(
-                modifier = Modifier
-                    .size(
-                        width = width,
-                        height = defaultRadius,
-                    ),
-            ) {
-                drawRoundRect(
-                    color = color,
-                    topLeft = Offset.Zero,
-                    size = Size(
-                        width = width.toPx(),
-                        height = defaultRadius.toPx(),
-                    ),
-                    cornerRadius = CornerRadius(
-                        x = defaultRadius.toPx(),
-                        y = defaultRadius.toPx(),
-                    ),
-                )
-            }
-        }
-    }
-}
-
 @Composable
 private fun LineChart(
-    netWorth: List<MainAccountBalance>,
+    netWorth: List<MonthAccountBalance>,
     color: Color,
     modifier: Modifier = Modifier
 ) {
@@ -411,7 +417,7 @@ private fun LineChart(
         return
     }
     val xValueToBalanceMap = remember(netWorth) {
-        mutableMapOf<Float, MainAccountBalance>()
+        mutableMapOf<Float, MonthAccountBalance>()
     }
     var verticalLineXValue by remember(netWorth) {
         mutableStateOf<Float?>(null)
@@ -450,7 +456,7 @@ private fun LineChart(
     ) {
         Canvas(
             modifier = Modifier
-                .fillMaxHeight(0.8f)
+                .fillMaxHeight(0.75f)
                 .fillMaxWidth()
         ) {
             val mainPath = Path()

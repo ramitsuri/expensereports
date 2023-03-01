@@ -16,7 +16,6 @@ import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.utils.ReportsDownloader
-import com.ramitsuri.expensereports.viewmodel.AccountsViewModel
 import com.ramitsuri.expensereports.viewmodel.ExpenseReportViewModel
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
@@ -74,14 +73,6 @@ class MainApplication : Application(), LifecycleEventObserver {
 
                 viewModel {
                     HomeViewModel(
-                        get<ReportsRepository>(),
-                        get<PrefManager>(),
-                        get<Clock>()
-                    )
-                }
-
-                viewModel {
-                    AccountsViewModel(
                         get<ReportsRepository>(),
                         get<ConfigRepository>(),
                         get<Clock>()

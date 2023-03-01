@@ -22,27 +22,6 @@ fun LocalDate.monthYear(): String {
     return DateTimeFormatter.ofPattern("MMM ’uu").format(this.toJavaLocalDate())
 }
 
-// This month
-// Last month
-// January 2023
-@Composable
-fun LocalDate.homeMonthYear(
-    timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    now: LocalDate = Clock.System.now().toLocalDateTime(timeZone).date
-): String {
-    return when (now.minus(other = this).months) {
-        0 -> {
-            stringResource(id = R.string.home_this_month)
-        }
-        1 -> {
-            stringResource(id = R.string.home_last_month)
-        }
-        else -> {
-            DateTimeFormatter.ofPattern("MMMM uuuu").format(this.toJavaLocalDate())
-        }
-    }
-}
-
 /**
  * As of 4 PM yesterday
  * As of 4:30 PM today

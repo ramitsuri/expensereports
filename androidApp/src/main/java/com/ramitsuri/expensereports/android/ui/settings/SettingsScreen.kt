@@ -54,78 +54,48 @@ import org.koin.androidx.compose.getViewModel
 
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = getViewModel(),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onBack: () -> Unit
+    viewModel: SettingsViewModel = getViewModel()
 ) {
     val viewState = viewModel.state.collectAsState().value
 
     SettingsContent(
-        snackbarHostState = snackbarHostState,
         serverUrl = viewState.serverUrl.url,
         onUrlSet = viewModel::setServerUrl,
         downloadViewState = viewState.downloadViewState,
-        onDownloadClicked = viewModel::downloadReports,
-        onBack = onBack,
-        modifier = modifier
+        onDownloadClicked = viewModel::downloadReports
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SettingsContent(
-    snackbarHostState: SnackbarHostState,
     serverUrl: String,
     onUrlSet: (String) -> Unit,
     downloadViewState: DownloadViewState,
     onDownloadClicked: () -> Unit,
-    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { },
-                navigationIcon = {
-                    IconButton(
-                        onClick = onBack
-                    ) {
-                        Icon(
-                            Icons.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back)
-                        )
-                    }
-                }
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .statusBarsPadding()
-            .displayCutoutPadding(),
-    ) { paddingValues ->
-        Column(
+            .padding(8.dp)
+    ) {
+        LazyColumn(
             modifier = modifier
-                .padding(paddingValues)
-                .padding(horizontal = 8.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    ServerUrlItem(
-                        serverUrl = serverUrl,
-                        onUrlSet = onUrlSet
-                    )
-                }
-                item {
-                    DownloadReportsItem(
-                        downloadViewState = downloadViewState,
-                        onClick = onDownloadClicked
-                    )
-                }
+            item {
+                ServerUrlItem(
+                    serverUrl = serverUrl,
+                    onUrlSet = onUrlSet
+                )
+            }
+            item {
+                DownloadReportsItem(
+                    downloadViewState = downloadViewState,
+                    onClick = onDownloadClicked
+                )
             }
         }
     }

@@ -11,12 +11,8 @@
 
     <!-- Bottom nav -->
     <string name="bottom_nav_home">Home</string>
-    <string name="bottom_nav_accounts">Accounts</string>
-    <string name="bottom_nav_expenses">Expenses</string>
-
-    <!-- Menu -->
-    <string name="home_menu_settings">Settings</string>
-    <string name="menu_content_description">Menu</string>
+    <string name="bottom_nav_details">Details</string>
+    <string name="bottom_nav_misc">Misc</string>
 
     <!-- View Type -->
     <string name="report_view_table">Table</string>
@@ -57,8 +53,11 @@
     <string name="home_savings">Savings</string>
     <string name="home_expenses">Expenses</string>
     <string name="home_incomes">Incomes</string>
-    <string name="home_this_month">This month</string>
-    <string name="home_last_month">Last month</string>
+    <string name="home_expense_this_month_format">This month (budget: %1$s)</string>
+    <string name="home_expense_this_year_format">This year (budget: %1$s)</string>
+    <string name="home_savings_this_month_format">This month (target: %1$s)</string>
+    <string name="home_savings_this_year_format">This year (target: %1$s)</string>
+    <string name="home_account_salary_name">Salary</string>
 
     <!-- Accounts -->
     <string name="accounts_assets_title">Assets</string>

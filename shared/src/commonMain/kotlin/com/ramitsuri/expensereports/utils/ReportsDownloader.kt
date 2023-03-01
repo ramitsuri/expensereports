@@ -6,11 +6,13 @@ import com.ramitsuri.expensereports.data.db.ReportDao
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.network.NetworkResponse
 import com.ramitsuri.expensereports.network.ReportApi
+import com.ramitsuri.expensereports.repository.ConfigRepository
 import kotlinx.datetime.Clock
 
 class ReportsDownloader(
     private val dao: ReportDao,
     private val api: ReportApi,
+    private val configRepository: ConfigRepository,
     private val clock: Clock,
     private val prefManager: PrefManager
 ) {
@@ -24,6 +26,8 @@ class ReportsDownloader(
             for (year in years) {
                 downloadAndSave(year, reportType)
             }
+
+            configRepository.downloadAndSave()
 
             prefManager.setLastDownloadTime(clock.now())
         }

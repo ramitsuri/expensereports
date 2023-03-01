@@ -59,6 +59,7 @@ private val coreModule = module {
         ReportsDownloader(
             get<ReportDao>(),
             get<NetworkProvider>().reportApi(),
+            get<ConfigRepository>(),
             get<Clock>(),
             get<PrefManager>()
         )

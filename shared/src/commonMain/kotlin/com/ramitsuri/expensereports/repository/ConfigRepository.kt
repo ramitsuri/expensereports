@@ -48,14 +48,19 @@ class ConfigRepository(
                 null
             }
         } else {
-            when (val result = configApi.get()) {
-                is NetworkResponse.Failure -> {
-                    null
-                }
-                is NetworkResponse.Success -> {
-                    prefManager.setConfigJson(json.encodeToString(result.data))
-                    Config(result.data)
-                }
+            return downloadAndSave()
+        }
+    }
+
+    suspend fun downloadAndSave(): Config? {
+        return when (val result = configApi.get()) {
+            is NetworkResponse.Failure -> {
+                null
+            }
+            is NetworkResponse.Success -> {
+                val config = Config(result.data)
+                prefManager.setConfigJson(json.encodeToString(config))
+                config
             }
         }
     }

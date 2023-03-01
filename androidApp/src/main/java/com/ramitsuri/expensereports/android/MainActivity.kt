@@ -4,34 +4,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -44,10 +33,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ramitsuri.expensereports.android.ui.AppTheme
-import com.ramitsuri.expensereports.android.ui.SettingsNavGraph
-import com.ramitsuri.expensereports.android.ui.accounts.AccountsScreen
-import com.ramitsuri.expensereports.android.ui.expenses.ExpensesScreen
+import com.ramitsuri.expensereports.android.ui.expenses.DetailsScreen
 import com.ramitsuri.expensereports.android.ui.home.HomeScreen
+import com.ramitsuri.expensereports.android.ui.settings.SettingsScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -57,17 +45,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme(theme) {
                 val navController = rememberNavController()
-                val showSettingsNavGraph = rememberSaveable { mutableStateOf(false) }
-                if (showSettingsNavGraph.value) {
-                    SettingsNavGraph(showSettingsNavGraph = showSettingsNavGraph)
-                } else {
-                    BottomNavGraph(
-                        navController = navController,
-                        onSettingsRequested = {
-                            showSettingsNavGraph.value = true
-                        }
-                    )
-                }
+                BottomNavGraph(navController = navController)
             }
         }
     }
@@ -75,11 +53,9 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BottomNavGraph(navController: NavHostController, onSettingsRequested: () -> Unit) {
+private fun BottomNavGraph(navController: NavHostController) {
     Scaffold(
-        topBar = {
-            TopBar(onSettingsRequested = onSettingsRequested)
-        },
+        topBar = {},
         bottomBar = {
             BottomNavBar(navController = navController)
         }
@@ -92,24 +68,10 @@ private fun BottomNavGraph(navController: NavHostController, onSettingsRequested
                 .padding(innerPadding)
         ) {
             composable(BottomNav.Home.route) { HomeScreen() }
-            composable(BottomNav.Accounts.route) { AccountsScreen() }
-            composable(BottomNav.Expenses.route) { ExpensesScreen() }
+            composable(BottomNav.Details.route) { DetailsScreen() }
+            composable(BottomNav.Misc.route) { SettingsScreen() }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TopBar(onSettingsRequested: () -> Unit) {
-    TopAppBar(
-        title = {},
-        actions = {
-            MoreMenu(
-                onSettingsRequested = onSettingsRequested
-            )
-        },
-        scrollBehavior = enterAlwaysScrollBehavior()
-    )
 }
 
 @Composable
@@ -147,38 +109,6 @@ private fun BottomNavBar(navController: NavHostController) {
     }
 }
 
-@Composable
-private fun MoreMenu(
-    onSettingsRequested: () -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    Box {
-        IconButton(
-            onClick = {
-                expanded = !expanded
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Filled.MoreVert,
-                contentDescription = stringResource(id = R.string.menu_content_description)
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(id = HomeMenuItem.SETTINGS.textResId)) },
-                onClick = {
-                    expanded = false
-                    onSettingsRequested()
-                }
-            )
-        }
-    }
-}
-
-
 sealed class BottomNav(
     val route: String,
     @StringRes val resourceId: Int,
@@ -193,16 +123,16 @@ sealed class BottomNav(
             selectedIcon = Icons.Filled.Home
         )
 
-    object Accounts : BottomNav(
-        route = "accounts",
-        resourceId = R.string.bottom_nav_accounts,
+    object Details : BottomNav(
+        route = "details",
+        resourceId = R.string.bottom_nav_details,
         unselectedIcon = Icons.Outlined.AccountBox,
         selectedIcon = Icons.Filled.AccountBox
     )
 
-    object Expenses : BottomNav(
-        route = "expenses",
-        resourceId = R.string.bottom_nav_expenses,
+    object Misc : BottomNav(
+        route = "misc",
+        resourceId = R.string.bottom_nav_misc,
         unselectedIcon = Icons.Outlined.ShoppingCart,
         selectedIcon = Icons.Filled.ShoppingCart
     )
@@ -210,10 +140,6 @@ sealed class BottomNav(
 
 val bottomNavItems = listOf(
     BottomNav.Home,
-    BottomNav.Accounts,
-    BottomNav.Expenses
+    BottomNav.Details,
+    BottomNav.Misc
 )
-
-enum class HomeMenuItem(val id: Int, @StringRes val textResId: Int) {
-    SETTINGS(1, R.string.home_menu_settings)
-}
