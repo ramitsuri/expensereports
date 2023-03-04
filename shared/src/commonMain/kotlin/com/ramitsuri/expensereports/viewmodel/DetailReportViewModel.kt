@@ -29,7 +29,7 @@ class DetailReportViewModel(
     private lateinit var calculator: ReportCalculator
 
     init {
-        reportSelected(selectedYear = Year(year = DEFAULT_YEAR))
+        reportSelected()
     }
 
     fun onErrorShown() {
@@ -38,17 +38,32 @@ class DetailReportViewModel(
         }
     }
 
-    fun reportSelected(selectedYear: Year) {
+    fun yearSelected(selectedYear: Year) {
         _state.update {
             it.copy(years = it.years.map { year ->
                 Year(year.year, selected = year.year == selectedYear.year)
             })
         }
+        reportSelected()
+    }
+
+    fun reportTypeSelected(selectedReport: ReportSelection) {
+        _state.update {
+            it.copy(reports = it.reports.map { report ->
+                ReportSelection(report.type, selected = report.type == selectedReport.type)
+            })
+        }
+        reportSelected()
+    }
+
+    private fun reportSelected() {
         _state.update {
             it.copy(loading = true)
         }
+        val year = _state.value.years.firstOrNull { it.selected }?.year ?: DEFAULT_YEAR
+        val type = _state.value.reports.firstOrNull { it.selected }?.type ?: DEFAULT_REPORT_TYPE
         viewModelScope.launch {
-            repository.getReport(selectedYear.year, reportType).collect { response ->
+            repository.getReport(year, type).collect { response ->
                 when (response) {
                     is Response.Success -> {
                         onReportAvailableForFirstTime(response.data)
@@ -189,8 +204,6 @@ class DetailReportViewModel(
 
     companion object {
         private const val TAG = "ExpensesVM"
-
-        private val reportType = ReportType.EXPENSE
     }
 }
 
@@ -206,15 +219,32 @@ data class ReportsViewState(
         View(ViewType.BAR_ACCOUNT),
         View(ViewType.BAR_MONTH)
     ),
+    val reports: List<ReportSelection> = ReportType.values().filter { it != ReportType.NONE }
+        .map { ReportSelection(it) },
     val months: List<FilterItem> = listOf(),
     val accounts: List<FilterItem> = listOf(),
     val report: ReportView? = null,
     val error: Error? = null
 )
 
-data class Year(val year: Int, val selected: Boolean = year == DEFAULT_YEAR)
+data class Year(
+    val year: Int,
+    override val selected: Boolean = year == DEFAULT_YEAR
+) : Selector
 
-data class View(val type: ViewType, val selected: Boolean = type == DEFAULT_CHART)
+data class View(
+    val type: ViewType,
+    override val selected: Boolean = type == DEFAULT_CHART
+) : Selector
+
+data class ReportSelection(
+    val type: ReportType,
+    override val selected: Boolean = type == DEFAULT_REPORT_TYPE
+) : Selector
+
+sealed interface Selector {
+    val selected: Boolean
+}
 
 enum class ViewType {
     TABLE,
@@ -224,3 +254,4 @@ enum class ViewType {
 
 private const val DEFAULT_YEAR = 2023
 private val DEFAULT_CHART = ViewType.TABLE
+private val DEFAULT_REPORT_TYPE = ReportType.EXPENSE_AFTER_DEDUCTION

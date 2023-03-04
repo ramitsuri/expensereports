@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,9 +63,12 @@ import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.Error
+import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.ui.FilterItem
 import com.ramitsuri.expensereports.utils.ReportView
 import com.ramitsuri.expensereports.viewmodel.DetailReportViewModel
+import com.ramitsuri.expensereports.viewmodel.ReportSelection
+import com.ramitsuri.expensereports.viewmodel.Selector
 import com.ramitsuri.expensereports.viewmodel.View
 import com.ramitsuri.expensereports.viewmodel.ViewType
 import com.ramitsuri.expensereports.viewmodel.Year
@@ -81,7 +85,9 @@ fun DetailsScreen(
         isLoading = viewState.loading,
         error = viewState.error,
         years = viewState.years,
-        onYearSelected = viewModel::reportSelected,
+        onYearSelected = viewModel::yearSelected,
+        reportTypes = viewState.reports,
+        onReportTypeSelected = viewModel::reportTypeSelected,
         views = viewState.views,
         onViewSelected = viewModel::onViewSelected,
         onErrorShown = viewModel::onErrorShown,
@@ -100,6 +106,8 @@ private fun DetailsContent(
     error: Error?,
     years: List<Year>,
     onYearSelected: (Year) -> Unit,
+    reportTypes: List<ReportSelection>,
+    onReportTypeSelected: (ReportSelection) -> Unit,
     views: List<View>,
     onViewSelected: (View) -> Unit,
     onErrorShown: () -> Unit,
@@ -135,7 +143,9 @@ private fun DetailsContent(
                 years = years,
                 onYearSelected = onYearSelected,
                 views = views,
-                onViewSelected = onViewSelected
+                onViewSelected = onViewSelected,
+                reportTypes = reportTypes,
+                onReportTypeSelected = onReportTypeSelected
             )
             FilterRow(
                 items = accounts,
@@ -557,80 +567,75 @@ private fun TopRow(
     years: List<Year>,
     onYearSelected: (Year) -> Unit,
     views: List<View>,
-    onViewSelected: (View) -> Unit
+    onViewSelected: (View) -> Unit,
+    reportTypes: List<ReportSelection>,
+    onReportTypeSelected: (ReportSelection) -> Unit
 ) {
-    Row(
+    LazyRow(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        YearSelector(
-            years = years,
-            onYearSelected = onYearSelected,
-            modifier = Modifier.weight(0.5F)
-        )
-        ViewSelector(
-            views = views,
-            onViewSelected = onViewSelected,
-            modifier = Modifier.weight(0.5F)
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun YearSelector(years: List<Year>, onYearSelected: (Year) -> Unit, modifier: Modifier) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = modifier) {
-        FilterChip(
-            selected = years.any { it.selected },
-            onClick = { expanded = !expanded },
-            label = { Text(years.first { it.selected }.year.toString()) },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = stringResource(id = R.string.report_year_selector_content_description),
-                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                )
-            }
-        )
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            years.forEach { year ->
-                DropdownMenuItem(
-                    text = {
-                        Text(year.year.toString())
-                    },
-                    onClick = {
-                        expanded = false
-                        onYearSelected(year)
-                    }
-                )
-            }
+        item {
+            Selector(
+                items = reportTypes,
+                onItemSelected = { selector ->
+                    onReportTypeSelected(selector as ReportSelection)
+                },
+                contentDescription = R.string.report_type_selector_content_description,
+                modifier = Modifier
+            )
+        }
+        item {
+            Selector(
+                items = years,
+                onItemSelected = { selector ->
+                    onYearSelected(selector as Year)
+                },
+                contentDescription = R.string.report_year_selector_content_description,
+                modifier = Modifier
+            )
+        }
+        item {
+            Selector(
+                items = views,
+                onItemSelected = { selector ->
+                    onViewSelected(selector as View)
+                },
+                contentDescription = R.string.report_view_selector_content_description,
+                modifier = Modifier
+            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ViewSelector(
-    views: List<View>,
-    onViewSelected: (View) -> Unit,
-    modifier: Modifier
+private fun Selector(
+    items: List<Selector>,
+    onItemSelected: (Selector) -> Unit,
+    @StringRes contentDescription: Int,
+    modifier: Modifier,
 ) {
+    @Composable
+    fun Selector.name(): String {
+        return when (this) {
+            is ReportSelection -> type.string()
+            is View -> type.string()
+            is Year -> year.toString()
+        }
+    }
+
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         FilterChip(
-            selected = views.any { it.selected },
+            selected = items.any { it.selected },
             onClick = { expanded = !expanded },
-            label = { Text(stringResource(id = views.first { it.selected }.type.string())) },
+            label = { Text(items.first { it.selected }.name()) },
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = stringResource(id = R.string.report_view_selector_content_description),
+                    contentDescription = stringResource(id = contentDescription),
                     modifier = Modifier.size(FilterChipDefaults.IconSize)
                 )
             }
@@ -640,14 +645,14 @@ private fun ViewSelector(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
-            views.forEach { view ->
+            items.forEach { view ->
                 DropdownMenuItem(
                     text = {
-                        Text(stringResource(id = view.type.string()))
+                        Text(view.name())
                     },
                     onClick = {
                         expanded = false
-                        onViewSelected(view)
+                        onItemSelected(view)
                     }
                 )
             }
@@ -662,7 +667,10 @@ private fun FilterRow(
     onItemClicked: (item: FilterItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyRow(modifier = modifier.fillMaxWidth()) {
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         items.forEach { filterItem ->
             item {
                 FilterChip(
@@ -670,19 +678,50 @@ private fun FilterRow(
                     onClick = { onItemClicked(filterItem) },
                     label = { Text(filterItem.displayName) }
                 )
-                Spacer(modifier = modifier.width(8.dp))
             }
         }
     }
 }
 
-@StringRes
-fun ViewType.string(): Int {
-    return when (this) {
+@Composable
+fun ViewType.string(): String {
+    val stringRes = when (this) {
         ViewType.TABLE -> R.string.report_view_table
         ViewType.BAR_MONTH -> R.string.report_view_bar_month
         ViewType.BAR_ACCOUNT -> R.string.report_view_bar_account
     }
+    return stringResource(id = stringRes)
+}
+
+@Composable
+fun ReportType.string(): String {
+    val stringRes = when (this) {
+        ReportType.EXPENSE -> {
+            R.string.report_type_expense
+        }
+        ReportType.EXPENSE_AFTER_DEDUCTION -> {
+            R.string.report_type_expense_after_deduction
+        }
+        ReportType.ASSETS -> {
+            R.string.report_type_assets
+        }
+        ReportType.LIABILITIES -> {
+            R.string.report_type_liabilities
+        }
+        ReportType.INCOME -> {
+            R.string.report_type_income
+        }
+        ReportType.NET_WORTH -> {
+            R.string.report_type_net_worth
+        }
+        ReportType.SAVINGS -> {
+            R.string.report_type_savings
+        }
+        ReportType.NONE -> {
+            R.string.report_type_none
+        }
+    }
+    return stringResource(id = stringRes)
 }
 
 @StringRes
