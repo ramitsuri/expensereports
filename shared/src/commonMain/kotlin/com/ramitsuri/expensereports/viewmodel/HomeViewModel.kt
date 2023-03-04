@@ -198,6 +198,7 @@ data class HomeViewState(
     val netWorth: List<MonthAccountBalance> = listOf(),
     val expenses: Balance = Balance(),
     val savings: Balance = Balance(),
+    val topExpenses: List<AccountBalance> = listOf(),
     val assetAccountBalances: List<AccountBalance> = listOf(),
     val liabilityAccountBalances: List<AccountBalance> = listOf(),
     val monthSalary: BigDecimal = BigDecimal.ZERO

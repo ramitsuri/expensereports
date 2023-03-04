@@ -33,7 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ramitsuri.expensereports.android.ui.AppTheme
-import com.ramitsuri.expensereports.android.ui.expenses.DetailsScreen
+import com.ramitsuri.expensereports.android.ui.details.DetailsScreen
 import com.ramitsuri.expensereports.android.ui.home.HomeScreen
 import com.ramitsuri.expensereports.android.ui.settings.SettingsScreen
 

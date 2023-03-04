@@ -4,32 +4,29 @@ import com.ramitsuri.expensereports.data.Error
 import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.Response
-import com.ramitsuri.expensereports.data.prefs.PrefManager
-import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.ui.Account
 import com.ramitsuri.expensereports.ui.FilterItem
 import com.ramitsuri.expensereports.ui.Month
 import com.ramitsuri.expensereports.ui.getNewItemsOnItemClicked
 import com.ramitsuri.expensereports.utils.DispatcherProvider
-import com.ramitsuri.expensereports.utils.ExpenseReportCalculator
-import com.ramitsuri.expensereports.utils.ExpenseReportView
 import com.ramitsuri.expensereports.utils.LogHelper
+import com.ramitsuri.expensereports.utils.ReportCalculator
+import com.ramitsuri.expensereports.utils.ReportView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ExpenseReportViewModel(
+class DetailReportViewModel(
     private val repository: ReportsRepository,
-    private val dispatchers: DispatcherProvider,
-    private val configRepository: ConfigRepository
+    private val dispatchers: DispatcherProvider
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<ReportsViewState> = MutableStateFlow(ReportsViewState())
     val state: StateFlow<ReportsViewState> = _state
 
-    private lateinit var calculator: ExpenseReportCalculator
+    private lateinit var calculator: ReportCalculator
 
     init {
         reportSelected(selectedYear = Year(year = DEFAULT_YEAR))
@@ -121,9 +118,9 @@ class ExpenseReportViewModel(
                 .mapNotNull { (it as? Account)?.accountName }
             val selectedBy = when (_state.value.views
                 .first { it.selected }.type) {
-                ViewType.TABLE -> ExpenseReportCalculator.By.FULL
-                ViewType.BAR_MONTH -> ExpenseReportCalculator.By.MONTH
-                ViewType.BAR_ACCOUNT -> ExpenseReportCalculator.By.ACCOUNT
+                ViewType.TABLE -> ReportCalculator.By.FULL
+                ViewType.BAR_MONTH -> ReportCalculator.By.MONTH
+                ViewType.BAR_ACCOUNT -> ReportCalculator.By.ACCOUNT
             }
 
             val reportView = calculator.calculate(
@@ -141,10 +138,9 @@ class ExpenseReportViewModel(
     }
 
     private suspend fun onReportAvailableForFirstTime(initialReport: Report) {
-        val ignoredAccounts = configRepository.getIgnoredExpenseAccounts()
-        calculator = ExpenseReportCalculator(initialReport, ignoredAccounts, dispatchers.default)
+        calculator = ReportCalculator(initialReport, dispatchers.default)
         val calculatedReport =
-            calculator.calculate(by = ExpenseReportCalculator.By.FULL) as? ExpenseReportView.Full
+            calculator.calculate(by = ReportCalculator.By.FULL) as? ReportView.Full
         if (calculatedReport == null) {
             _state.update {
                 it.copy(loading = false)
@@ -212,7 +208,7 @@ data class ReportsViewState(
     ),
     val months: List<FilterItem> = listOf(),
     val accounts: List<FilterItem> = listOf(),
-    val report: ExpenseReportView? = null,
+    val report: ReportView? = null,
     val error: Error? = null
 )
 

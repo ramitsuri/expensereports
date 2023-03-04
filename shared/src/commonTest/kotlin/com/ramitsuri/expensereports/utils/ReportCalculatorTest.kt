@@ -13,9 +13,9 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ExpenseReportCalculatorTest {
+class ReportCalculatorTest {
 
-    private lateinit var calculator: ExpenseReportCalculator
+    private lateinit var calculator: ReportCalculator
     private val dispatcher = StandardTestDispatcher()
 
     @BeforeTest
@@ -38,8 +38,8 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL
-        ) as ExpenseReportView.Full
+            by = ReportCalculator.By.FULL
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 1
@@ -67,43 +67,6 @@ class ExpenseReportCalculatorTest {
     /**
      *     |   Name    | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
      *     |-----------|---------|---------|---------|---------|---------|
-     *     |   Total   |   15    |   17    |   19    |   21    |    72   |
-     *     | Account 1 |    1    |    2    |    3    |    4    |    10   |
-     *     | Account 3 |   14    |   15    |   16    |   17    |    62   |
-     */
-    @Test
-    fun testCalculateFull_ifNoChangesMadeToAccountAndMonthSelections_andAccount2Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupSimpleCalculator(ignoredExpenseAccounts = listOf("Account2"))
-
-            // Act
-            val result = calculator.calculate(
-                by = ExpenseReportCalculator.By.FULL
-            ) as ExpenseReportView.Full
-            val accountTotals = result.accountTotals
-
-            // Assert Account 1
-            val account1 = accountTotals[0]
-            assert(10, account1.total)
-
-            // Assert Account 3
-            val account3 = accountTotals[1]
-            assert(62, account3.total)
-
-            // Assert Totals row
-            val totalsAccount = result.total
-            assertEquals(4, totalsAccount.monthAmounts.size)
-            assert(15, totalsAccount.monthAmounts[1])
-            assert(17, totalsAccount.monthAmounts[2])
-            assert(19, totalsAccount.monthAmounts[3])
-            assert(21, totalsAccount.monthAmounts[4])
-            assert(72, totalsAccount.total)
-        }
-
-    /**
-     *     |   Name    | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |-----------|---------|---------|---------|---------|---------|
      *     |   Total   |   22    |   25    |   28    |   31    |   106   |
      *     | Account 1 |    1    |    2    |    3    |    4    |    10   |
      *     | Account 2 |    7    |    8    |    9    |   10    |    34   |
@@ -116,8 +79,8 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = (calculator.calculate(
-            by = ExpenseReportCalculator.By.ACCOUNT
-        ) as ExpenseReportView.ByAccount)
+            by = ReportCalculator.By.ACCOUNT
+        ) as ReportView.ByAccount)
 
         val accountTotals = result.accountTotals
 
@@ -141,39 +104,6 @@ class ExpenseReportCalculatorTest {
     /**
      *     |   Name    | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
      *     |-----------|---------|---------|---------|---------|---------|
-     *     |   Total   |   15    |   17    |   19    |   21    |    72   |
-     *     | Account 1 |    1    |    2    |    3    |    4    |    10   |
-     *     | Account 3 |   14    |   15    |   16    |   17    |    62   |
-     */
-    @Test
-    fun testCalculateByAccount_ifNoChangesMadeToAccountAndMonthSelections_andAccount2Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupSimpleCalculator(ignoredExpenseAccounts = listOf("Account2"))
-
-            // Act
-            val result = (calculator.calculate(
-                by = ExpenseReportCalculator.By.ACCOUNT
-            ) as ExpenseReportView.ByAccount)
-
-            val accountTotals = result.accountTotals
-
-            // Assert Account 1
-            val account1Total = accountTotals["Account1"]
-            assert(10, account1Total)
-
-            // Assert Account 3
-            val account3Total = accountTotals["Account3"]
-            assert(62, account3Total)
-
-            // Assert Totals row
-            val totalsAccountTotal = result.total
-            assert(72, totalsAccountTotal)
-        }
-
-    /**
-     *     |   Name    | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |-----------|---------|---------|---------|---------|---------|
      *     |   Total   |   22    |   25    |   28    |   31    |   106   |
      *     | Account 1 |    1    |    2    |    3    |    4    |    10   |
      *     | Account 2 |    7    |    8    |    9    |   10    |    34   |
@@ -186,8 +116,8 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = (calculator.calculate(
-            by = ExpenseReportCalculator.By.MONTH
-        ) as ExpenseReportView.ByMonth)
+            by = ReportCalculator.By.MONTH
+        ) as ReportView.ByMonth)
 
         val monthTotals = result.monthTotals
 
@@ -215,47 +145,6 @@ class ExpenseReportCalculatorTest {
     /**
      *     |   Name    | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
      *     |-----------|---------|---------|---------|---------|---------|
-     *     |   Total   |   15    |   17    |   19    |   21    |    72   |
-     *     | Account 1 |    1    |    2    |    3    |    4    |    10   |
-     *     | Account 3 |   14    |   15    |   16    |   17    |    62   |
-     */
-    @Test
-    fun testCalculateByMonth_ifNoChangesMadeToAccountAndMonthSelections_andAccount2Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupSimpleCalculator(ignoredExpenseAccounts = listOf("Account2"))
-
-            // Act
-            val result = (calculator.calculate(
-                by = ExpenseReportCalculator.By.MONTH
-            ) as ExpenseReportView.ByMonth)
-
-            val monthTotals = result.monthTotals
-
-            // Assert Month 1
-            val month1Total = monthTotals[1]
-            assert(15, month1Total)
-
-            // Assert Month 2
-            val month2Total = monthTotals[2]
-            assert(17, month2Total)
-
-            // Assert Month 3
-            val month3Total = monthTotals[3]
-            assert(19, month3Total)
-
-            // Assert Month 4
-            val month4Total = monthTotals[4]
-            assert(21, month4Total)
-
-            // Assert Totals row
-            val totalsAccountTotal = result.total
-            assert(72, totalsAccountTotal)
-        }
-
-    /**
-     *     |   Name    | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |-----------|---------|---------|---------|---------|---------|
      *     |   Total   |   21    |   23    |   25    |   27    |    96   |
      *     | Account 2 |    7    |    8    |    9    |   10    |    34   |
      *     | Account 3 |   14    |   15    |   16    |   17    |    62   |
@@ -267,9 +156,9 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedAccounts = listOf("Account2", "Account3")
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 2
@@ -303,9 +192,9 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedAccounts = listOf("Account2")
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 2
@@ -337,9 +226,9 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedMonths = listOf(2, 3)
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 1
@@ -377,9 +266,9 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedMonths = listOf(1, 2, 3)
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 1
@@ -417,10 +306,10 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedAccounts = listOf("Account1", "Account3"),
             selectedMonths = listOf(1, 3, 4)
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 1
@@ -454,10 +343,10 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = (calculator.calculate(
-            by = ExpenseReportCalculator.By.ACCOUNT,
+            by = ReportCalculator.By.ACCOUNT,
             selectedAccounts = listOf("Account1", "Account3"),
             selectedMonths = listOf(1, 3, 4)
-        ) as ExpenseReportView.ByAccount)
+        ) as ReportView.ByAccount)
 
         val accountTotals = result.accountTotals
 
@@ -488,10 +377,10 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = (calculator.calculate(
-            by = ExpenseReportCalculator.By.MONTH,
+            by = ReportCalculator.By.MONTH,
             selectedAccounts = listOf("Account1", "Account3"),
             selectedMonths = listOf(1, 3, 4)
-        ) as ExpenseReportView.ByMonth)
+        ) as ReportView.ByMonth)
 
         val monthTotals = result.monthTotals
 
@@ -533,8 +422,8 @@ class ExpenseReportCalculatorTest {
 
             // Act
             val result = calculator.calculate(
-                by = ExpenseReportCalculator.By.FULL
-            ) as ExpenseReportView.Full
+                by = ReportCalculator.By.FULL
+            ) as ReportView.Full
             val accountTotals = result.accountTotals
 
             // Assert Account 1
@@ -562,47 +451,6 @@ class ExpenseReportCalculatorTest {
     /**
      *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
      *     |---------------|---------|---------|---------|---------|---------|
-     *     |     Total     |   33    |   42    |   56    |   74    |   205   |
-     *     |   Account 1   |    6    |   11    |   16    |   45    |    78   |
-     *     |  - Account 11 |    4    |    5    |    8    |   33    |    50   |
-     *     |  - Account 12 |    2    |    6    |    8    |   12    |    28   |
-     *     |  Account 3    |   27    |   31    |   40    |   29    |   127   |
-     *     |  - Account 31 |   12    |    8    |   12    |   10    |    42   |
-     *     |  - Account 32 |   15    |   23    |   28    |   19    |    85   |
-     */
-    @Test
-    fun testCalculateFullComplex_ifNoChangesMadeToAccountAndMonthSelections_andAccount2Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupComplexCalculator(ignoredExpenseAccounts = listOf("Account2"))
-
-            // Act
-            val result = calculator.calculate(
-                by = ExpenseReportCalculator.By.FULL
-            ) as ExpenseReportView.Full
-            val accountTotals = result.accountTotals
-
-            // Assert Account 1
-            val account1 = accountTotals[0]
-            assert(78, account1.total)
-
-            // Assert Account 3
-            val account3 = accountTotals[1]
-            assert(127, account3.total)
-
-            // Assert Totals row
-            val totalsAccount = result.total
-            assertEquals(4, totalsAccount.monthAmounts.size)
-            assert(33, totalsAccount.monthAmounts[1])
-            assert(42, totalsAccount.monthAmounts[2])
-            assert(56, totalsAccount.monthAmounts[3])
-            assert(74, totalsAccount.monthAmounts[4])
-            assert(205, totalsAccount.total)
-        }
-
-    /**
-     *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |---------------|---------|---------|---------|---------|---------|
      *     |     Total     |   40    |   50    |   65    |   84    |   239   |
      *     |   Account 1   |    6    |   11    |   16    |   45    |    78   |
      *     |  - Account 11 |    4    |    5    |    8    |   33    |    50   |
@@ -621,8 +469,8 @@ class ExpenseReportCalculatorTest {
 
             // Act
             val result = (calculator.calculate(
-                by = ExpenseReportCalculator.By.ACCOUNT
-            ) as ExpenseReportView.ByAccount)
+                by = ReportCalculator.By.ACCOUNT
+            ) as ReportView.ByAccount)
 
             val accountTotals = result.accountTotals
 
@@ -646,43 +494,6 @@ class ExpenseReportCalculatorTest {
     /**
      *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
      *     |---------------|---------|---------|---------|---------|---------|
-     *     |     Total     |   33    |   42    |   56    |   74    |   205   |
-     *     |   Account 1   |    6    |   11    |   16    |   45    |    78   |
-     *     |  - Account 11 |    4    |    5    |    8    |   33    |    50   |
-     *     |  - Account 12 |    2    |    6    |    8    |   12    |    28   |
-     *     |  Account 3    |   27    |   31    |   40    |   29    |   127   |
-     *     |  - Account 31 |   12    |    8    |   12    |   10    |    42   |
-     *     |  - Account 32 |   15    |   23    |   28    |   19    |    85   |
-     */
-    @Test
-    fun testCalculateByAccountComplex_ifNoChangesMadeToAccountAndMonthSelections_andAccount2Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupComplexCalculator(ignoredExpenseAccounts = listOf("Account2"))
-
-            // Act
-            val result = (calculator.calculate(
-                by = ExpenseReportCalculator.By.ACCOUNT
-            ) as ExpenseReportView.ByAccount)
-
-            val accountTotals = result.accountTotals
-
-            // Assert Account 1
-            val account1Total = accountTotals["Account1"]
-            assert(78, account1Total)
-
-            // Assert Account 3
-            val account3Total = accountTotals["Account3"]
-            assert(127, account3Total)
-
-            // Assert Totals row
-            val totalsAccountTotal = result.total
-            assert(205, totalsAccountTotal)
-        }
-
-    /**
-     *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |---------------|---------|---------|---------|---------|---------|
      *     |     Total     |   40    |   50    |   65    |   84    |   239   |
      *     |   Account 1   |    6    |   11    |   16    |   45    |    78   |
      *     |  - Account 11 |    4    |    5    |    8    |   33    |    50   |
@@ -701,8 +512,8 @@ class ExpenseReportCalculatorTest {
 
             // Act
             val result = (calculator.calculate(
-                by = ExpenseReportCalculator.By.MONTH
-            ) as ExpenseReportView.ByMonth)
+                by = ReportCalculator.By.MONTH
+            ) as ReportView.ByMonth)
 
             val monthTotals = result.monthTotals
 
@@ -730,51 +541,6 @@ class ExpenseReportCalculatorTest {
     /**
      *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
      *     |---------------|---------|---------|---------|---------|---------|
-     *     |     Total     |   33    |   42    |   56    |   74    |   205   |
-     *     |   Account 1   |    6    |   11    |   16    |   45    |    78   |
-     *     |  - Account 11 |    4    |    5    |    8    |   33    |    50   |
-     *     |  - Account 12 |    2    |    6    |    8    |   12    |    28   |
-     *     |  Account 3    |   27    |   31    |   40    |   29    |   127   |
-     *     |  - Account 31 |   12    |    8    |   12    |   10    |    42   |
-     *     |  - Account 32 |   15    |   23    |   28    |   19    |    85   |
-     */
-    @Test
-    fun testCalculateByMonthComplex_ifNoChangesMadeToAccountAndMonthSelections_andAccount2Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupComplexCalculator(ignoredExpenseAccounts = listOf("Account2"))
-
-            // Act
-            val result = (calculator.calculate(
-                by = ExpenseReportCalculator.By.MONTH
-            ) as ExpenseReportView.ByMonth)
-
-            val monthTotals = result.monthTotals
-
-            // Assert Month 1
-            val month1Total = monthTotals[1]
-            assert(33, month1Total)
-
-            // Assert Month 2
-            val month2Total = monthTotals[2]
-            assert(42, month2Total)
-
-            // Assert Month 3
-            val month3Total = monthTotals[3]
-            assert(56, month3Total)
-
-            // Assert Month 4
-            val month4Total = monthTotals[4]
-            assert(74, month4Total)
-
-            // Assert Totals row
-            val totalsAccountTotal = result.total
-            assert(205, totalsAccountTotal)
-        }
-
-    /**
-     *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |---------------|---------|---------|---------|---------|---------|
      *     |     Total     |   34    |   39    |   49    |   39    |   161   |
      *     |  Account 2    |    7    |    8    |    9    |   10    |    34   |
      *     |  - Account 21 |    7    |    8    |    9    |   10    |    34   |
@@ -789,9 +555,9 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedAccounts = listOf("Account2", "Account3")
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 2
@@ -825,9 +591,9 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedAccounts = listOf("Account2")
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 2
@@ -863,9 +629,9 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedMonths = listOf(2, 3)
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 1
@@ -908,9 +674,9 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedMonths = listOf(1, 2, 3)
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 1
@@ -952,10 +718,10 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = calculator.calculate(
-            by = ExpenseReportCalculator.By.FULL,
+            by = ReportCalculator.By.FULL,
             selectedAccounts = listOf("Account1", "Account3"),
             selectedMonths = listOf(1, 3, 4)
-        ) as ExpenseReportView.Full
+        ) as ReportView.Full
         val accountTotals = result.accountTotals
 
         // Assert Account 1
@@ -994,10 +760,10 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = (calculator.calculate(
-            by = ExpenseReportCalculator.By.ACCOUNT,
+            by = ReportCalculator.By.ACCOUNT,
             selectedAccounts = listOf("Account1", "Account3"),
             selectedMonths = listOf(1, 3, 4)
-        ) as ExpenseReportView.ByAccount)
+        ) as ReportView.ByAccount)
 
         val accountTotals = result.accountTotals
 
@@ -1033,10 +799,10 @@ class ExpenseReportCalculatorTest {
 
         // Act
         val result = (calculator.calculate(
-            by = ExpenseReportCalculator.By.MONTH,
+            by = ReportCalculator.By.MONTH,
             selectedAccounts = listOf("Account1", "Account3"),
             selectedMonths = listOf(1, 3, 4)
-        ) as ExpenseReportView.ByMonth)
+        ) as ReportView.ByMonth)
 
         val monthTotals = result.monthTotals
 
@@ -1057,183 +823,16 @@ class ExpenseReportCalculatorTest {
         assert(163, totalsAccountTotal)
     }
 
-    /**
-     *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |---------------|---------|---------|---------|---------|---------|
-     *     |     Total     |   33    |   42    |   56    |   74    |   205   |
-     *     |   Account 1   |    6    |   11    |   16    |   45    |    78   |
-     *     |  - Account 11 |    4    |    5    |    8    |   33    |    50   |
-     *     |  - Account 12 |    2    |    6    |    8    |   12    |    28   |
-     *     |  Account 3    |   27    |   31    |   40    |   29    |   127   |
-     *     |  - Account 31 |   12    |    8    |   12    |   10    |    42   |
-     *     |  - Account 32 |   15    |   23    |   28    |   19    |    85   |
-     */
-    @Test
-    fun testCalculateFullComplex_ifNoChangesMadeToAccountAndMonthSelections_andAccount21Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupComplexCalculator(listOf("Account21"))
-
-            // Act
-            val result = calculator.calculate(
-                by = ExpenseReportCalculator.By.FULL
-            ) as ExpenseReportView.Full
-            val accountTotals = result.accountTotals
-
-            // Assert Account 1
-            val account1 = accountTotals[0]
-            assert(78, account1.total)
-
-            // Assert Account 3
-            val account3 = accountTotals[1]
-            assert(127, account3.total)
-
-            // Assert Totals row
-            val totalsAccount = result.total
-            assertEquals(4, totalsAccount.monthAmounts.size)
-            assert(33, totalsAccount.monthAmounts[1])
-            assert(42, totalsAccount.monthAmounts[2])
-            assert(56, totalsAccount.monthAmounts[3])
-            assert(74, totalsAccount.monthAmounts[4])
-            assert(205, totalsAccount.total)
-        }
-
-    /**
-     *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |---------------|---------|---------|---------|---------|---------|
-     *     |     Total     |   38    |   44    |   57    |   72    |   211   |
-     *     |   Account 1   |    4    |    5    |    8    |   33    |    50   |
-     *     |  - Account 11 |    4    |    5    |    8    |   33    |    50   |
-     *     |  Account 2    |    7    |    8    |    9    |   10    |    34   |
-     *     |  - Account 21 |    7    |    8    |    9    |   10    |    34   |
-     *     |  Account 3    |   27    |   31    |   40    |   29    |   127   |
-     *     |  - Account 31 |   12    |    8    |   12    |   10    |    42   |
-     *     |  - Account 32 |   15    |   23    |   28    |   19    |    85   |
-     */
-    @Test
-    fun testCalculateFullComplex_ifNoChangesMadeToAccountAndMonthSelections_andAccount12Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupComplexCalculator(listOf("Account12"))
-
-            // Act
-            val result = calculator.calculate(
-                by = ExpenseReportCalculator.By.FULL
-            ) as ExpenseReportView.Full
-            val accountTotals = result.accountTotals
-
-            // Assert Account 1
-            val account1 = accountTotals[0]
-            assert(50, account1.total)
-
-            // Assert Account 2
-            val account2 = accountTotals[1]
-            assert(34, account2.total)
-
-            // Assert Account 3
-            val account3 = accountTotals[2]
-            assert(127, account3.total)
-
-            // Assert Totals row
-            val totalsAccount = result.total
-            assertEquals(4, totalsAccount.monthAmounts.size)
-            assert(38, totalsAccount.monthAmounts[1])
-            assert(44, totalsAccount.monthAmounts[2])
-            assert(57, totalsAccount.monthAmounts[3])
-            assert(72, totalsAccount.monthAmounts[4])
-            assert(211, totalsAccount.total)
-        }
-
-    /**
-     *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |---------------|---------|---------|---------|---------|---------|
-     *     |     Total     |   13    |   19    |   25    |   55    |   112   |
-     *     |   Account 1   |    6    |   11    |   16    |   45    |    78   |
-     *     |  - Account 11 |    4    |    5    |    8    |   33    |    50   |
-     *     |  - Account 12 |    2    |    6    |    8    |   12    |    28   |
-     *     |  Account 2    |    7    |    8    |    9    |   10    |    34   |
-     *     |  - Account 21 |    7    |    8    |    9    |   10    |    34   |
-     */
-    @Test
-    fun testCalculateFullComplex_ifNoChangesMadeToAccountAndMonthSelections_andAccount3Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupComplexCalculator(listOf("Account3"))
-
-            // Act
-            val result = calculator.calculate(
-                by = ExpenseReportCalculator.By.FULL
-            ) as ExpenseReportView.Full
-            val accountTotals = result.accountTotals
-
-            // Assert Account 1
-            val account1 = accountTotals[0]
-            assert(78, account1.total)
-
-            // Assert Account 2
-            val account2 = accountTotals[1]
-            assert(34, account2.total)
-
-            // Assert Totals row
-            val totalsAccount = result.total
-            assertEquals(4, totalsAccount.monthAmounts.size)
-            assert(13, totalsAccount.monthAmounts[1])
-            assert(19, totalsAccount.monthAmounts[2])
-            assert(25, totalsAccount.monthAmounts[3])
-            assert(55, totalsAccount.monthAmounts[4])
-            assert(112, totalsAccount.total)
-        }
-
-    /**
-     *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |  Total  |
-     *     |---------------|---------|---------|---------|---------|---------|
-     *     |     Total     |   13    |   19    |   25    |   55    |   112   |
-     *     |   Account 1   |    6    |   11    |   16    |   45    |    78   |
-     *     |  - Account 11 |    4    |    5    |    8    |   33    |    50   |
-     *     |  - Account 12 |    2    |    6    |    8    |   12    |    28   |
-     *     |  Account 2    |    7    |    8    |    9    |   10    |    34   |
-     *     |  - Account 21 |    7    |    8    |    9    |   10    |    34   |
-     */
-    @Test
-    fun testCalculateFullComplex_ifNoChangesMadeToAccountAndMonthSelections_andAccounts31And32Ignored() =
-        runTest(dispatcher) {
-            // Arrange
-            setupComplexCalculator(listOf("Account31", "Account32"))
-
-            // Act
-            val result = calculator.calculate(
-                by = ExpenseReportCalculator.By.FULL
-            ) as ExpenseReportView.Full
-            val accountTotals = result.accountTotals
-
-            // Assert Account 1
-            val account1 = accountTotals[0]
-            assert(78, account1.total)
-
-            // Assert Account 2
-            val account2 = accountTotals[1]
-            assert(34, account2.total)
-
-            // Assert Totals row
-            val totalsAccount = result.total
-            assertEquals(4, totalsAccount.monthAmounts.size)
-            assert(13, totalsAccount.monthAmounts[1])
-            assert(19, totalsAccount.monthAmounts[2])
-            assert(25, totalsAccount.monthAmounts[3])
-            assert(55, totalsAccount.monthAmounts[4])
-            assert(112, totalsAccount.total)
-        }
-
     private fun assert(expectedAmount: Int, actualAmount: BigDecimal?) {
         assertEquals(BigDecimal.fromInt(expectedAmount), actualAmount!!)
     }
 
-    private fun setupSimpleCalculator(ignoredExpenseAccounts: List<String> = emptyList()) {
-        calculator = ExpenseReportCalculator(getSimpleReport(), ignoredExpenseAccounts, dispatcher)
+    private fun setupSimpleCalculator() {
+        calculator = ReportCalculator(getSimpleReport(), dispatcher)
     }
 
-    private fun setupComplexCalculator(ignoredExpenseAccounts: List<String> = emptyList()) {
-        calculator = ExpenseReportCalculator(getComplexReport(), ignoredExpenseAccounts, dispatcher)
+    private fun setupComplexCalculator() {
+        calculator = ReportCalculator(getComplexReport(), dispatcher)
     }
 
     /**

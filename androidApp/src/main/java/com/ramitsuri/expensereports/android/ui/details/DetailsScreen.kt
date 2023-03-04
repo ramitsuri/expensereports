@@ -1,4 +1,4 @@
-package com.ramitsuri.expensereports.android.ui.expenses
+package com.ramitsuri.expensereports.android.ui.details
 
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -63,8 +63,8 @@ import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.data.AccountTotalWithTotal
 import com.ramitsuri.expensereports.data.Error
 import com.ramitsuri.expensereports.ui.FilterItem
-import com.ramitsuri.expensereports.utils.ExpenseReportView
-import com.ramitsuri.expensereports.viewmodel.ExpenseReportViewModel
+import com.ramitsuri.expensereports.utils.ReportView
+import com.ramitsuri.expensereports.viewmodel.DetailReportViewModel
 import com.ramitsuri.expensereports.viewmodel.View
 import com.ramitsuri.expensereports.viewmodel.ViewType
 import com.ramitsuri.expensereports.viewmodel.Year
@@ -73,11 +73,11 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun DetailsScreen(
     modifier: Modifier = Modifier,
-    viewModel: ExpenseReportViewModel = getViewModel()
+    viewModel: DetailReportViewModel = getViewModel()
 ) {
     val viewState = viewModel.state.collectAsState().value
 
-    ExpenseContent(
+    DetailsContent(
         isLoading = viewState.loading,
         error = viewState.error,
         years = viewState.years,
@@ -95,7 +95,7 @@ fun DetailsScreen(
 }
 
 @Composable
-private fun ExpenseContent(
+private fun DetailsContent(
     isLoading: Boolean,
     error: Error?,
     years: List<Year>,
@@ -107,7 +107,7 @@ private fun ExpenseContent(
     onAccountClicked: (item: FilterItem) -> Unit,
     months: List<FilterItem>,
     onMonthClicked: (item: FilterItem) -> Unit,
-    reportView: ExpenseReportView?,
+    reportView: ReportView?,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -157,10 +157,10 @@ private fun ExpenseContent(
 
 @Composable
 private fun ReportView(
-    report: ExpenseReportView
+    report: ReportView
 ) {
     when (report) {
-        is ExpenseReportView.Full -> {
+        is ReportView.Full -> {
             val context = LocalContext.current
             LaunchedEffect(key1 = report) {
                 Toast.makeText(context, report.generatedAt, Toast.LENGTH_SHORT).show()
@@ -172,11 +172,11 @@ private fun ReportView(
             )
         }
 
-        is ExpenseReportView.ByMonth -> {
+        is ReportView.ByMonth -> {
             BarChartMonth(report.monthTotals, report.total)
         }
 
-        is ExpenseReportView.ByAccount -> {
+        is ReportView.ByAccount -> {
             BarChartAccount(report.accountTotals, report.total)
         }
         else -> {
