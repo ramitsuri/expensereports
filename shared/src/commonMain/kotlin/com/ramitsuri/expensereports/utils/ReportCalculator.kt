@@ -1,7 +1,7 @@
 package com.ramitsuri.expensereports.utils
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ramitsuri.expensereports.data.AccountTotalWithTotal
+import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.isNotIn
 import kotlinx.coroutines.CoroutineDispatcher
@@ -18,7 +18,7 @@ class ReportCalculator(
         by: By = By.FULL
     ): ReportView = withContext(defaultDispatcher) {
         val result = withContext(defaultDispatcher) {
-            val accounts = mutableListOf<AccountTotalWithTotal>()
+            val accounts = mutableListOf<AccountTotal>()
             val totalsAccountMonthAmounts = mutableMapOf<Int, BigDecimal>()
             // Filter the month-amounts for selected months and accounts only
             for (account in initialReport.accountTotal.children) {
@@ -37,7 +37,7 @@ class ReportCalculator(
                     // Initialize totals row with zero amounts for selected months
                     totalsAccountMonthAmounts[month] = BigDecimal.ZERO
                 }
-                val resultAccount = AccountTotalWithTotal(
+                val resultAccount = AccountTotal(
                     name = account.name,
                     fullName = account.fullName,
                     children = listOf(),
@@ -57,7 +57,7 @@ class ReportCalculator(
                 totalAccountTotal += amount
                 totalsAccountMonthAmounts[totalMonth] = amount
             }
-            val totalAccount = AccountTotalWithTotal(
+            val totalAccount = AccountTotal(
                 name = TOTAL,
                 fullName = TOTAL,
                 children = listOf(),
@@ -139,8 +139,8 @@ class ReportCalculator(
 
 sealed class ReportView {
     data class Full(
-        val accountTotals: List<AccountTotalWithTotal>,
-        val total: AccountTotalWithTotal,
+        val accountTotals: List<AccountTotal>,
+        val total: AccountTotal,
         val generatedAt: String
     ) : ReportView()
 

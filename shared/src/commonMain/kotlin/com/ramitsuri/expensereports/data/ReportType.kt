@@ -1,52 +1,47 @@
 package com.ramitsuri.expensereports.data
 
-enum class ReportType(val key: Long, val reportName: String, val hasTotal: Boolean) {
+enum class ReportType(val key: Long, val reportName: String, val hasRunningTotal: Boolean= false) {
     NONE(
         key = 0,
-        reportName = "None",
-        hasTotal = false
+        reportName = "None"
     ),
 
     EXPENSE(
         key = 1,
-        reportName = "Expenses",
-        hasTotal = true
+        reportName = "Expenses"
     ),
 
     EXPENSE_AFTER_DEDUCTION(
         key = 2,
-        reportName = "After_Deduction_Expenses",
-        hasTotal = true
+        reportName = "After_Deduction_Expenses"
     ),
 
     ASSETS(
         key = 3,
         reportName = "Assets",
-        hasTotal = false
+        hasRunningTotal = true
     ),
 
     LIABILITIES(
         key = 4,
         reportName = "Liabilities",
-        hasTotal = false
+        hasRunningTotal = true
     ),
 
     INCOME(
         key = 5,
-        reportName = "Income",
-        hasTotal = true
+        reportName = "Income"
     ),
 
     NET_WORTH(
         key = 6,
         reportName = "NetWorth",
-        hasTotal = false
+        hasRunningTotal = true
     ),
 
     SAVINGS(
         key = 7,
-        reportName = "Savings",
-        hasTotal = true
+        reportName = "Savings"
     );
 
     companion object {

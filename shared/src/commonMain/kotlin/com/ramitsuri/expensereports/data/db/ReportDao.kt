@@ -1,7 +1,6 @@
 package com.ramitsuri.expensereports.data.db
 
-import com.ramitsuri.expensereports.data.AccountTotalWithTotal
-import com.ramitsuri.expensereports.data.AccountTotalWithoutTotal
+import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.db.ReportEntity
@@ -69,17 +68,7 @@ class ReportDaoImpl(
                 type = type,
                 generatedAt = report.generatedAt,
                 fetchedAt = fetchedAt,
-                content = when (report.accountTotal) {
-                    is AccountTotalWithoutTotal -> {
-                        json.encodeToString(
-                            AccountTotalWithoutTotal.serializer(),
-                            report.accountTotal
-                        )
-                    }
-                    is AccountTotalWithTotal -> {
-                        json.encodeToString(AccountTotalWithTotal.serializer(), report.accountTotal)
-                    }
-                }
+                content = json.encodeToString(AccountTotal.serializer(), report.accountTotal)
             )
         }
     }
@@ -96,17 +85,7 @@ class ReportDaoImpl(
                 name = report.name,
                 generatedAt = report.generatedAt,
                 fetchedAt = report.fetchedAt,
-                content = when (report.accountTotal) {
-                    is AccountTotalWithoutTotal -> {
-                        json.encodeToString(
-                            AccountTotalWithoutTotal.serializer(),
-                            report.accountTotal
-                        )
-                    }
-                    is AccountTotalWithTotal -> {
-                        json.encodeToString(AccountTotalWithTotal.serializer(), report.accountTotal)
-                    }
-                }
+                content = json.encodeToString(AccountTotal.serializer(), report.accountTotal)
             )
         }
     }
@@ -119,11 +98,7 @@ class ReportDaoImpl(
 
     private fun mapper(reportEntity: ReportEntity?): Report? {
         return if (reportEntity != null) {
-            val accountTotal = if (reportEntity.type.hasTotal) {
-                json.decodeFromString<AccountTotalWithTotal>(reportEntity.content)
-            } else {
-                json.decodeFromString<AccountTotalWithoutTotal>(reportEntity.content)
-            }
+            val accountTotal = json.decodeFromString<AccountTotal>(reportEntity.content)
             Report(
                 name = reportEntity.name,
                 generatedAt = reportEntity.generatedAt,

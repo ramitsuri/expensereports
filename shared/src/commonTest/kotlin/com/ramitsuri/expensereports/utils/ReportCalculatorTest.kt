@@ -1,7 +1,7 @@
 package com.ramitsuri.expensereports.utils
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ramitsuri.expensereports.data.AccountTotalWithTotal
+import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.ReportType
 import kotlinx.coroutines.Dispatchers
@@ -849,11 +849,11 @@ class ReportCalculatorTest {
             name = "Report",
             generatedAt = Clock.System.now(),
             fetchedAt = Clock.System.now(),
-            accountTotal = AccountTotalWithTotal(
+            accountTotal = AccountTotal(
                 name = "Expenses",
                 fullName = "Expenses",
                 children = listOf(
-                    AccountTotalWithTotal(
+                    AccountTotal(
                         name = "Account1",
                         fullName = "Account1",
                         children = listOf(),
@@ -864,7 +864,7 @@ class ReportCalculatorTest {
                             4 to BigDecimal.parseString("4")
                         )
                     ),
-                    AccountTotalWithTotal(
+                    AccountTotal(
                         name = "Account2",
                         fullName = "Account2",
                         children = listOf(),
@@ -876,7 +876,7 @@ class ReportCalculatorTest {
 
                         )
                     ),
-                    AccountTotalWithTotal(
+                    AccountTotal(
                         name = "Account3",
                         fullName = "Account3",
                         children = listOf(),
@@ -915,15 +915,15 @@ class ReportCalculatorTest {
             name = "Report",
             generatedAt = Clock.System.now(),
             fetchedAt = Clock.System.now(),
-            accountTotal = AccountTotalWithTotal(
+            accountTotal = AccountTotal(
                 name = "Expenses",
                 fullName = "Expenses",
                 children = listOf(
-                    AccountTotalWithTotal(
+                    AccountTotal(
                         name = "Account1",
                         fullName = "Account1",
                         children = listOf(
-                            AccountTotalWithTotal(
+                            AccountTotal(
                                 name = "Account11",
                                 fullName = "Account11",
                                 children = listOf(),
@@ -933,7 +933,7 @@ class ReportCalculatorTest {
                                     3 to BigDecimal.parseString("8"),
                                     4 to BigDecimal.parseString("33")
                                 )
-                            ), AccountTotalWithTotal(
+                            ), AccountTotal(
                                 name = "Account12",
                                 fullName = "Account12",
                                 children = listOf(),
@@ -952,11 +952,11 @@ class ReportCalculatorTest {
                             4 to BigDecimal.parseString("45")
                         )
                     ),
-                    AccountTotalWithTotal(
+                    AccountTotal(
                         name = "Account2",
                         fullName = "Account2",
                         children = listOf(
-                            AccountTotalWithTotal(
+                            AccountTotal(
                                 name = "Account21",
                                 fullName = "Account21",
                                 children = listOf(),
@@ -977,11 +977,11 @@ class ReportCalculatorTest {
 
                         )
                     ),
-                    AccountTotalWithTotal(
+                    AccountTotal(
                         name = "Account3",
                         fullName = "Account3",
                         children = listOf(
-                            AccountTotalWithTotal(
+                            AccountTotal(
                                 name = "Account31",
                                 fullName = "Account31",
                                 children = listOf(),
@@ -991,7 +991,7 @@ class ReportCalculatorTest {
                                     3 to BigDecimal.parseString("12"),
                                     4 to BigDecimal.parseString("10")
                                 )
-                            ), AccountTotalWithTotal(
+                            ), AccountTotal(
                                 name = "Account32",
                                 fullName = "Account32",
                                 children = listOf(),

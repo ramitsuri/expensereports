@@ -60,7 +60,7 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.utils.format
-import com.ramitsuri.expensereports.data.AccountTotalWithTotal
+import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.Error
 import com.ramitsuri.expensereports.ui.FilterItem
 import com.ramitsuri.expensereports.utils.ReportView
@@ -386,8 +386,8 @@ private fun BarChartBar(value: Float, label1: String, label2: String) {
 
 @Composable
 private fun TableView(
-    accountTotals: List<AccountTotalWithTotal>,
-    total: AccountTotalWithTotal,
+    accountTotals: List<AccountTotal>,
+    total: AccountTotal,
     sortedMonths: List<Int>
 ) {
     val rows = accountTotals.size + 2

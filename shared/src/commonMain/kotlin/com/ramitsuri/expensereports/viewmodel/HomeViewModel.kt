@@ -2,7 +2,6 @@ package com.ramitsuri.expensereports.viewmodel
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.data.AccountTotal
-import com.ramitsuri.expensereports.data.AccountTotalWithTotal
 import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.isIn
 import com.ramitsuri.expensereports.repository.ConfigRepository
@@ -44,7 +43,7 @@ class HomeViewModel(
             if (expenseReport != null) {
                 val monthAmount = expenseReport.accountTotal.monthAmounts[date.monthNumber]
                     ?: BigDecimal.ZERO
-                val accountTotal = expenseReport.accountTotal as? AccountTotalWithTotal
+                val accountTotal = expenseReport.accountTotal as? AccountTotal
                 val annualAmount = accountTotal?.total ?: BigDecimal.ZERO
                 val annualMax = configRepository.getAnnualBudget()
                 expenseBalance = expenseBalance.copy(
@@ -62,7 +61,7 @@ class HomeViewModel(
             if (savingReport != null) {
                 val monthAmount = savingReport.accountTotal.monthAmounts[date.monthNumber]
                     ?: BigDecimal.ZERO
-                val accountTotal = savingReport.accountTotal as? AccountTotalWithTotal
+                val accountTotal = savingReport.accountTotal as? AccountTotal
                 val annualAmount = accountTotal?.total ?: BigDecimal.ZERO
                 val annualMax = configRepository.getAnnualSavingsTarget()
                 savingsBalance = savingsBalance.copy(
