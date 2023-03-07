@@ -62,7 +62,7 @@ class DetailReportViewModel(
         }
         val year = _state.value.years.firstOrNull { it.selected }?.year ?: DEFAULT_YEAR
         val type = _state.value.reports.firstOrNull { it.selected }?.type ?: DEFAULT_REPORT_TYPE
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.io) {
             repository.getReport(year, type).collect { response ->
                 when (response) {
                     is Response.Success -> {

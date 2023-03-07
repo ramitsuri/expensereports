@@ -6,7 +6,9 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,10 +17,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -94,31 +99,31 @@ private fun HomeContent(
         modifier = modifier
             .fillMaxSize()
             .padding(8.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        NetWorthContent(netWorth, modifier = modifier.weight(0.3F))
-        Spacer(modifier = modifier.height(4.dp))
+        NetWorthContent(netWorth, modifier = modifier.heightIn(min = 200.dp, max = 240.dp))
+        Spacer(modifier = modifier.height(8.dp))
         MainAccountContent(
             titleRes = R.string.home_savings,
             monthRes = R.string.home_savings_this_month_format,
             annualRes = R.string.home_savings_this_year_format,
             balance = savingsBalance,
-            modifier = modifier.weight(0.25F)
+            modifier = modifier.heightIn(128.dp, max = 152.dp)
         )
-        Spacer(modifier = modifier.height(4.dp))
+        Spacer(modifier = modifier.height(8.dp))
         MainAccountContent(
             titleRes = R.string.home_expenses,
             monthRes = R.string.home_expense_this_month_format,
             annualRes = R.string.home_expense_this_year_format,
             balance = expenseBalance,
-            modifier = modifier.weight(0.25F)
+            modifier = modifier.heightIn(128.dp, max = 152.dp)
         )
-        Spacer(modifier = modifier.height(4.dp))
+        Spacer(modifier = modifier.height(8.dp))
         AccountBalancesContent(
             salary = salary,
             assetAccountBalances = assetAccountBalances,
             liabilityAccountBalances = liabilityAccountBalances,
-            modifier = modifier
-                .weight(0.2f)
+            modifier = modifier.heightIn(120.dp, max = 144.dp)
         )
     }
 }
