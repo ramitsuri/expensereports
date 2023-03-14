@@ -6,9 +6,7 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +46,9 @@ import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
@@ -436,6 +436,9 @@ private fun LineChart(
     LaunchedEffect(netWorth, block = {
         animationProgress.animateTo(1f, tween(3000))
     })
+
+    val hapticFeedback = LocalHapticFeedback.current
+
     Column(modifier = modifier
         .pointerInput(Unit) {
             detectHorizontalDragGestures(onDragEnd = {
@@ -557,6 +560,7 @@ private fun LineChart(
                         text = "${value.date.monthYear()}: ${value.balance.formatRounded()}",
                         style = MaterialTheme.typography.labelSmall
                     )
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 }
             }
             Text(
