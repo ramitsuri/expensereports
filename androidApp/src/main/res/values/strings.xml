@@ -70,11 +70,9 @@
     <string name="home_savings_this_year_format">This year (target: %1$s)</string>
     <string name="home_account_salary_name">Salary</string>
 
-    <!-- Accounts -->
-    <string name="accounts_assets_title">Assets</string>
-    <string name="accounts_liabilities_title">Liabilities</string>
-    <string name="accounts_as_of_yesterday_format">As of %1$s today</string>
-    <string name="accounts_as_of_today_format">As of %1$s yesterday</string>
-    <string name="accounts_as_of_date_format">As of %1$s</string>
+    <!-- Details -->
+    <string name="details_generated_at_yesterday_format">Generated at %1$s today</string>
+    <string name="details_generated_at_today_format">Generated at %1$s yesterday</string>
+    <string name="details_generated_at_date_format">Generated at %1$s</string>
 
 </resources>

@@ -40,7 +40,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -61,6 +60,7 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.utils.format
+import com.ramitsuri.expensereports.android.utils.timeAndDay
 import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.Error
 import com.ramitsuri.expensereports.data.ReportType
@@ -72,6 +72,7 @@ import com.ramitsuri.expensereports.viewmodel.Selector
 import com.ramitsuri.expensereports.viewmodel.View
 import com.ramitsuri.expensereports.viewmodel.ViewType
 import com.ramitsuri.expensereports.viewmodel.Year
+import kotlinx.datetime.Instant
 import org.koin.androidx.compose.getViewModel
 
 @Composable
@@ -171,14 +172,11 @@ private fun ReportView(
 ) {
     when (report) {
         is ReportView.Full -> {
-            val context = LocalContext.current
-            LaunchedEffect(key1 = report) {
-                Toast.makeText(context, report.generatedAt, Toast.LENGTH_SHORT).show()
-            }
             TableView(
                 report.accountTotals,
                 report.total,
-                report.total.monthAmounts.map { it.key }
+                report.total.monthAmounts.map { it.key },
+                report.generatedAt
             )
         }
 
@@ -398,16 +396,19 @@ private fun BarChartBar(value: Float, label1: String, label2: String) {
 private fun TableView(
     accountTotals: List<AccountTotal>,
     total: AccountTotal,
-    sortedMonths: List<Int>
+    sortedMonths: List<Int>,
+    generatedAt: Instant
 ) {
     val rows = accountTotals.size + 2
     val columns = sortedMonths.size.plus(2)
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        Text(text = generatedAt.timeAndDay(), style = MaterialTheme.typography.labelSmall)
+        Spacer(modifier = Modifier.height(8.dp))
         Table(
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier.fillMaxSize(),
             columnCount = columns,
             rowCount = rows,
             cellContent = { columnIndex, rowIndex ->
@@ -499,7 +500,7 @@ private fun Table(
                 Column {
                     Row(
                         modifier = if (rowIndex % 2 == 0) {
-                            rowModifier.then(Modifier.background(MaterialTheme.colorScheme.secondaryContainer))
+                            rowModifier.then(Modifier.background(MaterialTheme.colorScheme.surfaceVariant))
                         } else {
                             rowModifier
                         }

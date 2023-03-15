@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.ramitsuri.expensereports.android.R
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -29,6 +30,20 @@ fun LocalDate.monthYear(): String {
  * As of 4:30 PM Aug 21, 2022
  */
 @Composable
+fun Instant.timeAndDay(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    now: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
+): String {
+    return this.toLocalDateTime(timeZone).timeAndDay(timeZone = timeZone, now = now)
+}
+
+/**
+ * As of 4 PM yesterday
+ * As of 4:30 PM today
+ * As of 4:30 PM Aug 21
+ * As of 4:30 PM Aug 21, 2022
+ */
+@Composable
 fun LocalDateTime.timeAndDay(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     now: LocalDateTime = Clock.System.now().toLocalDateTime(timeZone)
@@ -39,15 +54,15 @@ fun LocalDateTime.timeAndDay(
     return when (Duration.between(nowTruncated, toFormatTruncated).toDays()) {
         0L -> {
             val time = this.timeOnly(timeZone, now)
-            stringResource(id = R.string.accounts_as_of_today_format, time)
+            stringResource(id = R.string.details_generated_at_today_format, time)
         }
         1L -> {
             val time = this.timeOnly(timeZone, now)
-            stringResource(id = R.string.accounts_as_of_yesterday_format, time)
+            stringResource(id = R.string.details_generated_at_yesterday_format, time)
         }
         else -> {
             val time = this.timeDateMonthYear(timeZone, now)
-            stringResource(id = R.string.accounts_as_of_date_format, time)
+            stringResource(id = R.string.details_generated_at_date_format, time)
         }
     }
 }

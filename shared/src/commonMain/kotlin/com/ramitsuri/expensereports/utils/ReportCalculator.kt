@@ -6,6 +6,7 @@ import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.isNotIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
 
 class ReportCalculator(
     private val initialReport: Report,
@@ -67,7 +68,7 @@ class ReportCalculator(
             ReportView.Full(
                 accountTotals = accounts.sortedBy { it.name },
                 total = totalAccount,
-                generatedAt = initialReport.generatedAt.toString()
+                generatedAt = initialReport.generatedAt
             )
         }
         val hideZeroTotals = selectedAccounts == null && selectedMonths == null // Filter out zeros
@@ -141,19 +142,19 @@ sealed class ReportView {
     data class Full(
         val accountTotals: List<AccountTotal>,
         val total: AccountTotal,
-        val generatedAt: String
+        val generatedAt: Instant
     ) : ReportView()
 
     data class ByMonth(
         val monthTotals: Map<Int, BigDecimal>,
         val total: BigDecimal,
-        val generatedAt: String
+        val generatedAt: Instant
     ) : ReportView()
 
     data class ByAccount(
         val accountTotals: Map<String, BigDecimal>,
         val total: BigDecimal,
-        val generatedAt: String
+        val generatedAt: Instant
     ) : ReportView()
 }
 
