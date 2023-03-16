@@ -7,20 +7,21 @@ import com.ramitsuri.expensereports.db.ReportEntity
 import com.ramitsuri.expensereports.db.ReportsQueries
 import com.ramitsuri.expensereports.utils.transactionWithContext
 import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Instant
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 interface ReportDao {
-    suspend fun get(year: Int, type: ReportType): Flow<Report?>
+    fun get(year: Int, type: ReportType): Flow<Report?>
 
-    suspend fun get(years: List<Int>, types: List<ReportType>): List<Report>
+    fun get(years: List<Int>, types: List<ReportType>): Flow<List<Report>>
 
     suspend fun update(year: Int, type: ReportType, fetchedAt: Instant, report: Report)
 
@@ -35,7 +36,7 @@ class ReportDaoImpl(
     private val json: Json
 ) : ReportDao {
 
-    override suspend fun get(year: Int, type: ReportType): Flow<Report?> {
+    override fun get(year: Int, type: ReportType): Flow<Report?> {
         return dbQueries.getReport(year = year.toLong(), type = type)
             .asFlow()
             .mapToOneOrNull()
@@ -45,15 +46,16 @@ class ReportDaoImpl(
             .flowOn(ioDispatcher)
     }
 
-    override suspend fun get(years: List<Int>, types: List<ReportType>): List<Report> {
-        val result = withContext(ioDispatcher) {
-            dbQueries.getReports(years = years.map { it.toLong() }, types = types)
-                .executeAsList()
-                .mapNotNull { reportEntity ->
+    override fun get(years: List<Int>, types: List<ReportType>): Flow<List<Report>> {
+        return dbQueries.getReports(years = years.map { it.toLong() }, types = types)
+            .asFlow()
+            .mapToList()
+            .mapNotNull { reportEntities ->
+                reportEntities.mapNotNull { reportEntity ->
                     mapper(reportEntity)
                 }
-        }
-        return result
+            }
+            .flowOn(ioDispatcher)
     }
 
     override suspend fun update(

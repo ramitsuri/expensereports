@@ -44,7 +44,7 @@ class ReportsRepository(
         }
     }
 
-    suspend fun get(years: List<Int>, types: List<ReportType>): List<Report> {
+     fun get(years: List<Int>, types: List<ReportType>): Flow<List<Report>> {
         return dao.get(years, types)
     }
 

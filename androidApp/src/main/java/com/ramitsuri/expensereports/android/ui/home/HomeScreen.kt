@@ -560,7 +560,7 @@ private fun LineChart(
                         text = "${value.date.monthYear()}: ${value.balance.formatRounded()}",
                         style = MaterialTheme.typography.labelSmall
                     )
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                 }
             }
             Text(

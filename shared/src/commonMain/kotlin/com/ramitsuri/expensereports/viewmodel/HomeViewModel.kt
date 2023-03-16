@@ -6,6 +6,7 @@ import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.isIn
 import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
+import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.utils.by
 import com.ramitsuri.expensereports.utils.inverse
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,8 @@ import kotlinx.datetime.toLocalDateTime
 class HomeViewModel(
     private val repository: ReportsRepository,
     private val configRepository: ConfigRepository,
-    private val clock: Clock
+    private val clock: Clock,
+    dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
     private val timeZone = TimeZone.currentSystemDefault()
@@ -31,122 +33,130 @@ class HomeViewModel(
     val state: StateFlow<HomeViewState> = _state
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.io) {
             val date = clock.now().toLocalDateTime(timeZone).date
             val generalReportTypes =
                 listOf(typeExpenses, typeSavings, typeIncome, typeAssets, typeLiabilities)
-            val generalReports = repository.get(listOf(date.year), generalReportTypes)
-
-            // Expenses
-            var expenseBalance = Balance()
-            val expenseReport = generalReports.firstOrNull { it.type == typeExpenses }
-            if (expenseReport != null) {
-                val monthAmount = expenseReport.accountTotal.monthAmounts[date.monthNumber]
-                    ?: BigDecimal.ZERO
-                val accountTotal = expenseReport.accountTotal as? AccountTotal
-                val annualAmount = accountTotal?.total ?: BigDecimal.ZERO
-                val annualMax = configRepository.getAnnualBudget()
-                expenseBalance = expenseBalance.copy(
-                    date = date,
-                    month = monthAmount,
-                    annual = annualAmount,
-                    monthMax = annualMax.by("12"),
-                    annualMax = annualMax
-                )
-            }
-
-            // Savings
-            var savingsBalance = Balance()
-            val savingReport = generalReports.firstOrNull { it.type == typeSavings }
-            if (savingReport != null) {
-                val monthAmount = savingReport.accountTotal.monthAmounts[date.monthNumber]
-                    ?: BigDecimal.ZERO
-                val accountTotal = savingReport.accountTotal as? AccountTotal
-                val annualAmount = accountTotal?.total ?: BigDecimal.ZERO
-                val annualMax = configRepository.getAnnualSavingsTarget()
-                savingsBalance = savingsBalance.copy(
-                    date = date,
-                    month = monthAmount,
-                    annual = annualAmount,
-                    monthMax = annualMax.by("12"),
-                    annualMax = annualMax
-                )
-            }
-
-            // Incomes
-            var monthIncomeBalance = BigDecimal.ZERO
-            val incomeReport = generalReports.firstOrNull { it.type == typeIncome }
-            if (incomeReport != null) {
-                val filteredIncomes = getFilteredAccounts(
-                    incomeReport.accountTotal,
-                    date,
-                    configRepository.getIncomeAccounts()
-                ) { accountTotal ->
-                    val balance = accountTotal.monthAmounts[date.monthNumber] ?: BigDecimal.ZERO
-                    MonthAccountBalance(balance, date)
+            repository.get(listOf(date.year), generalReportTypes).collect() { generalReports ->
+                // Expenses
+                var expenseBalance = Balance()
+                val expenseReport = generalReports.firstOrNull { it.type == typeExpenses }
+                if (expenseReport != null) {
+                    val monthAmount = expenseReport.accountTotal.monthAmounts[date.monthNumber]
+                        ?: BigDecimal.ZERO
+                    val accountTotal = expenseReport.accountTotal as? AccountTotal
+                    val annualAmount = accountTotal?.total ?: BigDecimal.ZERO
+                    val annualMax = configRepository.getAnnualBudget()
+                    expenseBalance = expenseBalance.copy(
+                        date = date,
+                        month = monthAmount,
+                        annual = annualAmount,
+                        monthMax = annualMax.by("12"),
+                        annualMax = annualMax
+                    )
                 }
-                var incomeBalance = BigDecimal.ZERO
-                for (filteredIncome in filteredIncomes) {
-                    incomeBalance += filteredIncome.balance
+
+                // Savings
+                var savingsBalance = Balance()
+                val savingReport = generalReports.firstOrNull { it.type == typeSavings }
+                if (savingReport != null) {
+                    val monthAmount = savingReport.accountTotal.monthAmounts[date.monthNumber]
+                        ?: BigDecimal.ZERO
+                    val accountTotal = savingReport.accountTotal as? AccountTotal
+                    val annualAmount = accountTotal?.total ?: BigDecimal.ZERO
+                    val annualMax = configRepository.getAnnualSavingsTarget()
+                    savingsBalance = savingsBalance.copy(
+                        date = date,
+                        month = monthAmount,
+                        annual = annualAmount,
+                        monthMax = annualMax.by("12"),
+                        annualMax = annualMax
+                    )
                 }
-                monthIncomeBalance = incomeBalance.inverse()
-            }
 
-            // Liability accounts
-            val liabilityAccountBalances = mutableListOf<AccountBalance>()
-            val liabilityReport = generalReports.firstOrNull { it.type == typeLiabilities }
-            if (liabilityReport != null) {
-                liabilityAccountBalances.addAll(getFilteredAccounts(
-                    accountTotal = liabilityReport.accountTotal,
-                    date = date,
-                    includeAccounts = configRepository.getLiabilityAccounts()
-                ) { accountTotal ->
-                    val balance = accountTotal.monthAmounts[date.monthNumber] ?: BigDecimal.ZERO
-                    AccountBalance(name = accountTotal.name, balance = balance)
-                })
-            }
+                // Incomes
+                var monthIncomeBalance = BigDecimal.ZERO
+                val incomeReport = generalReports.firstOrNull { it.type == typeIncome }
+                if (incomeReport != null) {
+                    val filteredIncomes = getFilteredAccounts(
+                        incomeReport.accountTotal,
+                        date,
+                        configRepository.getIncomeAccounts()
+                    ) { accountTotal ->
+                        val balance = accountTotal.monthAmounts[date.monthNumber] ?: BigDecimal.ZERO
+                        MonthAccountBalance(balance, date)
+                    }
+                    var incomeBalance = BigDecimal.ZERO
+                    for (filteredIncome in filteredIncomes) {
+                        incomeBalance += filteredIncome.balance
+                    }
+                    monthIncomeBalance = incomeBalance.inverse()
+                }
 
-            // Asset accounts
-            val assetAccountBalances = mutableListOf<AccountBalance>()
-            val assetReport = generalReports.firstOrNull { it.type == typeAssets }
-            if (assetReport != null) {
-                assetAccountBalances.addAll(getFilteredAccounts(
-                    accountTotal = assetReport.accountTotal,
-                    date = date,
-                    includeAccounts = configRepository.getAssetAccounts()
-                ) { accountTotal ->
-                    val balance = accountTotal.monthAmounts[date.monthNumber] ?: BigDecimal.ZERO
-                    AccountBalance(name = accountTotal.name, balance = balance)
-                })
-            }
+                // Liability accounts
+                val liabilityAccountBalances = mutableListOf<AccountBalance>()
+                val liabilityReport = generalReports.firstOrNull { it.type == typeLiabilities }
+                if (liabilityReport != null) {
+                    liabilityAccountBalances.addAll(getFilteredAccounts(
+                        accountTotal = liabilityReport.accountTotal,
+                        date = date,
+                        includeAccounts = configRepository.getLiabilityAccounts()
+                    ) { accountTotal ->
+                        val balance = accountTotal.monthAmounts[date.monthNumber] ?: BigDecimal.ZERO
+                        AccountBalance(name = accountTotal.name, balance = balance)
+                    })
+                }
 
+                // Asset accounts
+                val assetAccountBalances = mutableListOf<AccountBalance>()
+                val assetReport = generalReports.firstOrNull { it.type == typeAssets }
+                if (assetReport != null) {
+                    assetAccountBalances.addAll(getFilteredAccounts(
+                        accountTotal = assetReport.accountTotal,
+                        date = date,
+                        includeAccounts = configRepository.getAssetAccounts()
+                    ) { accountTotal ->
+                        val balance = accountTotal.monthAmounts[date.monthNumber] ?: BigDecimal.ZERO
+                        AccountBalance(name = accountTotal.name, balance = balance)
+                    })
+                }
+
+                _state.update { previousState ->
+                    previousState.copy(
+                        expenses = expenseBalance,
+                        savings = savingsBalance,
+                        monthSalary = monthIncomeBalance,
+                        liabilityAccountBalances = liabilityAccountBalances,
+                        assetAccountBalances = assetAccountBalances
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch(dispatcherProvider.io) {
             // NetWorth
             val netWorthPeriod = getMonths(numberOfMonths = MONTHS_FOR_NET_WORTH)
             val yearsInNetWorthPeriod = netWorthPeriod.map { it.year }.distinct()
-            val netWorthReports = repository.get(yearsInNetWorthPeriod, listOf(typeNetWorth))
+            repository.get(yearsInNetWorthPeriod, listOf(typeNetWorth))
+                .collect { netWorthReports ->
+                    val netWorthList = mutableListOf<MonthAccountBalance>()
+                    for (netWorthReport in netWorthReports) {
+                        for (periodDate in netWorthPeriod) {
+                            if (netWorthReport.year == periodDate.year) {
+                                val amount =
+                                    netWorthReport.accountTotal.monthAmounts[periodDate.monthNumber]
+                                        ?: BigDecimal.ZERO
+                                netWorthList.add(MonthAccountBalance(amount, periodDate))
+                            }
+                        }
+                    }
 
-            val netWorthList = mutableListOf<MonthAccountBalance>()
-            for (netWorthReport in netWorthReports) {
-                for (periodDate in netWorthPeriod) {
-                    if (netWorthReport.year == periodDate.year) {
-                        val amount =
-                            netWorthReport.accountTotal.monthAmounts[periodDate.monthNumber]
-                                ?: BigDecimal.ZERO
-                        netWorthList.add(MonthAccountBalance(amount, periodDate))
+                    _state.update { previousState ->
+                        previousState.copy(
+                            netWorth = netWorthList.sortedBy { it.date }
+                        )
                     }
                 }
-            }
-
-            _state.update { previousState ->
-                previousState.copy(
-                    expenses = expenseBalance,
-                    savings = savingsBalance,
-                    monthSalary = monthIncomeBalance,
-                    netWorth = netWorthList.sortedBy { it.date },
-                    liabilityAccountBalances = liabilityAccountBalances,
-                    assetAccountBalances = assetAccountBalances
-                )
-            }
         }
     }
 

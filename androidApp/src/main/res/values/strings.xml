@@ -71,8 +71,8 @@
     <string name="home_account_salary_name">Salary</string>
 
     <!-- Details -->
-    <string name="details_generated_at_yesterday_format">Generated at %1$s today</string>
-    <string name="details_generated_at_today_format">Generated at %1$s yesterday</string>
+    <string name="details_generated_at_yesterday_format">Generated at %1$s yesterday</string>
+    <string name="details_generated_at_today_format">Generated at %1$s today</string>
     <string name="details_generated_at_date_format">Generated at %1$s</string>
 
 </resources>
