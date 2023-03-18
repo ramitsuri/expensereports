@@ -1,17 +1,14 @@
 package com.ramitsuri.expensereports.utils
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ramitsuri.expensereports.data.AccountTotal
-import com.ramitsuri.expensereports.data.Report
-import com.ramitsuri.expensereports.data.ReportType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.datetime.Clock
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class ReportCalculatorTest {
 
@@ -43,15 +40,15 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 1
-        val account1 = accountTotals[0]
+        val account1 = accountTotals.first { it.name == "Account1" }
         assert(10, account1.total)
 
         // Assert Account 2
-        val account2 = accountTotals[1]
+        val account2 = accountTotals.first { it.name == "Account2" }
         assert(34, account2.total)
 
         // Assert Account 3
-        val account3 = accountTotals[2]
+        val account3 = accountTotals.first { it.name == "Account3" }
         assert(62, account3.total)
 
         // Assert Totals row
@@ -162,11 +159,11 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 2
-        val account2 = accountTotals[0]
+        val account2 = accountTotals.first { it.name == "Account2" }
         assert(34, account2.total)
 
         // Assert Account 3
-        val account3 = accountTotals[1]
+        val account3 = accountTotals.first { it.name == "Account3" }
         assert(62, account3.total)
 
         // Assert Totals row
@@ -232,15 +229,15 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 1
-        val account1 = accountTotals[0]
+        val account1 = accountTotals.first { it.name == "Account1" }
         assert(5, account1.total)
 
         // Assert Account 2
-        val account2 = accountTotals[1]
+        val account2 = accountTotals.first { it.name == "Account2" }
         assert(17, account2.total)
 
         // Assert Account 3
-        val account3 = accountTotals[2]
+        val account3 = accountTotals.first { it.name == "Account3" }
         assert(31, account3.total)
 
         // Assert Totals row
@@ -272,15 +269,15 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 1
-        val account1 = accountTotals[0]
+        val account1 = accountTotals.first { it.name == "Account1" }
         assert(6, account1.total)
 
         // Assert Account 2
-        val account2 = accountTotals[1]
+        val account2 = accountTotals.first { it.name == "Account2" }
         assert(24, account2.total)
 
         // Assert Account 3
-        val account3 = accountTotals[2]
+        val account3 = accountTotals.first { it.name == "Account3" }
         assert(45, account3.total)
 
         // Assert Totals row
@@ -313,11 +310,11 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 1
-        val account1 = accountTotals[0]
+        val account1 = accountTotals.first { it.name == "Account1" }
         assert(8, account1.total)
 
         // Assert Account 3
-        val account3 = accountTotals[1]
+        val account3 = accountTotals.first { it.name == "Account3" }
         assert(47, account3.total)
 
         // Assert Totals row
@@ -427,15 +424,15 @@ class ReportCalculatorTest {
             val accountTotals = result.accountTotals
 
             // Assert Account 1
-            val account1 = accountTotals[0]
+            val account1 = accountTotals.first { it.name == "Account1" }
             assert(78, account1.total)
 
             // Assert Account 2
-            val account2 = accountTotals[1]
+            val account2 = accountTotals.first { it.name == "Account2" }
             assert(34, account2.total)
 
             // Assert Account 3
-            val account3 = accountTotals[2]
+            val account3 = accountTotals.first { it.name == "Account3" }
             assert(127, account3.total)
 
             // Assert Totals row
@@ -561,11 +558,11 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 2
-        val account2 = accountTotals[0]
+        val account2 = accountTotals.first { it.name == "Account2" }
         assert(34, account2.total)
 
         // Assert Account 3
-        val account3 = accountTotals[1]
+        val account3 = accountTotals.first { it.name == "Account3" }
         assert(127, account3.total)
 
         // Assert Totals row
@@ -597,7 +594,7 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 2
-        val account2 = accountTotals[0]
+        val account2 = accountTotals.first { it.name == "Account2" }
         assert(34, account2.total)
 
         // Assert Totals row
@@ -635,15 +632,15 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 1
-        val account1 = accountTotals[0]
+        val account1 = accountTotals.first { it.name == "Account1" }
         assert(27, account1.total)
 
         // Assert Account 2
-        val account2 = accountTotals[1]
+        val account2 = accountTotals.first { it.name == "Account2" }
         assert(17, account2.total)
 
         // Assert Account 3
-        val account3 = accountTotals[2]
+        val account3 = accountTotals.first { it.name == "Account3" }
         assert(71, account3.total)
 
         // Assert Totals row
@@ -680,15 +677,15 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 1
-        val account1 = accountTotals[0]
+        val account1 = accountTotals.first { it.name == "Account1" }
         assert(33, account1.total)
 
         // Assert Account 2
-        val account2 = accountTotals[1]
+        val account2 = accountTotals.first { it.name == "Account2" }
         assert(24, account2.total)
 
         // Assert Account 3
-        val account3 = accountTotals[2]
+        val account3 = accountTotals.first { it.name == "Account3" }
         assert(98, account3.total)
 
         // Assert Totals row
@@ -725,11 +722,11 @@ class ReportCalculatorTest {
         val accountTotals = result.accountTotals
 
         // Assert Account 1
-        val account1 = accountTotals[0]
+        val account1 = accountTotals.first { it.name == "Account1" }
         assert(67, account1.total)
 
         // Assert Account 3
-        val account3 = accountTotals[1]
+        val account3 = accountTotals.first { it.name == "Account3" }
         assert(96, account3.total)
 
         // Assert Totals row
@@ -823,6 +820,279 @@ class ReportCalculatorTest {
         assert(163, totalsAccountTotal)
     }
 
+    /**
+     * | Name              | Month 1 | Month 2 | Month 3 | Total     |
+     * |-------------------|---------|---------|---------|-----------|
+     * | Assets            | 736     | 1033    | 1379    | 3148      |
+     * | +-Investments     | 486     | 653     | 879     | 2018      |
+     * | +--Retirement     | 486     | 653     | 879     | 2018      |
+     * | +---401K          | 432     | 545     | 754     | 1731      |
+     * | +----Contribution | 400     | 500     | 700     | 1600      |
+     * | +----Gains        | 12      | 15      | 14      | 41        |
+     * | +----Employer     | 20      | 30      | 40      | 90        |
+     * | +---Roth IRA      | 54      | 108     | 125     | 287       |
+     * | +----Contribution | 50      | 100     | 120     | 270       |
+     * | +----Gains        | 4       | 8       | 5       | 17        |
+     * | +-Current Assets  | 150     | 180     | 200     | 530       |
+     * | +--Checking       | 50      | 60      | 70      | 180       |
+     * | +--Savings        | 100     | 120     | 130     | 350       |
+     * | +-Fixed Assets    | 100     | 200     | 300     | 600       |
+     */
+    @Test
+    fun testCalculateAssetsReport_ifSelectedAccountAssetsAndSelectedMonthsAll() =
+        runTest(dispatcher) {
+            // Arrange
+            calculator = ReportCalculator(getAssetsReport(), dispatcher)
+
+            // Act
+            val result = calculator.calculate(
+                selectedAccounts = listOf("Assets"),
+                selectedMonths = listOf(1, 2, 3)
+            ) as ReportView.Full
+
+            // Assert assets
+            val assets = result.total
+            assert(736, assets.monthAmounts[1])
+            assert(1033, assets.monthAmounts[2])
+            assert(1379, assets.monthAmounts[3])
+            assert(3148, assets.total)
+
+            // Assert investments
+            val investments = result.accountTotals.first { it.name == "Investments" }
+            assert(486, investments.monthAmounts[1])
+            assert(653, investments.monthAmounts[2])
+            assert(879, investments.monthAmounts[3])
+            assert(2018, investments.total)
+
+            // Assert fixed assets
+            val fixedAssets = result.accountTotals.first { it.name == "Fixed Assets" }
+            assert(100, fixedAssets.monthAmounts[1])
+            assert(200, fixedAssets.monthAmounts[2])
+            assert(300, fixedAssets.monthAmounts[3])
+            assert(600, fixedAssets.total)
+
+            // Assert current assets
+            val currentAssets = result.accountTotals.first { it.name == "Current Assets" }
+            assert(150, currentAssets.monthAmounts[1])
+            assert(180, currentAssets.monthAmounts[2])
+            assert(200, currentAssets.monthAmounts[3])
+            assert(530, currentAssets.total)
+
+            // Uncomment if need to print output
+            //printAccounts(result.total, result.accountTotals)
+        }
+
+    /**
+     * | Name              | Month 1 | Month 2 | Month 3 | Total     |
+     * |-------------------|---------|---------|---------|-----------|
+     * | Assets            | 736     | 1033    | 1379    | 3148      |
+     * | +-Investments     | 486     | 653     | 879     | 2018      |
+     * | +--Retirement     | 486     | 653     | 879     | 2018      |
+     * | +---Roth IRA      | 54      | 108     | 125     | 287       |
+     * | +----Contribution | 50      | 100     | 120     | 270       |
+     * | +----Gains        | 4       | 8       | 5       | 17        |
+     */
+    @Test
+    fun testCalculateAssetsReport_ifSelectedAccountRothIraContributionAndGains() =
+        runTest(dispatcher) {
+            // Arrange
+            calculator = ReportCalculator(getAssetsReport(), dispatcher)
+
+            // Act
+            val result = calculator.calculate(
+                selectedAccounts = listOf(
+                    "Assets:Investments:Retirement:Roth IRA:Contribution",
+                    "Assets:Investments:Retirement:Roth IRA:Gains"
+                )
+            ) as ReportView.Full
+
+            assertNotNull(result.accountTotals.first { it.name == "Investments" })
+            assertNotNull(result.accountTotals.first { it.name == "Retirement" })
+            assertNotNull(result.accountTotals.first { it.name == "Roth IRA" })
+            assertNotNull(result.accountTotals.first { it.name == "Contribution" })
+            assertNotNull(result.accountTotals.first { it.name == "Gains" })
+            assertEquals(5, result.accountTotals.count())
+
+            // Uncomment if need to print output
+            //printAccounts(result.total, result.accountTotals)
+        }
+
+    /**
+     * | Name              | Month 1 | Month 2 | Month 3 | Total     |
+     * |-------------------|---------|---------|---------|-----------|
+     * | Assets            | 104     | 168     | 195     | 467      |
+     * | +-Investments     | 54      | 108     | 125     | 287       |
+     * | +--Retirement     | 54      | 108     | 125     | 287       |
+     * | +---Roth IRA      | 54      | 108     | 125     | 287       |
+     * | +----Contribution | 50      | 100     | 120     | 270       |
+     * | +----Gains        | 4       | 8       | 5       | 17        |
+     * | +-Current Assets  | 50      | 60      | 70      | 180       |
+     * | +--Checking       | 50      | 60      | 70      | 180       |
+     */
+    @Test
+    fun testCalculateAssetsReport_ifSelectedAccountRothIRAAndCheckingAndSelectedMonthsAll() =
+        runTest(dispatcher) {
+            // Arrange
+            calculator = ReportCalculator(getAssetsReport(), dispatcher)
+
+            // Act
+            val result = calculator.calculate(
+                selectedAccounts = listOf(
+                    "Assets:Investments:Retirement:Roth IRA",
+                    "Assets:Current Assets:Checking"
+                ),
+                selectedMonths = listOf(1, 2, 3)
+            ) as ReportView.Full
+
+            // Assert assets
+            val assets = result.total
+            assert(104, assets.monthAmounts[1])
+            assert(168, assets.monthAmounts[2])
+            assert(195, assets.monthAmounts[3])
+            assert(467, assets.total)
+
+            // Assert investments
+            val investments = result.accountTotals.first { it.name == "Investments" }
+            assert(54, investments.monthAmounts[1])
+            assert(108, investments.monthAmounts[2])
+            assert(125, investments.monthAmounts[3])
+            assert(287, investments.total)
+
+            // Assert current assets
+            val currentAssets = result.accountTotals.first { it.name == "Current Assets" }
+            assert(50, currentAssets.monthAmounts[1])
+            assert(60, currentAssets.monthAmounts[2])
+            assert(70, currentAssets.monthAmounts[3])
+            assert(180, currentAssets.total)
+
+            // Uncomment if need to print output
+            //printAccounts(result.total, result.accountTotals)
+        }
+
+    /**
+     * | Name              | Month 1 | Month 2 | Month 3 | Total     |
+     * |-------------------|---------|---------|---------|-----------|
+     * | Assets            | 54      | 108     | 125     | 287       |
+     * | +-Investments     | 54      | 108     | 125     | 287       |
+     * | +--Retirement     | 54      | 108     | 125     | 287       |
+     * | +---Roth IRA      | 54      | 108     | 125     | 287       |
+     * | +----Contribution | 50      | 100     | 120     | 270       |
+     * | +----Gains        | 4       | 8       | 5       | 17        |
+     */
+    @Test
+    fun testCalculateAssetsReport_ifSelectedAccountRothIRAAndSelectedMonthsAll() =
+        runTest(dispatcher) {
+            // Arrange
+            calculator = ReportCalculator(getAssetsReport(), dispatcher)
+
+            // Act
+            val result = calculator.calculate(
+                selectedAccounts = listOf("Assets:Investments:Retirement:Roth IRA"),
+                selectedMonths = listOf(1, 2, 3)
+            ) as ReportView.Full
+
+            // Assert assets
+            val assets = result.total
+            assert(54, assets.monthAmounts[1])
+            assert(108, assets.monthAmounts[2])
+            assert(125, assets.monthAmounts[3])
+            assert(287, assets.total)
+
+            // Assert investments
+            val investments = result.accountTotals.first { it.name == "Investments" }
+            assert(54, investments.monthAmounts[1])
+            assert(108, investments.monthAmounts[2])
+            assert(125, investments.monthAmounts[3])
+            assert(287, investments.total)
+
+            // Assert fixed assets
+            val retirement = result.accountTotals.first { it.name == "Retirement" }
+            assert(54, retirement.monthAmounts[1])
+            assert(108, retirement.monthAmounts[2])
+            assert(125, retirement.monthAmounts[3])
+            assert(287, retirement.total)
+
+            // Assert current assets
+            val rothIra = result.accountTotals.first { it.name == "Roth IRA" }
+            assert(54, rothIra.monthAmounts[1])
+            assert(108, rothIra.monthAmounts[2])
+            assert(125, rothIra.monthAmounts[3])
+            assert(287, rothIra.total)
+
+            // Uncomment if need to print output
+            //printAccounts(result.total, result.accountTotals)
+        }
+
+    /**
+     * | Name              | Month 1 | Month 2 | Month 3 | Total     |
+     * |-------------------|---------|---------|---------|-----------|
+     * | Assets            | 100     | 200     | 300     | 600       |
+     * | +-Fixed Assets    | 100     | 200     | 300     | 600       |
+     */
+    @Test
+    fun testCalculateAssetsReport_ifSelectedAccountFixedAssetsAndSelectedMonthsAll() =
+        runTest(dispatcher) {
+            // Arrange
+            calculator = ReportCalculator(getAssetsReport(), dispatcher)
+
+            // Act
+            val result = calculator.calculate(
+                selectedAccounts = listOf("Assets:Fixed Assets"),
+                selectedMonths = listOf(1, 2, 3)
+            ) as ReportView.Full
+
+            // Assert assets
+            val assets = result.total
+            assert(100, assets.monthAmounts[1])
+            assert(200, assets.monthAmounts[2])
+            assert(300, assets.monthAmounts[3])
+            assert(600, assets.total)
+
+            // Assert fixed assets
+            val fixedAssets = result.accountTotals.first { it.name == "Fixed Assets" }
+            assert(100, fixedAssets.monthAmounts[1])
+            assert(200, fixedAssets.monthAmounts[2])
+            assert(300, fixedAssets.monthAmounts[3])
+            assert(600, fixedAssets.total)
+
+            // Uncomment if need to print output
+            //printAccounts(result.total, result.accountTotals)
+        }
+
+    /**
+     * | Name              | Month 1 | Month 3 | Total     |
+     * |-------------------|---------|---------|-----------|
+     * | Assets            | 100     | 300     | 400       |
+     * | +-Fixed Assets    | 100     | 300     | 400       |
+     */
+    @Test
+    fun testCalculateAssetsReport_ifSelectedAccountFixedAssetsAndSelectedMonths1And3() =
+        runTest(dispatcher) {
+            // Arrange
+            calculator = ReportCalculator(getAssetsReport(), dispatcher)
+
+            // Act
+            val result = calculator.calculate(
+                selectedAccounts = listOf("Assets:Fixed Assets"),
+                selectedMonths = listOf(1, 3)
+            ) as ReportView.Full
+
+            // Assert assets
+            val assets = result.total
+            assert(100, assets.monthAmounts[1])
+            assert(300, assets.monthAmounts[3])
+            assert(400, assets.total)
+
+            // Assert fixed assets
+            val fixedAssets = result.accountTotals.first { it.name == "Fixed Assets" }
+            assert(100, fixedAssets.monthAmounts[1])
+            assert(300, fixedAssets.monthAmounts[3])
+            assert(400, fixedAssets.total)
+
+            // Uncomment if need to print output
+            //printAccounts(result.total, result.accountTotals)
+        }
+
     private fun assert(expectedAmount: Int, actualAmount: BigDecimal?) {
         assertEquals(BigDecimal.fromInt(expectedAmount), actualAmount!!)
     }
@@ -833,189 +1103,5 @@ class ReportCalculatorTest {
 
     private fun setupComplexCalculator() {
         calculator = ReportCalculator(getComplexReport(), dispatcher)
-    }
-
-    /**
-     * Returns a report that looks like
-     *
-     *     |   Name    | Month 1 | Month 2 | Month 3 | Month 4 |
-     *     |-----------|---------|---------|---------|---------|
-     *     | Account 1 |    1    |    2    |    3    |    4    |
-     *     | Account 2 |    7    |    8    |    9    |   10    |
-     *     | Account 3 |   14    |   15    |   16    |   17    |
-     */
-    private fun getSimpleReport(): Report {
-        return Report(
-            name = "Report",
-            generatedAt = Clock.System.now(),
-            fetchedAt = Clock.System.now(),
-            accountTotal = AccountTotal(
-                name = "Expenses",
-                fullName = "Expenses",
-                children = listOf(
-                    AccountTotal(
-                        name = "Account1",
-                        fullName = "Account1",
-                        children = listOf(),
-                        monthAmounts = mapOf(
-                            1 to BigDecimal.parseString("1"),
-                            2 to BigDecimal.parseString("2"),
-                            3 to BigDecimal.parseString("3"),
-                            4 to BigDecimal.parseString("4")
-                        )
-                    ),
-                    AccountTotal(
-                        name = "Account2",
-                        fullName = "Account2",
-                        children = listOf(),
-                        monthAmounts = mapOf(
-                            1 to BigDecimal.parseString("7"),
-                            2 to BigDecimal.parseString("8"),
-                            3 to BigDecimal.parseString("9"),
-                            4 to BigDecimal.parseString("10")
-
-                        )
-                    ),
-                    AccountTotal(
-                        name = "Account3",
-                        fullName = "Account3",
-                        children = listOf(),
-                        monthAmounts = mapOf(
-                            1 to BigDecimal.parseString("14"),
-                            2 to BigDecimal.parseString("15"),
-                            3 to BigDecimal.parseString("16"),
-                            4 to BigDecimal.parseString("17")
-                        )
-                    )
-                ),
-                monthAmounts = mapOf<Int, BigDecimal>(),
-                total = BigDecimal.ZERO
-            ),
-            type = ReportType.EXPENSE,
-            year = 2023
-        )
-    }
-
-    /**
-     * Returns a report that looks like
-     *
-     *     |     Name      | Month 1 | Month 2 | Month 3 | Month 4 |
-     *     |---------------|---------|---------|---------|---------|
-     *     |   Account 1   |    6    |   11    |   16    |   45    |
-     *     |  - Account 11 |    4    |    5    |    8    |   33    |
-     *     |  - Account 12 |    2    |    6    |    8    |   12    |
-     *     |  Account 2    |    7    |    8    |    9    |   10    |
-     *     |  - Account 21 |    7    |    8    |    9    |   10    |
-     *     |  Account 3    |   27    |   31    |   40    |   29    |
-     *     |  - Account 31 |   12    |    8    |   12    |   10    |
-     *     |  - Account 32 |   15    |   23    |   28    |   19    |
-     */
-    private fun getComplexReport(): Report {
-        return Report(
-            name = "Report",
-            generatedAt = Clock.System.now(),
-            fetchedAt = Clock.System.now(),
-            accountTotal = AccountTotal(
-                name = "Expenses",
-                fullName = "Expenses",
-                children = listOf(
-                    AccountTotal(
-                        name = "Account1",
-                        fullName = "Account1",
-                        children = listOf(
-                            AccountTotal(
-                                name = "Account11",
-                                fullName = "Account11",
-                                children = listOf(),
-                                monthAmounts = mapOf(
-                                    1 to BigDecimal.parseString("4"),
-                                    2 to BigDecimal.parseString("5"),
-                                    3 to BigDecimal.parseString("8"),
-                                    4 to BigDecimal.parseString("33")
-                                )
-                            ), AccountTotal(
-                                name = "Account12",
-                                fullName = "Account12",
-                                children = listOf(),
-                                monthAmounts = mapOf(
-                                    1 to BigDecimal.parseString("2"),
-                                    2 to BigDecimal.parseString("6"),
-                                    3 to BigDecimal.parseString("8"),
-                                    4 to BigDecimal.parseString("12")
-                                )
-                            )
-                        ),
-                        monthAmounts = mapOf(
-                            1 to BigDecimal.parseString("6"),
-                            2 to BigDecimal.parseString("11"),
-                            3 to BigDecimal.parseString("16"),
-                            4 to BigDecimal.parseString("45")
-                        )
-                    ),
-                    AccountTotal(
-                        name = "Account2",
-                        fullName = "Account2",
-                        children = listOf(
-                            AccountTotal(
-                                name = "Account21",
-                                fullName = "Account21",
-                                children = listOf(),
-                                monthAmounts = mapOf(
-                                    1 to BigDecimal.parseString("7"),
-                                    2 to BigDecimal.parseString("8"),
-                                    3 to BigDecimal.parseString("9"),
-                                    4 to BigDecimal.parseString("10")
-
-                                )
-                            )
-                        ),
-                        monthAmounts = mapOf(
-                            1 to BigDecimal.parseString("7"),
-                            2 to BigDecimal.parseString("8"),
-                            3 to BigDecimal.parseString("9"),
-                            4 to BigDecimal.parseString("10")
-
-                        )
-                    ),
-                    AccountTotal(
-                        name = "Account3",
-                        fullName = "Account3",
-                        children = listOf(
-                            AccountTotal(
-                                name = "Account31",
-                                fullName = "Account31",
-                                children = listOf(),
-                                monthAmounts = mapOf(
-                                    1 to BigDecimal.parseString("12"),
-                                    2 to BigDecimal.parseString("8"),
-                                    3 to BigDecimal.parseString("12"),
-                                    4 to BigDecimal.parseString("10")
-                                )
-                            ), AccountTotal(
-                                name = "Account32",
-                                fullName = "Account32",
-                                children = listOf(),
-                                monthAmounts = mapOf(
-                                    1 to BigDecimal.parseString("15"),
-                                    2 to BigDecimal.parseString("23"),
-                                    3 to BigDecimal.parseString("28"),
-                                    4 to BigDecimal.parseString("19")
-                                )
-                            )
-                        ),
-                        monthAmounts = mapOf(
-                            1 to BigDecimal.parseString("27"),
-                            2 to BigDecimal.parseString("31"),
-                            3 to BigDecimal.parseString("40"),
-                            4 to BigDecimal.parseString("29")
-                        )
-                    )
-                ),
-                monthAmounts = mapOf<Int, BigDecimal>(),
-                total = BigDecimal.ZERO
-            ),
-            type = ReportType.EXPENSE,
-            year = 2023
-        )
     }
 }

@@ -130,7 +130,7 @@ class DetailReportViewModel(
                 .mapNotNull { (it as? Month)?.month }
             val selectedAccounts = _state.value.accounts
                 .filter { !it.isAllFilterItem && it.selected }
-                .mapNotNull { (it as? Account)?.accountName }
+                .mapNotNull { (it as? Account)?.fullName }
             val selectedBy = when (_state.value.views
                 .first { it.selected }.type) {
                 ViewType.TABLE -> ReportCalculator.By.FULL
@@ -179,10 +179,9 @@ class DetailReportViewModel(
         ) + monthsFromInitialReport
 
         val accountsFromInitialReport = calculator.getAccounts()
-            .mapIndexed { index, accountName ->
-                Account(
-                    accountName,
-                    selected = calculatedReport.accountTotals.count { it.name == accountName } != 0,
+            .mapIndexed { index, account ->
+                account.copy(
+                    selected = calculatedReport.accountTotals.count { it.fullName == account.fullName } != 0,
                     id = index
                 )
             }

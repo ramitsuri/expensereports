@@ -92,6 +92,17 @@ fun AccountTotal.isNotIn(
     return !isIn(selectedAccountNames, fullName)
 }
 
+private fun Int.isIn(selectedMonths: List<Int>?): Boolean {
+    if (selectedMonths == null) {
+        return true
+    }
+    return selectedMonths.contains(this)
+}
+
+private fun Int.isNotIn(selectedMonths: List<Int>?): Boolean {
+    return !isIn(selectedMonths)
+}
+
 
 @Serializable
 data class Config(

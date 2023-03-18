@@ -3,7 +3,8 @@ package com.ramitsuri.expensereports.utils
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.Report
-import com.ramitsuri.expensereports.data.isNotIn
+import com.ramitsuri.expensereports.data.isIn
+import com.ramitsuri.expensereports.ui.Account
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
@@ -18,59 +19,23 @@ class ReportCalculator(
         selectedAccounts: List<String>? = null,
         by: By = By.FULL
     ): ReportView = withContext(defaultDispatcher) {
-        val result = withContext(defaultDispatcher) {
-            val accounts = mutableListOf<AccountTotal>()
-            val totalsAccountMonthAmounts = mutableMapOf<Int, BigDecimal>()
-            // Filter the month-amounts for selected months and accounts only
-            for (account in initialReport.accountTotal.children) {
-                if (account.isNotIn(selectedAccounts)) {
-                    continue
-                }
-                val resultAccountMonthAmounts = mutableMapOf<Int, BigDecimal>()
-                var resultAccountTotal = BigDecimal.ZERO
-                for ((month, amount) in account.monthAmounts) {
-                    if (month.isNotIn(selectedMonths)) {
-                        continue
-                    }
-                    resultAccountMonthAmounts[month] = amount
-                    resultAccountTotal += amount
-
-                    // Initialize totals row with zero amounts for selected months
-                    totalsAccountMonthAmounts[month] = BigDecimal.ZERO
-                }
-                val resultAccount = AccountTotal(
-                    name = account.name,
-                    fullName = account.fullName,
-                    children = listOf(),
-                    monthAmounts = resultAccountMonthAmounts,
-                    total = resultAccountTotal
-                )
-                accounts.add(resultAccount)
-            }
-
-            // Calculate amounts for the totals row
-            var totalAccountTotal = BigDecimal.ZERO
-            for ((totalMonth, _) in totalsAccountMonthAmounts) {
-                var amount = BigDecimal.ZERO
-                for (resultAccount in accounts) {
-                    amount += resultAccount.monthAmounts[totalMonth] ?: BigDecimal.ZERO
-                }
-                totalAccountTotal += amount
-                totalsAccountMonthAmounts[totalMonth] = amount
-            }
-            val totalAccount = AccountTotal(
-                name = TOTAL,
-                fullName = TOTAL,
-                children = listOf(),
-                monthAmounts = totalsAccountMonthAmounts,
-                total = totalAccountTotal
-            )
+        val afterFilter = initialReport.accountTotal
+            .filterAccounts(selectedAccounts)
+            .filterMonths(selectedMonths)
+        val result = if (afterFilter == null) {
             ReportView.Full(
-                accountTotals = accounts.sortedBy { it.name },
-                total = totalAccount,
+                accountTotals = listOf(),
+                total = SimpleAccountTotal(initialReport.accountTotal, level = 0),
+                generatedAt = initialReport.generatedAt
+            )
+        } else {
+            ReportView.Full(
+                accountTotals = afterFilter.flatten().sortedBy { it.fullName },
+                total = SimpleAccountTotal(afterFilter, level = 0),
                 generatedAt = initialReport.generatedAt
             )
         }
+
         val hideZeroTotals = selectedAccounts == null && selectedMonths == null // Filter out zeros
         // only when no selected months and accounts are sent because that's when the report is
         // requested for the first time. After that we want to send back totals for whatever
@@ -87,9 +52,9 @@ class ReportCalculator(
                 .map { accountTotal ->
                     accountTotal.copy(
                         monthAmounts = accountTotal.monthAmounts
-                            .filter {
+                            .filter { (month, _) ->
                                 totalAccountMonthsWithNoZeros.monthAmounts.keys.contains(
-                                    it.key
+                                    month
                                 )
                             }
                     )
@@ -108,8 +73,8 @@ class ReportCalculator(
         }
     }
 
-    fun getAccounts(): List<String> {
-        return initialReport.accountTotal.children.map { it.name }.sortedBy { it }
+    fun getAccounts(): List<Account> {
+        return getAccounts(initialReport.accountTotal, level = 0).sortedBy { it.fullName }
     }
 
     fun getMonths(): List<Int> {
@@ -127,21 +92,117 @@ class ReportCalculator(
         return !isIn(selectedMonths)
     }
 
+    private fun AccountTotal.flatten(level: Int = 0): List<SimpleAccountTotal> {
+        val result: MutableList<SimpleAccountTotal> = mutableListOf()
+        if (level != 0) {
+            result.add(SimpleAccountTotal(this, level))
+        }
+        for (accountTotal in children)
+            result.addAll(accountTotal.flatten(level + 1))
+        return result
+    }
+
+    private fun AccountTotal.filterAccounts(includedAccounts: List<String>?): AccountTotal? {
+        if (isIn(includedAccounts, fullName = true)) {
+            return this
+        }
+        val children = children.mapNotNull { child ->
+            child.filterAccounts(includedAccounts)
+        }
+        // The account wasn't included in the included accounts list so, only way it could be
+        // made available was for it to have any children.
+        if (children.isEmpty()) {
+            return null
+        }
+        return copy(children = children)
+    }
+
+    private fun AccountTotal?.filterMonths(includedMonths: List<Int>?): AccountTotal? {
+        if (this == null) {
+            return null
+        }
+        val children = children.mapNotNull { child ->
+            child.filterMonths(includedMonths)
+        }
+        val withTotalsPopulated = if (children.isEmpty()) {
+            populateTotals(includedMonths)
+        } else {
+            populateTotals(children, includedMonths)
+        }
+        return withTotalsPopulated.copy(children = children)
+    }
+
+    private fun AccountTotal.populateTotals(includedMonths: List<Int>?): AccountTotal {
+        val monthAmounts = monthAmounts.filter { (month, _) ->
+            month.isIn(includedMonths)
+        }
+        var total = BigDecimal.ZERO
+        monthAmounts.forEach { (_, amount) ->
+            total += amount
+        }
+        return copy(
+            monthAmounts = monthAmounts,
+            total = total
+        )
+    }
+
+    private fun AccountTotal.populateTotals(
+        children: List<AccountTotal>,
+        includedMonths: List<Int>?
+    ): AccountTotal {
+        val monthAmounts = mutableMapOf<Int, BigDecimal>()
+        for (month in 1..12) {
+            if (month.isNotIn(includedMonths)) {
+                continue
+            }
+            var monthTotal = BigDecimal.ZERO
+            var noChildHasMonth = true
+            for (child in children) {
+                val monthAmount = child.monthAmounts[month]
+                monthTotal += if (monthAmount == null) {
+                    BigDecimal.ZERO
+                } else {
+                    noChildHasMonth = false
+                    monthAmount
+                }
+            }
+            if (noChildHasMonth) {
+                continue
+            }
+            monthAmounts[month] = monthTotal
+        }
+
+        var total = BigDecimal.ZERO
+        monthAmounts.forEach { (_, amount) ->
+            total += amount
+        }
+        return copy(
+            monthAmounts = monthAmounts,
+            total = total
+        )
+    }
+
+    private fun getAccounts(accountTotal: AccountTotal, level: Int = 0): List<Account> {
+        val list: MutableList<Account> = mutableListOf()
+        if (level != 0) {
+            list.add(Account(accountTotal, level))
+        }
+        for (child in accountTotal.children)
+            list.addAll(getAccounts(child, level + 1))
+        return list
+    }
+
     enum class By {
         FULL,
         MONTH,
         ACCOUNT
     }
-
-    companion object {
-        const val TOTAL = "Total"
-    }
 }
 
 sealed class ReportView {
     data class Full(
-        val accountTotals: List<AccountTotal>,
-        val total: AccountTotal,
+        val accountTotals: List<SimpleAccountTotal>,
+        val total: SimpleAccountTotal,
         val generatedAt: Instant
     ) : ReportView()
 
@@ -175,5 +236,21 @@ fun ReportView.Full.toByAccount(): ReportView.ByAccount {
         accountTotals = otherAccounts,
         total = totalsAccount.total,
         generatedAt = this.generatedAt
+    )
+}
+
+data class SimpleAccountTotal(
+    val name: String,
+    val fullName: String,
+    val monthAmounts: Map<Int, BigDecimal>,
+    val total: BigDecimal = BigDecimal.ZERO,
+    val level: Int
+) {
+    constructor(accountTotal: AccountTotal, level: Int) : this(
+        name = accountTotal.name,
+        fullName = accountTotal.fullName,
+        monthAmounts = accountTotal.monthAmounts,
+        total = accountTotal.total,
+        level = level
     )
 }

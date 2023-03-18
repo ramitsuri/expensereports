@@ -1,5 +1,7 @@
 package com.ramitsuri.expensereports.ui
 
+import com.ramitsuri.expensereports.data.AccountTotal
+
 sealed interface FilterItem {
     val id: Int
     val selected: Boolean
@@ -32,19 +34,27 @@ data class Month(
 }
 
 data class Account(
-    val accountName: String = "",
-    override val id: Int,
-    override val selected: Boolean,
+    val name: String = "",
+    val fullName: String = "",
+    val level: Int = 0,
+    override val id: Int = 0,
+    override val selected: Boolean = false,
 ) : FilterItem {
     override val displayName: String
         get() = when (id) {
             FilterItem.ALL_ID -> ALL
-            else -> accountName
+            else -> name
         }
 
     override fun duplicate(isSelected: Boolean): FilterItem {
         return this.copy(selected = isSelected)
     }
+
+    constructor(accountTotal: AccountTotal, level: Int) : this(
+        name = accountTotal.name,
+        fullName = accountTotal.fullName,
+        level = level
+    )
 }
 
 fun getNewItemsOnItemClicked(
