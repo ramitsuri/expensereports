@@ -184,9 +184,7 @@ class ReportCalculator(
 
     private fun getAccounts(accountTotal: AccountTotal, level: Int = 0): List<Account> {
         val list: MutableList<Account> = mutableListOf()
-        if (level != 0) {
-            list.add(Account(accountTotal, level))
-        }
+        list.add(Account(accountTotal, level))
         for (child in accountTotal.children)
             list.addAll(getAccounts(child, level + 1))
         return list

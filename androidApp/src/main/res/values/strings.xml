@@ -8,6 +8,7 @@
     <string name="total">Total</string>
     <string name="total_format">Total: %1$s</string>
     <string name="accounts">Accounts</string>
+    <string name="apply">Apply</string>
 
     <!-- Bottom nav -->
     <string name="bottom_nav_home">Home</string>

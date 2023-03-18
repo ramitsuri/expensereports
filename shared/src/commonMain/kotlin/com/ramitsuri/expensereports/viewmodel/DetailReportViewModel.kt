@@ -95,20 +95,34 @@ class DetailReportViewModel(
         recalculate()
     }
 
-    fun onAccountClicked(account: FilterItem) {
-        if (account !is Account) {
-            return
+    fun onAccountClicked(account: Account) {
+        val currentAccounts = _state.value.accountsFilter
+        val newAccounts = currentAccounts.map {
+            if (it.fullName == account.fullName) {
+                it.copy(selected = !it.selected)
+            } else {
+                it
+            }
         }
+        _state.update {
+            it.copy(accountsFilter = newAccounts)
+        }
+    }
+
+    fun onAccountFiltersApplied() {
         _state.update {
             it.copy(loading = true)
         }
-        val currentAccounts = _state.value.accounts
-        val newAccounts =
-            getNewItemsOnItemClicked(filterItems = currentAccounts, filterItem = account)
         _state.update {
-            it.copy(accounts = newAccounts)
+            it.copy(accounts = it.accountsFilter)
         }
         recalculate()
+    }
+
+    fun onAccountFiltersNotApplied() {
+        _state.update {
+            it.copy(accountsFilter = it.accounts)
+        }
     }
 
     fun onViewSelected(selectedView: View) {
@@ -129,7 +143,7 @@ class DetailReportViewModel(
                 .filter { !it.isAllFilterItem && it.selected }
                 .mapNotNull { (it as? Month)?.month }
             val selectedAccounts = _state.value.accounts
-                .filter { !it.isAllFilterItem && it.selected }
+                .filter { it.selected }
                 .mapNotNull { (it as? Account)?.fullName }
             val selectedBy = when (_state.value.views
                 .first { it.selected }.type) {
@@ -178,25 +192,19 @@ class DetailReportViewModel(
             )
         ) + monthsFromInitialReport
 
-        val accountsFromInitialReport = calculator.getAccounts()
-            .mapIndexed { index, account ->
+        val accounts = calculator.getAccounts()
+            .map { account ->
                 account.copy(
                     selected = calculatedReport.accountTotals.count { it.fullName == account.fullName } != 0,
-                    id = index
                 )
             }
-        val accounts: List<Account> = listOf(
-            Account(
-                selected = accountsFromInitialReport.size == calculatedReport.accountTotals.size,
-                id = FilterItem.ALL_ID
-            )
-        ) + accountsFromInitialReport
         _state.update {
             it.copy(
                 loading = false,
                 report = calculatedReport,
                 months = months,
-                accounts = accounts
+                accounts = accounts,
+                accountsFilter = accounts
             )
         }
     }
@@ -221,7 +229,8 @@ data class ReportsViewState(
     val reports: List<ReportSelection> = ReportType.values().filter { it != ReportType.NONE }
         .map { ReportSelection(it) },
     val months: List<FilterItem> = listOf(),
-    val accounts: List<FilterItem> = listOf(),
+    val accounts: List<Account> = listOf(),
+    val accountsFilter: List<Account> = listOf(),
     val report: ReportView? = null,
     val error: Error? = null
 )

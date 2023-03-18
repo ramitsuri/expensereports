@@ -8,6 +8,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,8 +28,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -39,14 +44,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
@@ -56,6 +65,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
@@ -63,6 +74,7 @@ import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.timeAndDay
 import com.ramitsuri.expensereports.data.Error
 import com.ramitsuri.expensereports.data.ReportType
+import com.ramitsuri.expensereports.ui.Account
 import com.ramitsuri.expensereports.ui.FilterItem
 import com.ramitsuri.expensereports.utils.ReportView
 import com.ramitsuri.expensereports.utils.SimpleAccountTotal
@@ -92,8 +104,10 @@ fun DetailsScreen(
         views = viewState.views,
         onViewSelected = viewModel::onViewSelected,
         onErrorShown = viewModel::onErrorShown,
-        accounts = viewState.accounts,
+        accounts = viewState.accountsFilter,
         onAccountClicked = viewModel::onAccountClicked,
+        onAccountFiltersApplied = viewModel::onAccountFiltersApplied,
+        onAccountFiltersNotApplied = viewModel::onAccountFiltersNotApplied,
         months = viewState.months,
         onMonthClicked = viewModel::onMonthClicked,
         reportView = viewState.report,
@@ -112,8 +126,10 @@ private fun DetailsContent(
     views: List<View>,
     onViewSelected: (View) -> Unit,
     onErrorShown: () -> Unit,
-    accounts: List<FilterItem>,
-    onAccountClicked: (item: FilterItem) -> Unit,
+    accounts: List<Account>,
+    onAccountClicked: (account: Account) -> Unit,
+    onAccountFiltersApplied: () -> Unit,
+    onAccountFiltersNotApplied: () -> Unit,
     months: List<FilterItem>,
     onMonthClicked: (item: FilterItem) -> Unit,
     reportView: ReportView?,
@@ -149,10 +165,10 @@ private fun DetailsContent(
                 onReportTypeSelected = onReportTypeSelected
             )
             FilterRow(
-                items = accounts,
-                onItemClicked = onAccountClicked
-            )
-            FilterRow(
+                accounts = accounts,
+                onAccountClicked = onAccountClicked,
+                onAccountFiltersApplied = onAccountFiltersApplied,
+                onAccountFiltersNotApplied = onAccountFiltersNotApplied,
                 items = months,
                 onItemClicked = onMonthClicked
             )
@@ -413,7 +429,7 @@ private fun TableView(
             rowCount = rows,
             cellContent = { columnIndex, rowIndex ->
                 when (rowIndex) {
-                    0 -> { // Headers
+                    0 -> { // Header row
                         when (columnIndex) {
                             0 -> {
                                 TableCell(
@@ -439,7 +455,7 @@ private fun TableView(
                         when (columnIndex) {
                             0 -> {
                                 TableCell(
-                                    text = stringResource(id = R.string.total),
+                                    text = total.name,
                                     isHeader = true
                                 )
                             }
@@ -459,7 +475,11 @@ private fun TableView(
                         val account = accountTotals[rowIndex - 2]
                         when (columnIndex) {
                             0 -> {
-                                TableCell(text = account.name, isHeader = true)
+                                var prefix = ""
+                                repeat(account.level - 1) {
+                                    prefix += "   "
+                                }
+                                TableCell(text = prefix + account.name, isHeader = true)
                             }
                             columns - 1 -> {
                                 TableCell(
@@ -664,21 +684,128 @@ private fun Selector(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FilterRow(
+    accounts: List<Account>,
+    onAccountClicked: (Account) -> Unit,
+    onAccountFiltersApplied: () -> Unit,
+    onAccountFiltersNotApplied: () -> Unit,
     items: List<FilterItem>,
     onItemClicked: (item: FilterItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    val dialogState = rememberSaveable { mutableStateOf(false) }
+    Row(
+        modifier = modifier.fillMaxWidth()
     ) {
-        items.forEach { filterItem ->
-            item {
-                FilterChip(
-                    selected = filterItem.selected,
-                    onClick = { onItemClicked(filterItem) },
-                    label = { Text(filterItem.displayName) }
+        FilterChip(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = stringResource(id = R.string.accounts),
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
                 )
+            },
+            selected = true,
+            onClick = { dialogState.value = !dialogState.value },
+            label = { Text(stringResource(id = R.string.accounts)) }
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items.forEach { filterItem ->
+                item {
+                    FilterChip(
+                        selected = filterItem.selected,
+                        onClick = { onItemClicked(filterItem) },
+                        label = { Text(filterItem.displayName) }
+                    )
+                }
+            }
+        }
+    }
+    if (dialogState.value) {
+        AccountsFilterDialog(
+            accounts = accounts,
+            onAccountClicked = onAccountClicked,
+            onAccountFiltersApplied = onAccountFiltersApplied,
+            onAccountFiltersNotApplied = onAccountFiltersNotApplied,
+            dialogState = dialogState
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@Composable
+private fun AccountsFilterDialog(
+    accounts: List<Account>,
+    onAccountClicked: (Account) -> Unit,
+    onAccountFiltersApplied: () -> Unit,
+    onAccountFiltersNotApplied: () -> Unit,
+    modifier: Modifier = Modifier,
+    dialogState: MutableState<Boolean>
+) {
+    Dialog(
+        onDismissRequest = { dialogState.value = false },
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth(0.9f)
+                .fillMaxHeight(0.8f)
+                .background(
+                    MaterialTheme.colorScheme.background,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .padding(16.dp)
+        ) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.weight(1f, false)
+            ) {
+                accounts.forEach { account ->
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .clickable { onAccountClicked(account) }
+                                .fillMaxWidth()
+                                .padding(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            repeat(account.level) {
+                                Spacer(modifier = Modifier.width(16.dp))
+                            }
+                            Icon(
+                                imageVector = if (account.selected) {
+                                    Icons.Filled.CheckBox
+                                } else {
+                                    Icons.Filled.CheckBoxOutlineBlank
+                                },
+                                contentDescription = null,
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = account.name, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = {
+                    onAccountFiltersNotApplied()
+                    dialogState.value = false
+                }) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+                TextButton(onClick = {
+                    onAccountFiltersApplied()
+                    dialogState.value = false
+                }) {
+                    Text(text = stringResource(id = R.string.apply))
+                }
             }
         }
     }

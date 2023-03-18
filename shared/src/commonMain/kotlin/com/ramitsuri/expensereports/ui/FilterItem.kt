@@ -37,18 +37,8 @@ data class Account(
     val name: String = "",
     val fullName: String = "",
     val level: Int = 0,
-    override val id: Int = 0,
-    override val selected: Boolean = false,
-) : FilterItem {
-    override val displayName: String
-        get() = when (id) {
-            FilterItem.ALL_ID -> ALL
-            else -> name
-        }
-
-    override fun duplicate(isSelected: Boolean): FilterItem {
-        return this.copy(selected = isSelected)
-    }
+     val selected: Boolean = false,
+) {
 
     constructor(accountTotal: AccountTotal, level: Int) : this(
         name = accountTotal.name,
