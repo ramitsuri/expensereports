@@ -104,5 +104,6 @@ kotlin {
 sqldelight {
     database("ReportsDb") {
         packageName = "com.ramitsuri.expensereports.db"
+        schemaOutputDirectory = file("src/commonMain/sqldelight/databases")
     }
 }
