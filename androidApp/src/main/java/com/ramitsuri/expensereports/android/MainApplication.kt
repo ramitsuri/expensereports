@@ -16,7 +16,7 @@ import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.utils.DataDownloader
-import com.ramitsuri.expensereports.viewmodel.DetailReportViewModel
+import com.ramitsuri.expensereports.viewmodel.ReportsViewModel
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
 import kotlinx.datetime.Clock
@@ -64,7 +64,7 @@ class MainApplication : Application(), LifecycleEventObserver {
                 }
 
                 viewModel {
-                    DetailReportViewModel(
+                    ReportsViewModel(
                         get<ReportsRepository>(),
                         get<DispatcherProvider>()
                     )

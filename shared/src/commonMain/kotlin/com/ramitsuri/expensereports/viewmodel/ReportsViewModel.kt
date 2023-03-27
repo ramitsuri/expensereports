@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class DetailReportViewModel(
+class ReportsViewModel(
     private val repository: ReportsRepository,
     private val dispatchers: DispatcherProvider
 ) : ViewModel() {

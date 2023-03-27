@@ -33,7 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ramitsuri.expensereports.android.ui.AppTheme
-import com.ramitsuri.expensereports.android.ui.details.DetailsScreen
+import com.ramitsuri.expensereports.android.ui.reports.ReportsScreen
 import com.ramitsuri.expensereports.android.ui.home.HomeScreen
 import com.ramitsuri.expensereports.android.ui.settings.SettingsScreen
 
@@ -68,7 +68,7 @@ private fun BottomNavGraph(navController: NavHostController) {
                 .padding(innerPadding)
         ) {
             composable(BottomNav.Home.route) { HomeScreen() }
-            composable(BottomNav.Details.route) { DetailsScreen() }
+            composable(BottomNav.Reports.route) { ReportsScreen() }
             composable(BottomNav.Misc.route) { SettingsScreen() }
         }
     }
@@ -123,9 +123,9 @@ sealed class BottomNav(
             selectedIcon = Icons.Filled.Home
         )
 
-    object Details : BottomNav(
-        route = "details",
-        resourceId = R.string.bottom_nav_details,
+    object Reports : BottomNav(
+        route = "reports",
+        resourceId = R.string.bottom_nav_reports,
         unselectedIcon = Icons.Outlined.AccountBox,
         selectedIcon = Icons.Filled.AccountBox
     )
@@ -140,6 +140,6 @@ sealed class BottomNav(
 
 val bottomNavItems = listOf(
     BottomNav.Home,
-    BottomNav.Details,
+    BottomNav.Reports,
     BottomNav.Misc
 )

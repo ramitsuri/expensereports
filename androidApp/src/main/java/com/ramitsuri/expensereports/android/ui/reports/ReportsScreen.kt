@@ -1,4 +1,4 @@
-package com.ramitsuri.expensereports.android.ui.details
+package com.ramitsuri.expensereports.android.ui.reports
 
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -70,7 +70,7 @@ import com.ramitsuri.expensereports.ui.Account
 import com.ramitsuri.expensereports.ui.FilterItem
 import com.ramitsuri.expensereports.utils.ReportView
 import com.ramitsuri.expensereports.utils.SimpleAccountTotal
-import com.ramitsuri.expensereports.viewmodel.DetailReportViewModel
+import com.ramitsuri.expensereports.viewmodel.ReportsViewModel
 import com.ramitsuri.expensereports.viewmodel.ReportSelection
 import com.ramitsuri.expensereports.viewmodel.Selector
 import com.ramitsuri.expensereports.viewmodel.View
@@ -80,13 +80,13 @@ import kotlinx.datetime.Instant
 import org.koin.androidx.compose.getViewModel
 
 @Composable
-fun DetailsScreen(
+fun ReportsScreen(
     modifier: Modifier = Modifier,
-    viewModel: DetailReportViewModel = getViewModel()
+    viewModel: ReportsViewModel = getViewModel()
 ) {
     val viewState = viewModel.state.collectAsState().value
 
-    DetailsContent(
+    ReportsContent(
         isLoading = viewState.loading,
         error = viewState.error,
         years = viewState.years,
@@ -108,7 +108,7 @@ fun DetailsScreen(
 }
 
 @Composable
-private fun DetailsContent(
+private fun ReportsContent(
     isLoading: Boolean,
     error: Error?,
     years: List<Year>,

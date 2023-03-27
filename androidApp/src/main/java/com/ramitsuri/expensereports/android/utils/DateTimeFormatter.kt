@@ -8,7 +8,6 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toJavaZoneId
@@ -54,15 +53,15 @@ fun LocalDateTime.timeAndDay(
     return when (Duration.between(nowTruncated, toFormatTruncated).toDays()) {
         0L -> {
             val time = this.timeOnly(timeZone, now)
-            stringResource(id = R.string.details_generated_at_today_format, time)
+            stringResource(id = R.string.reports_generated_at_today_format, time)
         }
         1L -> {
             val time = this.timeOnly(timeZone, now)
-            stringResource(id = R.string.details_generated_at_yesterday_format, time)
+            stringResource(id = R.string.reports_generated_at_yesterday_format, time)
         }
         else -> {
             val time = this.timeDateMonthYear(timeZone, now)
-            stringResource(id = R.string.details_generated_at_date_format, time)
+            stringResource(id = R.string.reports_generated_at_date_format, time)
         }
     }
 }
