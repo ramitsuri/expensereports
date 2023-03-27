@@ -2,16 +2,19 @@ package com.ramitsuri.expensereports.di
 
 import com.ramitsuri.expensereports.data.db.Database
 import com.ramitsuri.expensereports.data.db.ReportDao
+import com.ramitsuri.expensereports.data.db.TransactionsDao
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.network.NetworkProvider
 import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
+import com.ramitsuri.expensereports.repository.TransactionsRepository
+import com.ramitsuri.expensereports.utils.DataDownloader
 import com.ramitsuri.expensereports.utils.DispatcherProvider
-import com.ramitsuri.expensereports.utils.ReportsDownloader
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
@@ -41,9 +44,15 @@ private val coreModule = module {
 
     factory<ReportsRepository> {
         ReportsRepository(
-            get<ReportsDownloader>(),
+            get<NetworkProvider>().reportApi(),
             get<ReportDao>(),
             get<Clock>()
+        )
+    }
+
+    factory<TransactionsRepository> {
+        TransactionsRepository(
+            get<TransactionsDao>(),
         )
     }
 
@@ -55,12 +64,15 @@ private val coreModule = module {
         )
     }
 
-    factory<ReportsDownloader> {
-        ReportsDownloader(
+    factory<DataDownloader> {
+        DataDownloader(
             get<ReportDao>(),
             get<NetworkProvider>().reportApi(),
+            get<TransactionsDao>(),
+            get<NetworkProvider>().transactionsApi(),
             get<ConfigRepository>(),
             get<Clock>(),
+            get<TimeZone>(),
             get<PrefManager>()
         )
     }
@@ -73,6 +85,10 @@ private val coreModule = module {
         get<Database>().reportDao
     }
 
+    factory<TransactionsDao> {
+        get<Database>().transactionsDao
+    }
+
     single<Json> {
         Json {
             isLenient = true
@@ -82,6 +98,10 @@ private val coreModule = module {
 
     single<Clock> {
         Clock.System
+    }
+
+    single<TimeZone> {
+        TimeZone.currentSystemDefault()
     }
 }
 

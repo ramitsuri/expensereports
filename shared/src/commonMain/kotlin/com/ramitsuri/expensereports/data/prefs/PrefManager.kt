@@ -39,6 +39,16 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         return getString(key, null)
     }
 
+    fun setDownloadRecentData(downloadRecentData: Boolean) {
+        val key = Key.DOWNLOAD_RECENT_DATA
+        putBoolean(key, downloadRecentData)
+    }
+
+    fun shouldDownloadRecentData(): Boolean {
+        val key = Key.DOWNLOAD_RECENT_DATA
+        return getBoolean(key, true)
+    }
+
     private fun putString(key: Key, value: String) {
         val keyValueStore = getKeyValueStore(key)
         keyValueStore.putString(key.key, value)
@@ -112,6 +122,10 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
 
             CONFIG(
                 key = "config"
+            ),
+
+            DOWNLOAD_RECENT_DATA(
+                key = "download_recent_data"
             )
         }
     }

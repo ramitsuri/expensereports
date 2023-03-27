@@ -8,14 +8,14 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.material.color.DynamicColors
-import com.ramitsuri.expensereports.android.work.ReportDownloadWorker
+import com.ramitsuri.expensereports.android.work.DataDownloadWorker
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.di.AppInfo
 import com.ramitsuri.expensereports.di.initKoin
 import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
-import com.ramitsuri.expensereports.utils.ReportsDownloader
+import com.ramitsuri.expensereports.utils.DataDownloader
 import com.ramitsuri.expensereports.viewmodel.DetailReportViewModel
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
@@ -49,7 +49,7 @@ class MainApplication : Application(), LifecycleEventObserver {
         if (BuildConfig.DEBUG) {
             return
         }
-        ReportDownloadWorker.enqueuePeriodic(this)
+        DataDownloadWorker.enqueuePeriodic(this)
     }
 
     private fun initDependencyInjection() {
@@ -82,7 +82,7 @@ class MainApplication : Application(), LifecycleEventObserver {
                 viewModel {
                     SettingsViewModel(
                         get<PrefManager>(),
-                        get<ReportsDownloader>()
+                        get<DataDownloader>()
                     )
                 }
             }

@@ -1,12 +1,11 @@
 package com.ramitsuri.expensereports.viewmodel
 
 import com.ramitsuri.expensereports.data.prefs.PrefManager
-import com.ramitsuri.expensereports.utils.ReportsDownloader
+import com.ramitsuri.expensereports.utils.DataDownloader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -14,7 +13,7 @@ import org.koin.core.component.KoinComponent
 
 class SettingsViewModel(
     private val prefManager: PrefManager,
-    private val downloader: ReportsDownloader
+    private val downloader: DataDownloader
 ) : ViewModel(), KoinComponent {
 
     private val timeZone = TimeZone.currentSystemDefault()
@@ -39,7 +38,7 @@ class SettingsViewModel(
             it.copy(downloadViewState = it.downloadViewState.copy(isLoading = true))
         }
         viewModelScope.launch {
-            downloader.downloadAndSaveAll()
+            downloader.download()
             _state.update {
                 it.copy(
                     downloadViewState = it.downloadViewState.copy(

@@ -10,17 +10,17 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.ramitsuri.expensereports.android.MainApplication
 import com.ramitsuri.expensereports.utils.LogHelper
-import com.ramitsuri.expensereports.utils.ReportsDownloader
+import com.ramitsuri.expensereports.utils.DataDownloader
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.time.Duration
 
-class ReportDownloadWorker(
+class DataDownloadWorker(
     context: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams), KoinComponent {
 
-    private val downloader: ReportsDownloader by inject()
+    private val downloader: DataDownloader by inject()
 
     override suspend fun doWork(): Result {
         val app = applicationContext as? MainApplication ?: return Result.failure()
@@ -30,7 +30,7 @@ class ReportDownloadWorker(
             return Result.retry()
         }
 
-        downloader.downloadAndSaveAll()
+        downloader.download()
 
         return Result.success()
     }
@@ -46,7 +46,7 @@ class ReportDownloadWorker(
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
-            val request = PeriodicWorkRequestBuilder<ReportDownloadWorker>(
+            val request = PeriodicWorkRequestBuilder<DataDownloadWorker>(
                 repeatInterval = Duration.ofHours(REPEAT_HOURS)
             )
                 .addTag(TAG)

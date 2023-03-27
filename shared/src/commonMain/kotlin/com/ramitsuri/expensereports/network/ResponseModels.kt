@@ -1,6 +1,7 @@
 package com.ramitsuri.expensereports.network
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -63,4 +64,38 @@ data class ConfigDto(
 
     @SerialName("annual_savings_target")
     val annualSavingsTarget: String
+)
+
+@Serializable
+data class TransactionsDto(
+    @Serializable(with = InstantSerializer::class)
+    @SerialName("time")
+    val time: Instant,
+
+    @SerialName("transactions")
+    val transactions: List<TransactionDto>
+) {
+}
+
+@Serializable
+data class TransactionDto(
+    @Serializable(with = LocalDateSerializer::class)
+    @SerialName("date")
+    val date: LocalDate,
+
+
+    @SerialName("amount")
+    val amount: String,
+
+
+    @SerialName("description")
+    val description: String,
+
+
+    @SerialName("from_accounts")
+    val fromAccounts: List<String>,
+
+
+    @SerialName("to_accounts")
+    val toAccounts: List<String>
 )

@@ -6,8 +6,10 @@ import com.ramitsuri.expensereports.network.BigDecimalSerializer
 import com.ramitsuri.expensereports.network.ConfigDto
 import com.ramitsuri.expensereports.network.IntBigDecimalMapSerializer
 import com.ramitsuri.expensereports.network.ReportDto
+import com.ramitsuri.expensereports.network.TransactionDto
 import com.ramitsuri.expensereports.utils.Constants
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -130,5 +132,21 @@ data class Config(
         } catch (e: Exception) {
             BigDecimal.ZERO
         },
+    )
+}
+
+data class Transaction(
+    val date: LocalDate,
+    val amount: BigDecimal,
+    val description: String,
+    val fromAccounts: List<String>,
+    val toAccounts: List<String>
+) {
+    constructor(dto: TransactionDto) : this(
+        date = dto.date,
+        amount = BigDecimal.parseString(dto.amount),
+        description = dto.description,
+        fromAccounts = dto.fromAccounts,
+        toAccounts = dto.toAccounts
     )
 }

@@ -6,14 +6,15 @@ import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.Response
 import com.ramitsuri.expensereports.data.db.ReportDao
 import com.ramitsuri.expensereports.data.isStale
+import com.ramitsuri.expensereports.network.NetworkResponse
+import com.ramitsuri.expensereports.network.ReportApi
 import com.ramitsuri.expensereports.utils.LogHelper
-import com.ramitsuri.expensereports.utils.ReportsDownloader
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 
 class ReportsRepository(
-    private val downloader: ReportsDownloader,
+    private val api: ReportApi,
     private val dao: ReportDao,
     private val clock: Clock
 ) {
@@ -44,7 +45,7 @@ class ReportsRepository(
         }
     }
 
-     fun get(years: List<Int>, types: List<ReportType>): Flow<List<Report>> {
+    fun get(years: List<Int>, types: List<ReportType>): Flow<List<Report>> {
         return dao.get(years, types)
     }
 
@@ -52,7 +53,21 @@ class ReportsRepository(
         year: Int,
         type: ReportType
     ): Report? {
-        return downloader.downloadAndSave(year, type)
+        return when (val response = api.get(year, type)) {
+            is NetworkResponse.Failure -> {
+                LogHelper.e(
+                    TAG, "Error: $response.error, message: ${response.throwable?.message}"
+                )
+                null
+            }
+            is NetworkResponse.Success -> {
+                val report = Report(response.data, fetchedAt = clock.now(), type, year)
+                if (api.allowsCaching) {
+                    dao.insert(year, type, report)
+                }
+                report
+            }
+        }
     }
 
     companion object {

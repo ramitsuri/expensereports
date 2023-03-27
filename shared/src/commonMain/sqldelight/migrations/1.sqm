@@ -1,0 +1,14 @@
+import kotlinx.datetime.LocalDate;
+import kotlin.collections.List;
+import com.ionspin.kotlin.bignum.decimal.BigDecimal;
+
+CREATE TABLE IF NOT EXISTS TransactionEntity(
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    year INTEGER NOT NULL,
+    month INTEGER NOT NULL,
+    date TEXT AS LocalDate NOT NULL,
+    description TEXT NOT NULL,
+    amount TEXT AS BigDecimal NOT NULL,
+    fromAccounts TEXT AS List<String> NOT NULL,
+    toAccounts TEXT AS List<String> NOT NULL
+);

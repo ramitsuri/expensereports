@@ -65,6 +65,14 @@ class NetworkProvider(
         }
     }
 
+    fun transactionsApi(): TransactionsApi {
+        return if (prefManager.getServerUrl().isEmpty()) {
+            DummyTransactionsApiImpl(json)
+        } else {
+            TransactionsApiImpl(client, prefManager.getServerUrl(), dispatcherProvider)
+        }
+    }
+
     fun configApi(): ConfigApi {
         return if (prefManager.getServerUrl().isEmpty()) {
             DummyConfigApiImpl(json)
