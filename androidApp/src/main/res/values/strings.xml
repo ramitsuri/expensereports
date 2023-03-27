@@ -60,6 +60,10 @@
     <string name="settings_download_last_download_time_format">Last downloaded at: %1$s</string>
     <string name="settings_download_never_downloaded">Never downloaded</string>
 
+    <!-- Settings/Should Download Recent Data -->
+    <string name="settings__should_download_recent_title">Should download recent data</string>
+    <string name="settings_should_download_recent_subtitle">Download only current year reports, last 2 months\' transactions</string>
+
     <!-- Home -->
     <string name="home_net_worth">Net Worth</string>
     <string name="home_savings">Savings</string>

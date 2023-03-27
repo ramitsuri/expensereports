@@ -21,7 +21,8 @@ class SettingsViewModel(
     private val _state = MutableStateFlow(
         SettingsViewState(
             serverUrl = ServerUrl(getServerUrl()),
-            downloadViewState = DownloadViewState(lastDownloadTime = getDownloadTime())
+            downloadViewState = DownloadViewState(lastDownloadTime = getDownloadTime()),
+            shouldDownloadRecentData = shouldDownloadRecentData()
         )
     )
     val state: StateFlow<SettingsViewState> = _state
@@ -50,15 +51,28 @@ class SettingsViewModel(
         }
     }
 
+    fun setShouldDownloadRecentData() {
+        val currentValue = _state.value.shouldDownloadRecentData
+        val newValue = !currentValue
+        prefManager.setDownloadRecentData(newValue)
+        _state.update {
+            it.copy(shouldDownloadRecentData = newValue)
+        }
+    }
+
     private fun getDownloadTime(): LocalDateTime? {
         return prefManager.getLastDownloadTime()?.toLocalDateTime(timeZone)
     }
+
     private fun getServerUrl() = prefManager.getServerUrl()
+
+    private fun shouldDownloadRecentData() = prefManager.shouldDownloadRecentData()
 }
 
 data class SettingsViewState(
     val serverUrl: ServerUrl = ServerUrl(),
-    val downloadViewState: DownloadViewState
+    val downloadViewState: DownloadViewState,
+    val shouldDownloadRecentData: Boolean
 )
 
 data class ServerUrl(val url: String = "")

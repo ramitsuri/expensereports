@@ -12,13 +12,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -51,7 +58,9 @@ fun SettingsScreen(
         serverUrl = viewState.serverUrl.url,
         onUrlSet = viewModel::setServerUrl,
         downloadViewState = viewState.downloadViewState,
-        onDownloadClicked = viewModel::downloadReports
+        onDownloadClicked = viewModel::downloadReports,
+        shouldDownloadRecent = viewState.shouldDownloadRecentData,
+        onShouldDownloadRecentClicked = viewModel::setShouldDownloadRecentData
     )
 }
 
@@ -62,6 +71,8 @@ private fun SettingsContent(
     onUrlSet: (String) -> Unit,
     downloadViewState: DownloadViewState,
     onDownloadClicked: () -> Unit,
+    shouldDownloadRecent: Boolean,
+    onShouldDownloadRecentClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -84,6 +95,12 @@ private fun SettingsContent(
                 DownloadReportsItem(
                     downloadViewState = downloadViewState,
                     onClick = onDownloadClicked
+                )
+            }
+            item {
+                ShouldDownloadRecentItem(
+                    shouldDownloadRecent = shouldDownloadRecent,
+                    onClick = onShouldDownloadRecentClicked
                 )
             }
         }
@@ -153,6 +170,21 @@ fun DownloadReportsItem(
         },
         onClick = onClick,
         showProgress = downloadViewState.isLoading,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun ShouldDownloadRecentItem(
+    shouldDownloadRecent: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SettingsItemWithSwitch(
+        title = stringResource(id = R.string.settings__should_download_recent_title),
+        subtitle = stringResource(id = R.string.settings_should_download_recent_subtitle),
+        checked = shouldDownloadRecent,
+        onClick = onClick,
         modifier = modifier
     )
 }
@@ -236,5 +268,57 @@ private fun SettingsItem(
                     .basicMarquee()
             )
         }
+    }
+}
+
+@Composable
+private fun SettingsItemWithSwitch(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 64.dp)
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1F),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = modifier.padding(4.dp)
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = modifier.padding(horizontal = 4.dp)
+            )
+        }
+
+        val icon: (@Composable () -> Unit)? = if (checked) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
+                )
+            }
+        } else {
+            null
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = { onClick() },
+            thumbContent = icon
+        )
     }
 }
