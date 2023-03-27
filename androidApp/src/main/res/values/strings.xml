@@ -13,6 +13,7 @@
     <!-- Bottom nav -->
     <string name="bottom_nav_home">Home</string>
     <string name="bottom_nav_reports">Reports</string>
+    <string name="bottom_nav_transactions">Transactions</string>
     <string name="bottom_nav_misc">Misc</string>
 
     <!-- View Type -->

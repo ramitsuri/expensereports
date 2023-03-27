@@ -3,16 +3,10 @@ package com.ramitsuri.expensereports.android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.outlined.AccountBox
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -22,7 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -33,9 +27,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ramitsuri.expensereports.android.ui.AppTheme
-import com.ramitsuri.expensereports.android.ui.reports.ReportsScreen
 import com.ramitsuri.expensereports.android.ui.home.HomeScreen
+import com.ramitsuri.expensereports.android.ui.reports.ReportsScreen
 import com.ramitsuri.expensereports.android.ui.settings.SettingsScreen
+import com.ramitsuri.expensereports.android.ui.transactions.TransactionsScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -69,6 +64,7 @@ private fun BottomNavGraph(navController: NavHostController) {
         ) {
             composable(BottomNav.Home.route) { HomeScreen() }
             composable(BottomNav.Reports.route) { ReportsScreen() }
+            composable(BottomNav.Transactions.route) { TransactionsScreen() }
             composable(BottomNav.Misc.route) { SettingsScreen() }
         }
     }
@@ -85,11 +81,13 @@ private fun BottomNavBar(navController: NavHostController) {
             NavigationBarItem(
                 icon = {
                     Icon(
-                        if (isSelected) {
-                            item.selectedIcon
-                        } else {
-                            item.unselectedIcon
-                        },
+                        painterResource(
+                            id = if (isSelected) {
+                                item.selectedIcon
+                            } else {
+                                item.unselectedIcon
+                            }
+                        ),
                         contentDescription = stringResource(id = item.resourceId)
                     )
                 },
@@ -111,35 +109,46 @@ private fun BottomNavBar(navController: NavHostController) {
 
 sealed class BottomNav(
     val route: String,
-    @StringRes val resourceId: Int,
-    val unselectedIcon: ImageVector,
-    val selectedIcon: ImageVector
+    @StringRes
+    val resourceId: Int,
+    @DrawableRes
+    val unselectedIcon: Int,
+    @DrawableRes
+    val selectedIcon: Int
 ) {
     object Home :
         BottomNav(
             route = "home",
             resourceId = R.string.bottom_nav_home,
-            unselectedIcon = Icons.Outlined.Home,
-            selectedIcon = Icons.Filled.Home
+            unselectedIcon = R.drawable.home_outlined,
+            selectedIcon = R.drawable.home_filled
         )
 
     object Reports : BottomNav(
         route = "reports",
         resourceId = R.string.bottom_nav_reports,
-        unselectedIcon = Icons.Outlined.AccountBox,
-        selectedIcon = Icons.Filled.AccountBox
+        unselectedIcon = R.drawable.reports_outlined,
+        selectedIcon = R.drawable.reports_filled
+    )
+
+    object Transactions : BottomNav(
+        route = "transactions",
+        resourceId = R.string.bottom_nav_transactions,
+        unselectedIcon = R.drawable.transactions_outlined,
+        selectedIcon = R.drawable.transactions_filled
     )
 
     object Misc : BottomNav(
         route = "misc",
         resourceId = R.string.bottom_nav_misc,
-        unselectedIcon = Icons.Outlined.ShoppingCart,
-        selectedIcon = Icons.Filled.ShoppingCart
+        unselectedIcon = R.drawable.misc_outlined,
+        selectedIcon = R.drawable.misc_filled
     )
 }
 
 val bottomNavItems = listOf(
     BottomNav.Home,
     BottomNav.Reports,
+    BottomNav.Transactions,
     BottomNav.Misc
 )
