@@ -2,14 +2,10 @@ package com.ramitsuri.expensereports.android.ui.details
 
 import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,10 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -49,7 +42,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -57,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,6 +61,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
+import com.ramitsuri.expensereports.android.ui.views.Table
 import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.timeAndDay
 import com.ramitsuri.expensereports.data.Error
@@ -501,63 +493,6 @@ private fun TableView(
             })
     }
 }
-
-@Composable
-private fun Table(
-    modifier: Modifier = Modifier,
-    rowModifier: Modifier = Modifier,
-    verticalLazyListState: LazyListState = rememberLazyListState(),
-    horizontalScrollState: ScrollState = rememberScrollState(),
-    columnCount: Int,
-    rowCount: Int,
-    cellContent: @Composable (columnIndex: Int, rowIndex: Int) -> Unit
-) {
-    val columnWidths = remember { mutableStateMapOf<Int, Int>() }
-
-    Box(modifier = modifier.then(Modifier.horizontalScroll(horizontalScrollState))) {
-        LazyColumn(state = verticalLazyListState) {
-            items(rowCount) { rowIndex ->
-                Column {
-                    Row(
-                        modifier = if (rowIndex % 2 == 0) {
-                            rowModifier.then(Modifier.background(MaterialTheme.colorScheme.surfaceVariant))
-                        } else {
-                            rowModifier
-                        }
-                    ) {
-                        (0 until columnCount).forEach { columnIndex ->
-                            Box(
-                                modifier = Modifier
-                                    .border(
-                                        border = BorderStroke(
-                                            1.dp,
-                                            color = MaterialTheme.colorScheme.onBackground
-                                        )
-                                    )
-                                    .layout { measurable, constraints ->
-                                        val placeable = measurable.measure(constraints)
-
-                                        val existingWidth = columnWidths[columnIndex] ?: 0
-                                        val maxWidth = maxOf(existingWidth, placeable.width)
-
-                                        if (maxWidth > existingWidth) {
-                                            columnWidths[columnIndex] = maxWidth
-                                        }
-
-                                        layout(width = maxWidth, height = placeable.height) {
-                                            placeable.placeRelative(0, 0)
-                                        }
-                                    }) {
-                                cellContent(columnIndex, rowIndex)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 
 @Composable
 private fun TableCell(
