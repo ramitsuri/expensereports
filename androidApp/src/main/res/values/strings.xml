@@ -81,4 +81,11 @@
     <string name="reports_generated_at_today_format">Generated at %1$s today</string>
     <string name="reports_generated_at_date_format">Generated at %1$s</string>
 
+    <!-- Transactions -->
+    <string name="transactions_date_header">Date</string>
+    <string name="transactions_description_header">Description</string>
+    <string name="transactions_amount_header">Amount</string>
+    <string name="transactions_from_accounts_header">From</string>
+    <string name="transactions_to_accounts_header">To</string>
+
 </resources>

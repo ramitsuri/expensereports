@@ -41,6 +41,7 @@ turbine = "0.12.1"
 sqlDelight = "1.5.3"
 bignum = "0.3.7"
 work = "2.7.0"
+material-dialogs = "0.9.0"
 
 [libraries]
 android-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "android-desugaring" }
@@ -60,6 +61,7 @@ compose-foundation = { module = "androidx.compose.foundation:foundation", versio
 compose-material = { module = "androidx.compose.material3:material3", version.ref = "compose-m3" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
+material-dialogs = { module = "io.github.vanpra.compose-material-dialogs:datetime", version.ref = "material-dialogs" }
 
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
@@ -120,7 +122,8 @@ app-ui = [
     "compose-activity",
     "google-accompanist-swipeRefresh",
     "compose-navigation",
-    "icons"
+    "icons",
+    "material-dialogs"
 ]
 ktor-common = ["ktor-client-core", "ktor-client-logging", "ktor-client-serialization", "ktor-client-contentNegotiation"]
 shared-commonTest = [

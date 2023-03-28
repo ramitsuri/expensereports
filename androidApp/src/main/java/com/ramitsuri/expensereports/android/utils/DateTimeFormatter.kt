@@ -111,6 +111,26 @@ fun LocalDateTime.timeDateMonthYear(
     )
 }
 
+/**
+ * 08/10/2021
+ */
+fun LocalDate.monthDateYear(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    now: LocalDate = Clock.System.now().toLocalDateTime(timeZone).date
+): String {
+    val (formatSameYear, formatDifferentYear) = Pair("MM/dd", "MM/dd/uuuu")
+    val pattern = if (year == now.year) {
+        formatSameYear
+    } else {
+        formatDifferentYear
+    }
+    val jvmToFormat = toJavaLocalDate()
+    val formatter = DateTimeFormatter
+        .ofPattern(pattern)
+        .withLocale(Locale.getDefault())
+    return formatter.format(jvmToFormat)
+}
+
 private fun format(
     toFormat: LocalDateTime,
     now: LocalDateTime,

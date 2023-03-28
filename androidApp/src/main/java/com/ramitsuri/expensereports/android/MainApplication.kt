@@ -14,12 +14,15 @@ import com.ramitsuri.expensereports.di.AppInfo
 import com.ramitsuri.expensereports.di.initKoin
 import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
+import com.ramitsuri.expensereports.repository.TransactionsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.utils.DataDownloader
 import com.ramitsuri.expensereports.viewmodel.ReportsViewModel
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
+import com.ramitsuri.expensereports.viewmodel.TransactionsViewModel
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -83,6 +86,15 @@ class MainApplication : Application(), LifecycleEventObserver {
                     SettingsViewModel(
                         get<PrefManager>(),
                         get<DataDownloader>()
+                    )
+                }
+
+                viewModel {
+                    TransactionsViewModel(
+                        get<TransactionsRepository>(),
+                        get<DispatcherProvider>(),
+                        get<Clock>(),
+                        get<TimeZone>()
                     )
                 }
             }

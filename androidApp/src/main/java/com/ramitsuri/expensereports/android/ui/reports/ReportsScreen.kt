@@ -502,6 +502,7 @@ private fun TableCell(
     Text(
         text = text,
         fontWeight = if (isHeader) FontWeight.Bold else null,
+        style = if (isHeader) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
         modifier = Modifier
             .padding(8.dp)
     )
