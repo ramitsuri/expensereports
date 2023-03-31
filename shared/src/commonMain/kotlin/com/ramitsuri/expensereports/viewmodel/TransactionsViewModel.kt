@@ -22,39 +22,30 @@ class TransactionsViewModel(
     private val clock: Clock,
     private val timeZone: TimeZone
 ) : ViewModel() {
-    private val _state: MutableStateFlow<TransactionsViewState> = MutableStateFlow(
-        TransactionsViewState()
-    )
+
+    private val _state: MutableStateFlow<TransactionsViewState> =
+        MutableStateFlow(TransactionsViewState(filter = TransactionsFilter()))
     val state: StateFlow<TransactionsViewState> = _state
 
     init {
         filterUpdated()
     }
 
-    fun onStartDateSelected(date: LocalDate?) {
+    fun onFilterUpdated(
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        minAmount: BigDecimal?,
+        maxAmount: BigDecimal?
+    ) {
         _state.update {
-            it.copy(filter = it.filter.copy(startDate = date))
-        }
-        filterUpdated()
-    }
-
-    fun onEndDateSelected(date: LocalDate?) {
-        _state.update {
-            it.copy(filter = it.filter.copy(endDate = date))
-        }
-        filterUpdated()
-    }
-
-    fun onMinAmountUpdated(amount: BigDecimal?) {
-        _state.update {
-            it.copy(filter = it.filter.copy(minAmount = amount))
-        }
-        filterUpdated()
-    }
-
-    fun onMaxAmountUpdated(amount: BigDecimal?) {
-        _state.update {
-            it.copy(filter = it.filter.copy(maxAmount = amount))
+            it.copy(
+                filter = TransactionsFilter(
+                    startDate = startDate,
+                    endDate = endDate,
+                    minAmount = minAmount,
+                    maxAmount = maxAmount
+                )
+            )
         }
         filterUpdated()
     }
@@ -73,20 +64,6 @@ class TransactionsViewModel(
             repository.getTransactions(startDate, endDate).collect { transactions ->
                 val filteredTransactions = transactions
                     .asSequence()
-                    .filter { transaction ->
-                        if (filter.fromAccounts == null) {
-                            true
-                        } else {
-                            transaction.fromAccounts.any { filter.fromAccounts.contains(it) }
-                        }
-                    }
-                    .filter { transaction ->
-                        if (filter.toAccounts == null) {
-                            true
-                        } else {
-                            transaction.toAccounts.any { filter.toAccounts.contains(it) }
-                        }
-                    }
                     .filter { transaction ->
                         if (filter.minAmount == null) {
                             true
@@ -109,7 +86,8 @@ class TransactionsViewModel(
                 _state.update {
                     it.copy(
                         loading = false,
-                        transactions = filteredTransactions
+                        transactions = filteredTransactions,
+                        filter = filter.copy(startDate = startDate, endDate = endDate)
                     )
                 }
             }
@@ -120,14 +98,12 @@ class TransactionsViewModel(
 data class TransactionsViewState(
     val loading: Boolean = false,
     val transactions: List<Transaction> = listOf(),
-    val filter: TransactionsFilter = TransactionsFilter()
+    val filter: TransactionsFilter
 )
 
 data class TransactionsFilter(
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
-    val fromAccounts: List<String>? = null,
-    val toAccounts: List<String>? = null,
     val minAmount: BigDecimal? = null,
     val maxAmount: BigDecimal? = null
 )

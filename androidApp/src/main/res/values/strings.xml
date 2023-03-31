@@ -87,5 +87,13 @@
     <string name="transactions_amount_header">Amount</string>
     <string name="transactions_from_accounts_header">From</string>
     <string name="transactions_to_accounts_header">To</string>
+    <string name="transactions_filter_date_range">Date range</string>
+    <string name="transactions_filter_start_date_label">Start Date</string>
+    <string name="transactions_filter_end_date_label">End Date</string>
+    <string name="transactions_filter_date_format_hint">MM-DD-YYYY</string>
+    <string name="transactions_filter_amount_range">Amount range</string>
+    <string name="transactions_filter_min_amount_label">Min Amount</string>
+    <string name="transactions_filter_max_amount_label">Max Amount</string>
+    <string name="transactions_filter_amount_format_hint">00.00</string>
 
 </resources>

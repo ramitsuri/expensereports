@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -70,6 +72,7 @@ private fun BottomNavGraph(navController: NavHostController) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BottomNavBar(navController: NavHostController) {
     NavigationBar {
@@ -91,7 +94,13 @@ private fun BottomNavBar(navController: NavHostController) {
                         contentDescription = stringResource(id = item.resourceId)
                     )
                 },
-                label = { Text(stringResource(item.resourceId)) },
+                label = {
+                    Text(
+                        stringResource(item.resourceId),
+                        maxLines = 1,
+                        modifier = Modifier.basicMarquee()
+                    )
+                },
                 selected = isSelected,
                 onClick = {
                     navController.navigate(item.route) {
