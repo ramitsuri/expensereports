@@ -2,7 +2,7 @@
 kotlin = "1.7.20"
 
 ## SDK Versions
-minSdk = "21"
+minSdk = "26"
 targetSdk = "33"
 compileSdk = "33"
 

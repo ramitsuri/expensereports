@@ -91,14 +91,15 @@ kotlin {
             languageSettings.optIn("kotlin.time.ExperimentalTime")
         }
 
-    /*cocoapods {
+    cocoapods {
         summary = "Common library"
+        homepage = "https://github.com/ramitsuri/expensereports"
         framework {
             isStatic = false // SwiftUI preview requires dynamic framework
         }
         ios.deploymentTarget = "12.4"
-        podfile = project.file("../ios/Podfile")
-    }*/
+        podfile = project.file("../iosApp/Podfile")
+    }
 }
 
 sqldelight {

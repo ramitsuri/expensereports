@@ -43,7 +43,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.extensions.shutdown
-import com.ramitsuri.expensereports.android.utils.timeDateMonthYear
+import com.ramitsuri.expensereports.utils.timeDateMonthYear
 import com.ramitsuri.expensereports.viewmodel.DownloadViewState
 import com.ramitsuri.expensereports.viewmodel.SettingsViewModel
 import org.koin.androidx.compose.getViewModel
@@ -181,7 +181,7 @@ fun ShouldDownloadRecentItem(
     modifier: Modifier = Modifier
 ) {
     SettingsItemWithSwitch(
-        title = stringResource(id = R.string.settings__should_download_recent_title),
+        title = stringResource(id = R.string.settings_should_download_recent_title),
         subtitle = stringResource(id = R.string.settings_should_download_recent_subtitle),
         checked = shouldDownloadRecent,
         onClick = onClick,

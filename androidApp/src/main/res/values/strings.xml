@@ -9,6 +9,8 @@
     <string name="total_format">Total: %1$s</string>
     <string name="accounts">Accounts</string>
     <string name="apply">Apply</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
 
     <!-- Bottom nav -->
     <string name="bottom_nav_home">Home</string>
@@ -62,7 +64,7 @@
     <string name="settings_download_never_downloaded">Never downloaded</string>
 
     <!-- Settings/Should Download Recent Data -->
-    <string name="settings__should_download_recent_title">Should download recent data</string>
+    <string name="settings_should_download_recent_title">Should download recent data</string>
     <string name="settings_should_download_recent_subtitle">Download only current year reports, last 2 months\' transactions</string>
 
     <!-- Home -->
