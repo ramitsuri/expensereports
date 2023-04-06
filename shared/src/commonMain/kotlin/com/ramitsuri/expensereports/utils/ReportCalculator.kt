@@ -29,9 +29,11 @@ class ReportCalculator(
                 generatedAt = initialReport.generatedAt
             )
         } else {
+            val withFirstLevelAccountsSorted =
+                afterFilter.copy(children = afterFilter.children.sortedBy { it.fullName })
             ReportView.Full(
-                accountTotals = afterFilter.flatten().sortedBy { it.fullName },
-                total = SimpleAccountTotal(afterFilter, level = 0),
+                accountTotals = withFirstLevelAccountsSorted.flatten(),
+                total = SimpleAccountTotal(withFirstLevelAccountsSorted, level = 0),
                 generatedAt = initialReport.generatedAt
             )
         }
@@ -74,7 +76,9 @@ class ReportCalculator(
     }
 
     fun getAccounts(): List<Account> {
-        return getAccounts(initialReport.accountTotal, level = 0).sortedBy { it.fullName }
+        val withFirstLevelAccountsSorted = initialReport.accountTotal
+            .copy(children = initialReport.accountTotal.children.sortedBy { it.fullName })
+        return getAccounts(withFirstLevelAccountsSorted, level = 0)
     }
 
     fun getMonths(): List<Int> {
