@@ -23,6 +23,7 @@ android {
         warningsAsErrors = true
         abortOnError = true
     }
+    namespace = "com.ramitsuri.expensereports"
 }
 
 version = "1.0"
@@ -66,7 +67,7 @@ kotlin {
                 implementation(libs.ktor.client.okHttp)
             }
         }
-        val androidTest by getting {
+        val androidUnitTest by getting {
             dependencies {
                 implementation(libs.bundles.shared.androidTest)
             }
@@ -86,7 +87,7 @@ kotlin {
         }
     }
 
-    sourceSets.matching { it.name.endsWith("Test") }
+    sourceSets.matching { it.name.endsWith("Test") || it.name.endsWith("Debug") || it.name.endsWith("TestRelease") }
         .configureEach {
             languageSettings.optIn("kotlin.time.ExperimentalTime")
         }

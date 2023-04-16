@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.gradleVersions)
     alias(libs.plugins.ktlint) apply false
 
+    id("com.android.application") version libs.versions.android.gradle.plugin.get() apply false
     kotlin("multiplatform") version libs.versions.kotlin.get() apply false
     kotlin("plugin.serialization") version libs.versions.kotlin.get() apply false
     id("com.squareup.sqldelight") version libs.versions.sqlDelight.get() apply false
