@@ -6,9 +6,13 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,8 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -219,6 +221,7 @@ private fun MainAccountContent(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AccountBalancesContent(
     salary: BigDecimal,
@@ -226,38 +229,32 @@ private fun AccountBalancesContent(
     liabilityAccountBalances: List<AccountBalance>,
     modifier: Modifier = Modifier
 ) {
-    LazyHorizontalGrid(
-        rows = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-        item {
-            AccountItem(
+    FlowRow(horizontalArrangement = Arrangement.SpaceBetween) {
+        listOf(
+            AccountBalance(
                 name = stringResource(id = R.string.home_account_salary_name),
                 balance = salary
             )
-        }
-        assetAccountBalances.forEach { account ->
-            item {
+        )
+            .plus(assetAccountBalances)
+            .plus(liabilityAccountBalances).forEachIndexed { index, account ->
                 AccountItem(
                     name = account.name,
-                    balance = account.balance
+                    balance = account.balance,
+                    modifier = Modifier.fillMaxWidth(0.3f)
                 )
+                if (index % 3 == 2) {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                    )
+                }
             }
-        }
-        liabilityAccountBalances.forEach { account ->
-            item {
-                AccountItem(
-                    name = account.name,
-                    balance = account.balance
-                )
-            }
-        }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AccountItem(
     name: String,
@@ -271,7 +268,7 @@ private fun AccountItem(
             shape = RoundedCornerShape(16.dp)
         ) {
             Column(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -280,13 +277,17 @@ private fun AccountItem(
                     text = name,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    maxLines = 1,
+                    modifier = Modifier
+                        .basicMarquee(iterations = 10)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = balance.format(),
                     style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    maxLines = 1,
+                    modifier = Modifier
+                        .basicMarquee(iterations = 10)
                 )
             }
         }
