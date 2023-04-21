@@ -6,6 +6,7 @@ import com.ramitsuri.expensereports.network.BigDecimalSerializer
 import com.ramitsuri.expensereports.network.ConfigDto
 import com.ramitsuri.expensereports.network.IntBigDecimalMapSerializer
 import com.ramitsuri.expensereports.network.ReportDto
+import com.ramitsuri.expensereports.network.SplitDto
 import com.ramitsuri.expensereports.network.TransactionDto
 import com.ramitsuri.expensereports.utils.Constants
 import kotlinx.datetime.Instant
@@ -137,16 +138,29 @@ data class Config(
 
 data class Transaction(
     val date: LocalDate,
-    val amount: BigDecimal,
+    val total: BigDecimal,
     val description: String,
-    val fromAccounts: List<String>,
-    val toAccounts: List<String>
+    val splits: List<Split>
 ) {
     constructor(dto: TransactionDto) : this(
         date = dto.date,
-        amount = BigDecimal.parseString(dto.amount),
+        total = BigDecimal.parseString(dto.total),
         description = dto.description,
-        fromAccounts = dto.fromAccounts,
-        toAccounts = dto.toAccounts
+        splits = dto.splits.map { Split(it) },
+    )
+}
+
+@Serializable
+data class Split(
+    @SerialName("account")
+    val account: String,
+
+    @Serializable(with = BigDecimalSerializer::class)
+    @SerialName("amount")
+    val amount: BigDecimal
+) {
+    constructor(dto: SplitDto) : this(
+        account = dto.account,
+        amount = BigDecimal.parseString(dto.amount)
     )
 }

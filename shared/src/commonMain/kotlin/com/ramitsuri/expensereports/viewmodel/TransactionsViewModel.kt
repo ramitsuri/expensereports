@@ -68,14 +68,14 @@ class TransactionsViewModel(
                         if (filter.minAmount == null) {
                             true
                         } else {
-                            transaction.amount >= filter.minAmount
+                            transaction.total >= filter.minAmount
                         }
                     }
                     .filter { transaction ->
                         if (filter.maxAmount == null) {
                             true
                         } else {
-                            transaction.amount <= filter.maxAmount
+                            transaction.total <= filter.maxAmount
                         }
                     }
                     .sortedByDescending { transaction ->

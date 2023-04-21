@@ -44,9 +44,8 @@ class TransactionsDaoImpl(
                     month = month.toLong(),
                     date = transaction.date,
                     description = transaction.description,
-                    amount = transaction.amount,
-                    fromAccounts = transaction.fromAccounts,
-                    toAccounts = transaction.toAccounts,
+                    total = transaction.total,
+                    splits = transaction.splits
                 )
             }
         }
@@ -56,10 +55,9 @@ class TransactionsDaoImpl(
         return if (transactionEntity != null) {
             Transaction(
                 date = transactionEntity.date,
-                amount = transactionEntity.amount,
+                total = transactionEntity.total,
                 description = transactionEntity.description,
-                fromAccounts = transactionEntity.fromAccounts,
-                toAccounts = transactionEntity.toAccounts
+                splits = transactionEntity.splits
             )
         } else {
             null

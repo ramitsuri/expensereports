@@ -82,11 +82,6 @@
 "reports_generated_at_date_format" = "Generated at %@";
 
 /* Transactions */
-"transactions_date_header" = "Date";
-"transactions_description_header" = "Description";
-"transactions_amount_header" = "Amount";
-"transactions_from_accounts_header" = "From";
-"transactions_to_accounts_header" = "To";
 "transactions_filter_date_range" = "Date range";
 "transactions_filter_start_date_label" = "Start Date";
 "transactions_filter_end_date_label" = "End Date";

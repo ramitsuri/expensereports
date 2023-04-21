@@ -1,0 +1,16 @@
+import com.ionspin.kotlin.bignum.decimal.BigDecimal;
+import com.ramitsuri.expensereports.data.Split;
+import kotlin.collections.List;
+import kotlinx.datetime.LocalDate;
+
+DROP TABLE TransactionEntity;
+
+CREATE TABLE IF NOT EXISTS TransactionEntity(
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    year INTEGER NOT NULL,
+    month INTEGER NOT NULL,
+    date TEXT AS LocalDate NOT NULL,
+    description TEXT NOT NULL,
+    total TEXT AS BigDecimal NOT NULL,
+    splits TEXT AS List<Split> NOT NULL
+);

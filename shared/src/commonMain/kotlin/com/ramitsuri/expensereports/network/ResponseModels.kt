@@ -2,6 +2,7 @@ package com.ramitsuri.expensereports.network
 
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -84,18 +85,23 @@ data class TransactionDto(
     val date: LocalDate,
 
 
-    @SerialName("amount")
-    val amount: String,
+    @SerialName("total")
+    val total: String,
 
 
     @SerialName("description")
     val description: String,
 
 
-    @SerialName("from_accounts")
-    val fromAccounts: List<String>,
+    @SerialName("splits")
+    val splits: List<@Contextual SplitDto>
+)
 
+@Serializable
+data class SplitDto(
+    @SerialName("amount")
+    val amount: String,
 
-    @SerialName("to_accounts")
-    val toAccounts: List<String>
+    @SerialName("account")
+    val account: String,
 )

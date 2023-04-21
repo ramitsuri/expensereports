@@ -2,6 +2,7 @@ package com.ramitsuri.expensereports.data.db
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.data.ReportType
+import com.ramitsuri.expensereports.data.Split
 import com.ramitsuri.expensereports.db.ReportEntity
 import com.ramitsuri.expensereports.db.ReportsDb
 import com.ramitsuri.expensereports.db.TransactionEntity
@@ -10,6 +11,8 @@ import com.squareup.sqldelight.ColumnAdapter
 import com.squareup.sqldelight.db.SqlDriver
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 class Database(
@@ -26,9 +29,8 @@ class Database(
         ),
         TransactionEntity.Adapter(
             dateAdapter = localDateConverter,
-            amountAdapter = bigDecimalConverter,
-            fromAccountsAdapter = stringListConverter,
-            toAccountsAdapter = stringListConverter
+            totalAdapter = bigDecimalConverter,
+            splitsAdapter = splitsAdapter(json)
         )
     )
     private val dbQueries = database.reportsQueries
@@ -89,5 +91,17 @@ private val reportTypeConverter = object : ColumnAdapter<ReportType, Long> {
 
     override fun encode(value: ReportType): Long {
         return value.key
+    }
+}
+
+private fun splitsAdapter(json: Json): ColumnAdapter<List<Split>, String> {
+    return object : ColumnAdapter<List<Split>, String> {
+        override fun decode(databaseValue: String): List<Split> {
+            return json.decodeFromString(databaseValue)
+        }
+
+        override fun encode(value: List<Split>): String {
+            return json.encodeToString(ListSerializer(Split.serializer()), value)
+        }
     }
 }

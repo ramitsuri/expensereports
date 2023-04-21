@@ -11,8 +11,6 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -221,7 +220,6 @@ private fun MainAccountContent(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AccountBalancesContent(
     salary: BigDecimal,
@@ -229,28 +227,45 @@ private fun AccountBalancesContent(
     liabilityAccountBalances: List<AccountBalance>,
     modifier: Modifier = Modifier
 ) {
-    FlowRow(horizontalArrangement = Arrangement.SpaceBetween) {
-        listOf(
-            AccountBalance(
-                name = stringResource(id = R.string.home_account_salary_name),
-                balance = salary
-            )
+    val itemsInRow = 4
+    val accounts = listOf(
+        AccountBalance(
+            name = stringResource(id = R.string.home_account_salary_name),
+            balance = salary
         )
-            .plus(assetAccountBalances)
-            .plus(liabilityAccountBalances).forEachIndexed { index, account ->
+    )
+        .plus(assetAccountBalances)
+        .plus(liabilityAccountBalances)
+    val accountChunks = accounts.chunked(itemsInRow)
+    accountChunks.forEachIndexed { index, chunk ->
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            chunk.forEach { account ->
                 AccountItem(
                     name = account.name,
                     balance = account.balance,
-                    modifier = Modifier.fillMaxWidth(0.3f)
+                    modifier = Modifier
+                        .width(0.dp)
+                        .weight(1 / itemsInRow.toFloat())
                 )
-                if (index % 3 == 2) {
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                    )
-                }
             }
+            repeat(itemsInRow - chunk.size) {
+                Spacer(
+                    modifier = Modifier
+                        .width(0.dp)
+                        .weight(1 / itemsInRow.toFloat())
+                )
+            }
+        }
+        if (index != accountChunks.lastIndex) {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+            )
+        }
     }
 }
 

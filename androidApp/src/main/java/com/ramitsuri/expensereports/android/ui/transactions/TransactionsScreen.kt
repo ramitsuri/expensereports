@@ -1,6 +1,13 @@
 package com.ramitsuri.expensereports.android.ui.transactions
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,39 +19,52 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.android.R
-import com.ramitsuri.expensereports.android.ui.views.Table
-import com.ramitsuri.expensereports.android.ui.views.TableCell
 import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.monthDateYear
+import com.ramitsuri.expensereports.data.Split
 import com.ramitsuri.expensereports.data.Transaction
 import com.ramitsuri.expensereports.viewmodel.TransactionsFilter
 import com.ramitsuri.expensereports.viewmodel.TransactionsViewModel
@@ -94,99 +114,31 @@ fun TransactionsContent(
                 filter = filter,
                 onFilterUpdated = onFilterUpdated
             )
-            TableView(transactions = transactions)
+            Transactions(transactions = transactions)
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TableView(
-    transactions: List<Transaction>
-) {
-    val rows = transactions.size + 1
-    val columns = 5
-    Column(
+private fun Transactions(transactions: List<Transaction>) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Table(
-            modifier = Modifier.fillMaxSize(),
-            columnCount = columns,
-            rowCount = rows,
-            cellContent = { columnIndex, rowIndex ->
-                when (rowIndex) {
-                    0 -> { // Header row
-                        when (columnIndex) {
-                            0 -> {
-                                TableCell(
-                                    text = stringResource(id = R.string.transactions_date_header),
-                                    isHeader = true
-                                )
-                            }
-                            1 -> {
-                                TableCell(
-                                    text = stringResource(id = R.string.transactions_description_header),
-                                    isHeader = true
-                                )
-                            }
-                            2 -> {
-                                TableCell(
-                                    text = stringResource(id = R.string.transactions_amount_header),
-                                    isHeader = true
-                                )
-                            }
-                            3 -> {
-                                TableCell(
-                                    text = stringResource(id = R.string.transactions_from_accounts_header),
-                                    isHeader = true
-                                )
-                            }
-                            4 -> {
-                                TableCell(
-                                    text = stringResource(id = R.string.transactions_to_accounts_header),
-                                    isHeader = true
-                                )
-                            }
-                        }
-                    }
-                    else -> { // Transactions
-                        val transaction = transactions[rowIndex - 1]
-                        when (columnIndex) {
-                            0 -> {
-                                TableCell(
-                                    text = transaction.date.monthDateYear()
-                                )
-                            }
-                            1 -> {
-                                TableCell(
-                                    text = transaction.description
-                                )
-                            }
-                            2 -> {
-                                TableCell(
-                                    text = transaction.amount.format()
-                                )
-                            }
-                            3 -> {
-                                TableCell(
-                                    text = transaction.fromAccounts
-                                        .joinToString {
-                                            it.split(":").last()
-                                        }
-                                )
-                            }
-                            4 -> {
-                                TableCell(
-                                    text = transaction.toAccounts
-                                        .joinToString {
-                                            it.split(":").last()
-                                        }
-                                )
-                            }
-                        }
-                    }
-                }
-            })
+        val transactionsGrouped = transactions.groupBy { it.date }
+        transactionsGrouped.forEach { (date, transactions) ->
+            stickyHeader {
+                TransactionItemHeader(date = date)
+            }
+            items(transactions) { item ->
+                TransactionItem(item)
+            }
+        }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 
@@ -407,6 +359,193 @@ private fun FilterField(
         ),
         modifier = modifier.fillMaxWidth()
     )
+}
+
+@Composable
+fun TransactionItemHeader(date: LocalDate, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.background)
+    ) {
+        Text(
+            text = date.monthDateYear(),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = modifier
+                .background(
+                    MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(
+                        topEnd = 24.dp,
+                        bottomEnd = 24.dp
+                    )
+                )
+                .padding(8.dp)
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TransactionItem(
+    transaction: Transaction
+) {
+    var showDetails by rememberSaveable { mutableStateOf(false) }
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = transaction.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .width(0.dp)
+                        .weight(1f)
+                        .padding(top = 4.dp)
+                        .basicMarquee()
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = transaction.total.format(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                )
+            }
+            IconButton(
+                onClick = { showDetails = !showDetails },
+                modifier = Modifier
+                    .height(24.dp)
+                    .fillMaxWidth()
+            ) {
+                val rotationAngle by animateFloatAsState(
+                    targetValue = if (showDetails) 180F else 0F,
+                    animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+
+                )
+                Icon(
+                    imageVector =
+                    Icons.Default.ExpandMore,
+                    modifier = Modifier.rotate(rotationAngle),
+                    contentDescription = null
+                )
+            }
+            AnimatedVisibility(visible = showDetails) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val debitSplits = transaction.splits.filter { it.amount < BigDecimal.ZERO }
+                    val creditSplits = transaction.splits.filter { it.amount >= BigDecimal.ZERO }
+                    Column(
+                        modifier = Modifier
+                            .width(0.dp)
+                            .weight(0.4f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        debitSplits.forEachIndexed { index, split ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = split.account.split(":").last(),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    text = split.amount.abs().format(),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            if (index != debitSplits.lastIndex) {
+                                Divider(
+                                    modifier = Modifier
+                                        .height(0.5.dp)
+                                        .fillMaxWidth(0.5f),
+                                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2F)
+                                )
+                            }
+                        }
+                    }
+                    Icon(
+                        painterResource(
+                            id = R.drawable.ic_transfer
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .width(0.dp)
+                            .weight(0.2f)
+                    )
+                    Column(
+                        modifier = Modifier
+                            .width(0.dp)
+                            .weight(0.4f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        creditSplits.forEachIndexed { index, split ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = split.account.split(":").last(),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    text = split.amount.format(),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            if (index != creditSplits.lastIndex) {
+                                Divider(
+                                    modifier = Modifier
+                                        .height(0.5.dp)
+                                        .fillMaxWidth(0.4f),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+@Preview
+@Composable
+fun TransactionItemPreview() {
+    Surface {
+        TransactionItem(
+            Transaction(
+                date = LocalDate.parse("2023-01-12"),
+                description = "Google Cloud - Chores",
+                total = BigDecimal.parseString("5"),
+                splits = listOf(
+                    Split(account = "Fidelity", amount = BigDecimal.parseString("-5")),
+                    Split(account = "Groceries", amount = BigDecimal.parseString("2")),
+                    Split(account = "Food", amount = BigDecimal.parseString("3")),
+                )
+            )
+        )
+    }
 }
 
 private fun String.toLocalDate(): LocalDate? {
