@@ -62,10 +62,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.android.R
-import com.ramitsuri.expensereports.android.utils.format
-import com.ramitsuri.expensereports.android.utils.monthDateYear
 import com.ramitsuri.expensereports.data.Split
 import com.ramitsuri.expensereports.data.Transaction
+import com.ramitsuri.expensereports.utils.format
+import com.ramitsuri.expensereports.utils.monthDateYear
 import com.ramitsuri.expensereports.viewmodel.TransactionsFilter
 import com.ramitsuri.expensereports.viewmodel.TransactionsViewModel
 import kotlinx.datetime.LocalDate
@@ -92,7 +92,7 @@ fun TransactionsScreen(
 @Composable
 fun TransactionsContent(
     isLoading: Boolean,
-    transactions: List<Transaction>,
+    transactions: Map<String, List<Transaction>>,
     filter: TransactionsFilter,
     onFilterUpdated: (startDate: LocalDate?, endDate: LocalDate?, minAmount: BigDecimal?, maxAmount: BigDecimal?) -> Unit,
     modifier: Modifier = Modifier
@@ -114,21 +114,20 @@ fun TransactionsContent(
                 filter = filter,
                 onFilterUpdated = onFilterUpdated
             )
-            Transactions(transactions = transactions)
+            Transactions(transactionGroups = transactions)
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Transactions(transactions: List<Transaction>) {
+private fun Transactions(transactionGroups: Map<String, List<Transaction>>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxSize()
     ) {
-        val transactionsGrouped = transactions.groupBy { it.date }
-        transactionsGrouped.forEach { (date, transactions) ->
+        transactionGroups.forEach { (date, transactions) ->
             stickyHeader {
                 TransactionItemHeader(date = date)
             }
@@ -362,14 +361,14 @@ private fun FilterField(
 }
 
 @Composable
-fun TransactionItemHeader(date: LocalDate, modifier: Modifier = Modifier) {
+fun TransactionItemHeader(date: String, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.background)
     ) {
         Text(
-            text = date.monthDateYear(),
+            text = date,
             style = MaterialTheme.typography.titleMedium,
             modifier = modifier
                 .background(
@@ -447,8 +446,8 @@ fun TransactionItem(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val debitSplits = transaction.splits.filter { it.amount < BigDecimal.ZERO }
-                    val creditSplits = transaction.splits.filter { it.amount >= BigDecimal.ZERO }
+                    val debitSplits = transaction.debitSplits
+                    val creditSplits = transaction.creditSplits
                     Column(
                         modifier = Modifier
                             .width(0.dp)

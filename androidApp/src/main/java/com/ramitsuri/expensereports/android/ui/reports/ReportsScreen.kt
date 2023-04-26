@@ -63,7 +63,6 @@ import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
 import com.ramitsuri.expensereports.android.ui.views.Table
 import com.ramitsuri.expensereports.android.ui.views.TableCell
-import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.timeAndDay
 import com.ramitsuri.expensereports.data.Error
 import com.ramitsuri.expensereports.data.ReportType
@@ -71,6 +70,7 @@ import com.ramitsuri.expensereports.ui.Account
 import com.ramitsuri.expensereports.ui.FilterItem
 import com.ramitsuri.expensereports.utils.ReportView
 import com.ramitsuri.expensereports.utils.SimpleAccountTotal
+import com.ramitsuri.expensereports.utils.format
 import com.ramitsuri.expensereports.viewmodel.ReportSelection
 import com.ramitsuri.expensereports.viewmodel.ReportsViewModel
 import com.ramitsuri.expensereports.viewmodel.Selector

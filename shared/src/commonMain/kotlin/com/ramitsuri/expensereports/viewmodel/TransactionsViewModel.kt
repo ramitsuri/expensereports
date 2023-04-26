@@ -6,6 +6,7 @@ import com.ramitsuri.expensereports.utils.startOfMonth
 import com.ramitsuri.expensereports.data.Transaction
 import com.ramitsuri.expensereports.repository.TransactionsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
+import com.ramitsuri.expensereports.utils.monthDateYear
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -81,7 +82,10 @@ class TransactionsViewModel(
                     .sortedByDescending { transaction ->
                         transaction.date
                     }
-                    .toList()
+                    .groupBy { it.date }
+                    .mapKeys { (date, _) ->
+                        date.monthDateYear()
+                    }
 
                 _state.update {
                     it.copy(
@@ -97,7 +101,7 @@ class TransactionsViewModel(
 
 data class TransactionsViewState(
     val loading: Boolean = false,
-    val transactions: List<Transaction> = listOf(),
+    val transactions: Map<String, List<Transaction>> = mapOf(),
     val filter: TransactionsFilter
 )
 

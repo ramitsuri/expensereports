@@ -1,9 +1,13 @@
 package com.ramitsuri.expensereports.utils
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toJavaZoneId
+import kotlinx.datetime.toLocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -23,6 +27,20 @@ actual fun LocalDateTime.timeDateMonthYear(
         formatSameYear,
         formatDifferentYear
     )
+}
+
+actual fun LocalDate.monthDateYear(timeZone: TimeZone, now: LocalDate): String {
+    val (formatSameYear, formatDifferentYear) = Pair("MM/dd", "MM/dd/uuuu")
+    val pattern = if (year == now.year) {
+        formatSameYear
+    } else {
+        formatDifferentYear
+    }
+    val jvmToFormat = toJavaLocalDate()
+    val formatter = DateTimeFormatter
+        .ofPattern(pattern)
+        .withLocale(Locale.getDefault())
+    return formatter.format(jvmToFormat)
 }
 
 fun format(

@@ -1,13 +1,12 @@
-package com.ramitsuri.expensereports.android.utils
+package com.ramitsuri.expensereports.utils
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import org.junit.Assert.assertEquals
-import org.junit.Test
-import java.util.Locale
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class CurrencyFormatterKtTest {
 
-    private val locale = Locale.US
+    private val locale = "en-US"
 
     @Test
     fun testFormat() {

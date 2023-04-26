@@ -61,9 +61,9 @@ import androidx.compose.ui.unit.dp
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
-import com.ramitsuri.expensereports.android.utils.format
-import com.ramitsuri.expensereports.android.utils.formatRounded
 import com.ramitsuri.expensereports.android.utils.monthYear
+import com.ramitsuri.expensereports.utils.format
+import com.ramitsuri.expensereports.utils.formatRounded
 import com.ramitsuri.expensereports.viewmodel.AccountBalance
 import com.ramitsuri.expensereports.viewmodel.Balance
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel

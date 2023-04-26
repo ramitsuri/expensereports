@@ -3,7 +3,7 @@ import class shared.DownloadViewState
 
 struct SettingsScreen: View {
     @StateObject
-    var model = ObservableSettingsModel()
+    private var model = ObservableSettingsModel()
 
     var body: some View {
         Form {

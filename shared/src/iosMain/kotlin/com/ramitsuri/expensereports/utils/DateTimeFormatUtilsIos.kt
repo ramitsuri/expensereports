@@ -1,5 +1,6 @@
 package com.ramitsuri.expensereports.utils
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toNSDateComponents
@@ -23,6 +24,20 @@ actual fun LocalDateTime.timeDateMonthYear(
         formatSameYear,
         formatDifferentYear
     )
+}
+
+actual fun LocalDate.monthDateYear(timeZone: TimeZone, now: LocalDate): String {
+    val (formatSameYear, formatDifferentYear) = Pair("MM/dd", "MM/dd/uuuu")
+    val pattern = if (year == now.year) {
+        formatSameYear
+    } else {
+        formatDifferentYear
+    }
+    val dateFormatter = NSDateFormatter()
+    dateFormatter.dateFormat = pattern
+    dateFormatter.timeZone = timeZone.toNSTimeZone()
+    val date = NSCalendar.currentCalendar.dateFromComponents(toNSDateComponents()) ?: return ""
+    return dateFormatter.stringFromDate(date)
 }
 
 fun format(

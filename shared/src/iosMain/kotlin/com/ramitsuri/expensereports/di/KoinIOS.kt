@@ -4,18 +4,18 @@ import com.ramitsuri.expensereports.data.db.Database
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.data.prefs.SettingsKeyValueStore
 import com.ramitsuri.expensereports.db.ReportsDb
-import com.ramitsuri.expensereports.repository.ConfigRepository
-import com.ramitsuri.expensereports.repository.ReportsRepository
+import com.ramitsuri.expensereports.repository.TransactionsRepository
 import com.ramitsuri.expensereports.utils.DataDownloader
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.utils.Logger
-import com.ramitsuri.expensereports.viewmodel.HomeCallbackViewModel
 import com.ramitsuri.expensereports.viewmodel.SettingsCallbackViewModel
+import com.ramitsuri.expensereports.viewmodel.TransactionsCallbackViewModel
 import com.russhwolf.settings.NSUserDefaultsSettings
 import com.squareup.sqldelight.drivers.native.NativeSqliteDriver
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
 import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
@@ -59,12 +59,12 @@ fun initKoinIos(
             appInfo
         }
 
-        single<HomeCallbackViewModel> {
-            HomeCallbackViewModel(
-                get<ReportsRepository>(),
-                get<ConfigRepository>(),
+        single<TransactionsCallbackViewModel> {
+            TransactionsCallbackViewModel(
+                get<TransactionsRepository>(),
+                get<DispatcherProvider>(),
                 get<Clock>(),
-                get<DispatcherProvider>()
+                get<TimeZone>(),
             )
         }
 
@@ -79,7 +79,7 @@ fun initKoinIos(
 
 // To be called from Swift code
 object Dependencies : KoinComponent {
-    fun getHomeViewModel() = getKoin().get<HomeCallbackViewModel>()
+    fun getTransactionsViewModel() = getKoin().get<TransactionsCallbackViewModel>()
 
     fun getSettingsViewModel() = getKoin().get<SettingsCallbackViewModel>()
 

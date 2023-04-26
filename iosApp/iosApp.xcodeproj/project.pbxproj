@@ -13,6 +13,7 @@
 		657EF1589503285F7B300347 /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95368F5A164BFEBFAF77DBCF /* Pods_iosApp.framework */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 		B513225329D84BB400BD7C04 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B513225529D84BB400BD7C04 /* Localizable.strings */; };
+		B52D905D29DED5E900188A7C /* ObservableTransactionsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52D905C29DED5E900188A7C /* ObservableTransactionsModel.swift */; };
 		B58676FB29D766F6007994B9 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58676FA29D766F6007994B9 /* HomeScreen.swift */; };
 		B586770129D768F2007994B9 /* ReportsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B586770029D768F2007994B9 /* ReportsScreen.swift */; };
 		B586770329D768F9007994B9 /* TransactionsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B586770229D768F9007994B9 /* TransactionsScreen.swift */; };
@@ -46,6 +47,7 @@
 		95368F5A164BFEBFAF77DBCF /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9754164BA8DBC5F9C821E8E3 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
 		B513225429D84BB400BD7C04 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B52D905C29DED5E900188A7C /* ObservableTransactionsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableTransactionsModel.swift; sourceTree = "<group>"; };
 		B58676FA29D766F6007994B9 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		B586770029D768F2007994B9 /* ReportsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsScreen.swift; sourceTree = "<group>"; };
 		B586770229D768F9007994B9 /* TransactionsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsScreen.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 			isa = PBXGroup;
 			children = (
 				B5C70CD129DAEF4500FBA3A9 /* ObservableSettingsModel.swift */,
+				B52D905C29DED5E900188A7C /* ObservableTransactionsModel.swift */,
 			);
 			path = model;
 			sourceTree = "<group>";
@@ -326,6 +329,7 @@
 				B5C9512C29D60F4D00E21C8B /* Koin.swift in Sources */,
 				B5C70CD529DAF29B00FBA3A9 /* CombineAdapters.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
+				B52D905D29DED5E900188A7C /* ObservableTransactionsModel.swift in Sources */,
 				B586770329D768F9007994B9 /* TransactionsScreen.swift in Sources */,
 				B586770529D76901007994B9 /* SettingsScreen.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
@@ -398,7 +402,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -453,7 +457,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

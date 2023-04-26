@@ -152,6 +152,10 @@ data class Transaction(
         splits = dto.splits.map { Split(it) },
         num = dto.num
     )
+
+    val debitSplits: List<Split> = splits.filter { it.amount < BigDecimal.ZERO }
+
+    val creditSplits: List<Split> = splits.filter { it.amount >= BigDecimal.ZERO }
 }
 
 @Serializable

@@ -11,30 +11,30 @@ struct MainScreen: View {
 //            }
             HomeScreen()
                 .tabItem {
-                    BottomNav.home.label
-                }
+                BottomNav.home.label
+            }
             ReportsScreen()
                 .tabItem {
-                    BottomNav.reports.label
-                }
+                BottomNav.reports.label
+            }
             TransactionsScreen()
                 .tabItem {
-                    BottomNav.transactions.label
-                }
+                BottomNav.transactions.label
+            }
             SettingsScreen()
                 .tabItem {
-                    BottomNav.misc.label
-                }
+                BottomNav.misc.label
+            }
         }
-	}
+    }
 }
 
-enum BottomNav:CaseIterable {
+enum BottomNav: CaseIterable {
     case home
     case reports
     case transactions
     case misc
-    
+
     var label: Label<Text, Image> {
         switch self {
         case .home:
@@ -47,7 +47,7 @@ enum BottomNav:CaseIterable {
             return Label(self.labelKey.local(), systemImage: self.imageKey)
         }
     }
-    
+
     private var labelKey: String {
         switch self {
         case .home:
@@ -60,25 +60,25 @@ enum BottomNav:CaseIterable {
             return "bottom_nav_misc"
         }
     }
-    
+
     private var imageKey: String {
-            switch self {
-            case .home:
-                return "house.fill"
-            case .reports:
-                return "doc.on.clipboard.fill"
-            case .transactions:
-                return "list.bullet.rectangle.portrait.fill"
-            case .misc:
-                return "person.2.badge.gearshape.fill"
-            }
+        switch self {
+        case .home:
+            return "house.fill"
+        case .reports:
+            return "doc.on.clipboard.fill"
+        case .transactions:
+            return "list.bullet.rectangle.portrait.fill"
+        case .misc:
+            return "person.2.badge.gearshape.fill"
+        }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
-	static var previews: some View {
-		MainScreen()
-	}
+    static var previews: some View {
+        MainScreen()
+    }
 }
 
 extension String {
