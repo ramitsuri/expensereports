@@ -1,5 +1,8 @@
-package com.ramitsuri.expensereports.network
+package com.ramitsuri.expensereports.network.config
 
+import com.ramitsuri.expensereports.network.ConfigDto
+import com.ramitsuri.expensereports.network.NetworkResponse
+import com.ramitsuri.expensereports.network.apiRequest
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get

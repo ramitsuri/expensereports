@@ -7,7 +7,7 @@ import com.ramitsuri.expensereports.data.Response
 import com.ramitsuri.expensereports.data.db.ReportDao
 import com.ramitsuri.expensereports.data.isStale
 import com.ramitsuri.expensereports.network.NetworkResponse
-import com.ramitsuri.expensereports.network.ReportApi
+import com.ramitsuri.expensereports.network.report.ReportApi
 import com.ramitsuri.expensereports.utils.LogHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

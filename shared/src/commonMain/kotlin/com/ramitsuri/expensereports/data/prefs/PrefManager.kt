@@ -1,5 +1,7 @@
 package com.ramitsuri.expensereports.data.prefs
 
+import com.ramitsuri.expensereports.data.TransactionGroup
+import com.ramitsuri.expensereports.utils.bd
 import kotlinx.datetime.Instant
 
 class PrefManager(private val keyValueStore: KeyValueStore) {
@@ -47,6 +49,21 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
     fun shouldDownloadRecentData(): Boolean {
         val key = Key.DOWNLOAD_RECENT_DATA
         return getBoolean(key, true)
+    }
+
+    fun setTransactionGroup(transactionGroup: TransactionGroup) {
+        putString(Key.TRANSACTION_GROUP_NAME, transactionGroup.name)
+        putString(Key.TRANSACTION_GROUP_TOTAL, transactionGroup.total.toPlainString())
+    }
+
+    fun getTransactionGroup(): TransactionGroup? {
+        val name = getString(Key.TRANSACTION_GROUP_NAME, "")
+        val total = getString(Key.TRANSACTION_GROUP_TOTAL, "")
+        return if (name.isNullOrEmpty() || total.isNullOrEmpty()) {
+            null
+        } else {
+            return TransactionGroup(name, total.bd())
+        }
     }
 
     private fun putString(key: Key, value: String) {
@@ -126,6 +143,14 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
 
             DOWNLOAD_RECENT_DATA(
                 key = "download_recent_data"
+            ),
+
+            TRANSACTION_GROUP_NAME(
+                key = "transaction_group_name"
+            ),
+
+            TRANSACTION_GROUP_TOTAL(
+                key = "transaction_group_total"
             )
         }
     }

@@ -4,10 +4,12 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.network.AccountTotalDto
 import com.ramitsuri.expensereports.network.BigDecimalSerializer
 import com.ramitsuri.expensereports.network.ConfigDto
+import com.ramitsuri.expensereports.network.InstantSerializer
 import com.ramitsuri.expensereports.network.IntBigDecimalMapSerializer
 import com.ramitsuri.expensereports.network.ReportDto
 import com.ramitsuri.expensereports.network.SplitDto
 import com.ramitsuri.expensereports.network.TransactionDto
+import com.ramitsuri.expensereports.network.TransactionGroupDto
 import com.ramitsuri.expensereports.utils.Constants
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -164,5 +166,15 @@ data class Split(
     constructor(dto: SplitDto) : this(
         account = dto.account,
         amount = BigDecimal.parseString(dto.amount)
+    )
+}
+
+data class TransactionGroup(
+    val name: String,
+    val total: BigDecimal
+) {
+    constructor(dto: TransactionGroupDto) : this(
+        name = dto.name,
+        total = BigDecimal.parseString(dto.total)
     )
 }

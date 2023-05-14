@@ -3,12 +3,14 @@ package com.ramitsuri.expensereports.utils
 import com.ramitsuri.expensereports.data.Report
 import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.Transaction
+import com.ramitsuri.expensereports.data.TransactionGroup
 import com.ramitsuri.expensereports.data.db.ReportDao
 import com.ramitsuri.expensereports.data.db.TransactionsDao
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.network.NetworkResponse
-import com.ramitsuri.expensereports.network.ReportApi
-import com.ramitsuri.expensereports.network.TransactionsApi
+import com.ramitsuri.expensereports.network.report.ReportApi
+import com.ramitsuri.expensereports.network.transactiongroups.TransactionGroupsApi
+import com.ramitsuri.expensereports.network.transactions.TransactionsApi
 import com.ramitsuri.expensereports.repository.ConfigRepository
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
@@ -23,6 +25,7 @@ class DataDownloader(
     private val reportApi: ReportApi,
     private val transactionsDao: TransactionsDao,
     private val transactionsApi: TransactionsApi,
+    private val transactionGroupsApi: TransactionGroupsApi,
     private val configRepository: ConfigRepository,
     private val clock: Clock,
     private val timeZone: TimeZone,
@@ -31,6 +34,7 @@ class DataDownloader(
     suspend fun download() {
         downloadAndSaveReports()
         downloadAndSaveTransactions()
+        downloadAndSaveTransactionGroups()
         configRepository.downloadAndSave()
         prefManager.setLastDownloadTime(clock.now())
     }
@@ -91,6 +95,22 @@ class DataDownloader(
                 val transactions = response.data.transactions.map { Transaction(it) }
                 if (transactionsApi.allowsCaching) {
                     transactionsDao.insert(year, month, transactions)
+                }
+            }
+        }
+    }
+
+    private suspend fun downloadAndSaveTransactionGroups() {
+        LogHelper.d(TAG, "Getting transaction groups from network")
+        when (val response = transactionGroupsApi.get()) {
+            is NetworkResponse.Failure -> {
+                LogHelper.e(TAG, "Error: $response.error, message: ${response.throwable?.message}")
+            }
+            is NetworkResponse.Success -> {
+                val transactionGroup =
+                    response.data.transactionGroups.map { TransactionGroup(it) }.firstOrNull()
+                if (transactionsApi.allowsCaching && transactionGroup != null) {
+                    prefManager.setTransactionGroup(transactionGroup)
                 }
             }
         }

@@ -6,6 +6,8 @@ import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// region Reports
+
 @Serializable
 data class ReportDto(
     @SerialName("name")
@@ -46,6 +48,11 @@ data class BalanceDto(
     val amount: String
 )
 
+//endregion
+
+
+//region Config
+
 @Serializable
 data class ConfigDto(
     @SerialName("ignored_expense_accounts")
@@ -66,6 +73,10 @@ data class ConfigDto(
     @SerialName("annual_savings_target")
     val annualSavingsTarget: String
 )
+
+//endregion
+
+//region Transactions
 
 @Serializable
 data class TransactionsDto(
@@ -108,3 +119,28 @@ data class SplitDto(
     @SerialName("account")
     val account: String,
 )
+
+//endregion
+
+//region TransactionGroups
+
+@Serializable
+data class TransactionGroupsDto(
+    @Serializable(with = InstantSerializer::class)
+    @SerialName("time")
+    val time: Instant,
+
+    @SerialName("transaction_groups")
+    val transactionGroups: List<TransactionGroupDto>
+)
+
+@Serializable
+data class TransactionGroupDto(
+    @SerialName("name")
+    val name: String,
+
+    @SerialName("total")
+    val total: String
+)
+
+//endregion

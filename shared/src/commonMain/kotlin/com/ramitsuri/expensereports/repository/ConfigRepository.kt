@@ -3,7 +3,7 @@ package com.ramitsuri.expensereports.repository
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.data.Config
 import com.ramitsuri.expensereports.data.prefs.PrefManager
-import com.ramitsuri.expensereports.network.ConfigApi
+import com.ramitsuri.expensereports.network.config.ConfigApi
 import com.ramitsuri.expensereports.network.NetworkResponse
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString

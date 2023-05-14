@@ -3,6 +3,18 @@ package com.ramitsuri.expensereports.network
 import co.touchlab.kermit.StaticConfig
 import co.touchlab.kermit.platformLogWriter
 import com.ramitsuri.expensereports.data.prefs.PrefManager
+import com.ramitsuri.expensereports.network.config.ConfigApi
+import com.ramitsuri.expensereports.network.config.ConfigApiImpl
+import com.ramitsuri.expensereports.network.config.DummyConfigApiImpl
+import com.ramitsuri.expensereports.network.report.DummyReportApiImpl
+import com.ramitsuri.expensereports.network.report.ReportApi
+import com.ramitsuri.expensereports.network.report.ReportApiImpl
+import com.ramitsuri.expensereports.network.transactiongroups.DummyTransactionGroupsApiImpl
+import com.ramitsuri.expensereports.network.transactiongroups.TransactionGroupsApi
+import com.ramitsuri.expensereports.network.transactiongroups.TransactionGroupsApiImpl
+import com.ramitsuri.expensereports.network.transactions.DummyTransactionsApiImpl
+import com.ramitsuri.expensereports.network.transactions.TransactionsApi
+import com.ramitsuri.expensereports.network.transactions.TransactionsApiImpl
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
@@ -70,6 +82,14 @@ class NetworkProvider(
             DummyTransactionsApiImpl(json)
         } else {
             TransactionsApiImpl(client, prefManager.getServerUrl(), dispatcherProvider)
+        }
+    }
+
+    fun transactionGroupsApi(): TransactionGroupsApi {
+        return if (prefManager.getServerUrl().isEmpty()) {
+            DummyTransactionGroupsApiImpl(json)
+        } else {
+            TransactionGroupsApiImpl(client, prefManager.getServerUrl(), dispatcherProvider)
         }
     }
 

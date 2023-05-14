@@ -1,5 +1,7 @@
-package com.ramitsuri.expensereports.network
+package com.ramitsuri.expensereports.network.config
 
+import com.ramitsuri.expensereports.network.ConfigDto
+import com.ramitsuri.expensereports.network.NetworkResponse
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 

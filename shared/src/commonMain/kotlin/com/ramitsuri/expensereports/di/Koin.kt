@@ -70,6 +70,7 @@ private val coreModule = module {
             get<NetworkProvider>().reportApi(),
             get<TransactionsDao>(),
             get<NetworkProvider>().transactionsApi(),
+            get<NetworkProvider>().transactionGroupsApi(),
             get<ConfigRepository>(),
             get<Clock>(),
             get<TimeZone>(),
