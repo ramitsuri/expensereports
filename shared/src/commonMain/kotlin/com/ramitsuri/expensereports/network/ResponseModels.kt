@@ -94,7 +94,10 @@ data class TransactionDto(
 
 
     @SerialName("splits")
-    val splits: List<@Contextual SplitDto>
+    val splits: List<@Contextual SplitDto>,
+
+    @SerialName("num")
+    val num: String
 )
 
 @Serializable

@@ -542,7 +542,8 @@ fun TransactionItemPreview() {
                     Split(account = "Fidelity", amount = BigDecimal.parseString("-5")),
                     Split(account = "Groceries", amount = BigDecimal.parseString("2")),
                     Split(account = "Food", amount = BigDecimal.parseString("3")),
-                )
+                ),
+                num = ""
             )
         )
     }

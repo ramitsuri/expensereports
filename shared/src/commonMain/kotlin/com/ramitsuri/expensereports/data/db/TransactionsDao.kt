@@ -45,7 +45,8 @@ class TransactionsDaoImpl(
                     date = transaction.date,
                     description = transaction.description,
                     total = transaction.total,
-                    splits = transaction.splits
+                    splits = transaction.splits,
+                    num = transaction.num
                 )
             }
         }
@@ -57,7 +58,8 @@ class TransactionsDaoImpl(
                 date = transactionEntity.date,
                 total = transactionEntity.total,
                 description = transactionEntity.description,
-                splits = transactionEntity.splits
+                splits = transactionEntity.splits,
+                num = transactionEntity.num
             )
         } else {
             null

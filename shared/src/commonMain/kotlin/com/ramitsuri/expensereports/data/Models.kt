@@ -140,13 +140,15 @@ data class Transaction(
     val date: LocalDate,
     val total: BigDecimal,
     val description: String,
-    val splits: List<Split>
+    val splits: List<Split>,
+    val num: String
 ) {
     constructor(dto: TransactionDto) : this(
         date = dto.date,
         total = BigDecimal.parseString(dto.total),
         description = dto.description,
         splits = dto.splits.map { Split(it) },
+        num = dto.num
     )
 }
 

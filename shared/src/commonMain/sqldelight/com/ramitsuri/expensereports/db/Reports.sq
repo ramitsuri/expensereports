@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS TransactionEntity(
     date TEXT AS LocalDate NOT NULL,
     description TEXT NOT NULL,
     total TEXT AS BigDecimal NOT NULL,
-    splits TEXT AS List<Split> NOT NULL
+    splits TEXT AS List<Split> NOT NULL,
+    num TEXT NOT NULL DEFAULT ''
 );
 
 getTransactions:
@@ -57,8 +58,8 @@ WHERE year IN :years AND month IN :months;
 
 insertTransaction:
 INSERT OR REPLACE INTO
-TransactionEntity(year, month, date, description, total, splits)
-VALUES (?, ?, ?, ?,?, ?);
+TransactionEntity(year, month, date, description, total, splits, num)
+VALUES (?, ?, ?, ?,?, ?, ?);
 
 deleteTransactions:
 DELETE FROM TransactionEntity
