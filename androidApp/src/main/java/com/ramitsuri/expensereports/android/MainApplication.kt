@@ -77,6 +77,7 @@ class MainApplication : Application(), LifecycleEventObserver {
                     HomeViewModel(
                         get<ReportsRepository>(),
                         get<ConfigRepository>(),
+                        get<PrefManager>(),
                         get<Clock>(),
                         get<DispatcherProvider>()
                     )

@@ -82,7 +82,8 @@ fun HomeScreen(
         savingsBalance = viewState.savings,
         salary = viewState.monthSalary,
         liabilityAccountBalances = viewState.liabilityAccountBalances,
-        assetAccountBalances = viewState.assetAccountBalances
+        assetAccountBalances = viewState.assetAccountBalances,
+        transactionGroups = viewState.transactionGroups
     )
 }
 
@@ -94,6 +95,7 @@ private fun HomeContent(
     salary: BigDecimal,
     assetAccountBalances: List<AccountBalance>,
     liabilityAccountBalances: List<AccountBalance>,
+    transactionGroups: List<AccountBalance>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -124,6 +126,7 @@ private fun HomeContent(
             salary = salary,
             assetAccountBalances = assetAccountBalances,
             liabilityAccountBalances = liabilityAccountBalances,
+            transactionGroups = transactionGroups,
             modifier = modifier.heightIn(120.dp, max = 144.dp)
         )
     }
@@ -225,6 +228,7 @@ private fun AccountBalancesContent(
     salary: BigDecimal,
     assetAccountBalances: List<AccountBalance>,
     liabilityAccountBalances: List<AccountBalance>,
+    transactionGroups: List<AccountBalance>,
     modifier: Modifier = Modifier
 ) {
     val itemsInRow = 4
@@ -234,6 +238,7 @@ private fun AccountBalancesContent(
             balance = salary
         )
     )
+        .plus(transactionGroups)
         .plus(assetAccountBalances)
         .plus(liabilityAccountBalances)
     val accountChunks = accounts.chunked(itemsInRow)

@@ -4,6 +4,7 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.data.AccountTotal
 import com.ramitsuri.expensereports.data.ReportType
 import com.ramitsuri.expensereports.data.isIn
+import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.repository.ConfigRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
@@ -23,6 +24,7 @@ import kotlinx.datetime.toLocalDateTime
 class HomeViewModel(
     private val repository: ReportsRepository,
     private val configRepository: ConfigRepository,
+    private val prefManager: PrefManager,
     private val clock: Clock,
     dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
@@ -158,6 +160,18 @@ class HomeViewModel(
                     }
                 }
         }
+
+        viewModelScope.launch(dispatcherProvider.io) {
+            // Transaction Groups
+            val transactionGroup = prefManager.getTransactionGroup()
+            if (transactionGroup != null) {
+                val transactionGroupAccountBalance =
+                    AccountBalance(name = transactionGroup.name, balance = transactionGroup.total)
+                _state.update { previousState ->
+                    previousState.copy(transactionGroups = listOf(transactionGroupAccountBalance))
+                }
+            }
+        }
     }
 
 
@@ -210,6 +224,7 @@ data class HomeViewState(
     val topExpenses: List<AccountBalance> = listOf(),
     val assetAccountBalances: List<AccountBalance> = listOf(),
     val liabilityAccountBalances: List<AccountBalance> = listOf(),
+    val transactionGroups: List<AccountBalance> = listOf(),
     val monthSalary: BigDecimal = BigDecimal.ZERO
 )
 
