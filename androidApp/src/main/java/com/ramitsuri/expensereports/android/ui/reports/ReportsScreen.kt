@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -671,63 +672,64 @@ private fun AccountsFilterDialog(
         onDismissRequest = { dialogState.value = false },
         properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth(0.9f)
-                .fillMaxHeight(0.8f)
-                .background(
-                    MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .padding(16.dp)
-        ) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.weight(1f, false)
+        Card(modifier = modifier.padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .fillMaxHeight(0.8f)
+                    .padding(16.dp)
             ) {
-                accounts.forEach { account ->
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .clickable { onAccountClicked(account) }
-                                .fillMaxWidth()
-                                .padding(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            repeat(account.level) {
-                                Spacer(modifier = Modifier.width(16.dp))
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.weight(1f, false)
+                ) {
+                    accounts.forEach { account ->
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .clickable { onAccountClicked(account) }
+                                    .fillMaxWidth()
+                                    .padding(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                repeat(account.level) {
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                }
+                                Icon(
+                                    imageVector = if (account.selected) {
+                                        Icons.Filled.CheckBox
+                                    } else {
+                                        Icons.Filled.CheckBoxOutlineBlank
+                                    },
+                                    contentDescription = null,
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = account.name,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
-                            Icon(
-                                imageVector = if (account.selected) {
-                                    Icons.Filled.CheckBox
-                                } else {
-                                    Icons.Filled.CheckBoxOutlineBlank
-                                },
-                                contentDescription = null,
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = account.name, style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(onClick = {
-                    onAccountFiltersNotApplied()
-                    dialogState.value = false
-                }) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
-                TextButton(onClick = {
-                    onAccountFiltersApplied()
-                    dialogState.value = false
-                }) {
-                    Text(text = stringResource(id = R.string.apply))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = {
+                        onAccountFiltersNotApplied()
+                        dialogState.value = false
+                    }) {
+                        Text(text = stringResource(id = R.string.cancel))
+                    }
+                    TextButton(onClick = {
+                        onAccountFiltersApplied()
+                        dialogState.value = false
+                    }) {
+                        Text(text = stringResource(id = R.string.apply))
+                    }
                 }
             }
         }
