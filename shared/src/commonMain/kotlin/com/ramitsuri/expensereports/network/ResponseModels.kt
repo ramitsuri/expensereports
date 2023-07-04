@@ -51,27 +51,44 @@ data class BalanceDto(
 //endregion
 
 
-//region Config
+//region Miscellaneous
 
 @Serializable
-data class ConfigDto(
-    @SerialName("ignored_expense_accounts")
-    val ignoredExpenseAccounts: List<String>,
+data class MiscellaneousDataDto(
+    @Serializable(with = InstantSerializer::class)
+    @SerialName("time")
+    val time: Instant,
 
-    @SerialName("main_asset_accounts")
-    val mainAssetAccounts: List<String>,
+    @SerialName("miscellaneous")
+    val miscellaneous: MiscellaneousDto
+)
 
-    @SerialName("main_liability_accounts")
-    val mainLiabilityAccounts: List<String>,
+@Serializable
+data class MiscellaneousDto(
+    @SerialName("income_total")
+    val incomeTotal: String,
 
-    @SerialName("main_income_accounts")
-    val mainIncomeAccounts: List<String>,
+    @SerialName("expense_total")
+    val expensesTotal: String,
 
-    @SerialName("annual_budget")
-    val annualBudget: String,
+    @SerialName("expense_after_deduction_total")
+    val expensesAfterDeductionTotal: String,
 
-    @SerialName("annual_savings_target")
-    val annualSavingsTarget: String
+    @SerialName("savings_total")
+    val savingsTotal: String,
+
+    @SerialName("account_balances")
+    val accountBalances: List<AccountBalanceDto>
+)
+
+@Serializable
+data class AccountBalanceDto(
+    @SerialName("name")
+    val name: String,
+
+    @SerialName("balance")
+    val balance: String
+
 )
 
 //endregion

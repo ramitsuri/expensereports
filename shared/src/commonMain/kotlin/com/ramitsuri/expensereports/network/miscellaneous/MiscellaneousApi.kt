@@ -1,24 +1,24 @@
-package com.ramitsuri.expensereports.network.config
+package com.ramitsuri.expensereports.network.miscellaneous
 
-import com.ramitsuri.expensereports.network.ConfigDto
+import com.ramitsuri.expensereports.network.MiscellaneousDataDto
 import com.ramitsuri.expensereports.network.NetworkResponse
 import com.ramitsuri.expensereports.network.apiRequest
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 
-internal class ConfigApiImpl(
+internal class MiscellaneousApiImpl(
     private val client: HttpClient,
     private val baseUrl: String,
     private val dispatcherProvider: DispatcherProvider
-) : ConfigApi {
+) : MiscellaneousApi {
 
-    override suspend fun get(): NetworkResponse<ConfigDto> {
-        val apiUrl = "$baseUrl/config.json"
+    override suspend fun get(): NetworkResponse<MiscellaneousDataDto> {
+        val apiUrl = "$baseUrl/Miscellaneous.json"
         return apiRequest(dispatcherProvider.io) { client.get(apiUrl) }
     }
 }
 
-interface ConfigApi {
-    suspend fun get(): NetworkResponse<ConfigDto>
+interface MiscellaneousApi {
+    suspend fun get(): NetworkResponse<MiscellaneousDataDto>
 }

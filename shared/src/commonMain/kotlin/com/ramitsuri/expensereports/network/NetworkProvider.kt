@@ -3,9 +3,9 @@ package com.ramitsuri.expensereports.network
 import co.touchlab.kermit.StaticConfig
 import co.touchlab.kermit.platformLogWriter
 import com.ramitsuri.expensereports.data.prefs.PrefManager
-import com.ramitsuri.expensereports.network.config.ConfigApi
-import com.ramitsuri.expensereports.network.config.ConfigApiImpl
-import com.ramitsuri.expensereports.network.config.DummyConfigApiImpl
+import com.ramitsuri.expensereports.network.miscellaneous.MiscellaneousApi
+import com.ramitsuri.expensereports.network.miscellaneous.MiscellaneousApiImpl
+import com.ramitsuri.expensereports.network.miscellaneous.DummyMiscellaneousApiImpl
 import com.ramitsuri.expensereports.network.report.DummyReportApiImpl
 import com.ramitsuri.expensereports.network.report.ReportApi
 import com.ramitsuri.expensereports.network.report.ReportApiImpl
@@ -93,11 +93,11 @@ class NetworkProvider(
         }
     }
 
-    fun configApi(): ConfigApi {
+    fun miscellaneousApi(): MiscellaneousApi {
         return if (prefManager.getServerUrl().isEmpty()) {
-            DummyConfigApiImpl(json)
+            DummyMiscellaneousApiImpl(json)
         } else {
-            ConfigApiImpl(client, prefManager.getServerUrl(), dispatcherProvider)
+            MiscellaneousApiImpl(client, prefManager.getServerUrl(), dispatcherProvider)
         }
     }
 

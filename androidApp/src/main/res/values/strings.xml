@@ -69,14 +69,11 @@
 
     <!-- Home -->
     <string name="home_net_worth">Net Worth</string>
-    <string name="home_savings">Savings</string>
-    <string name="home_expenses">Expenses</string>
-    <string name="home_incomes">Incomes</string>
-    <string name="home_expense_this_month_format">This month (budget: %1$s)</string>
-    <string name="home_expense_this_year_format">This year (budget: %1$s)</string>
-    <string name="home_savings_this_month_format">This month (target: %1$s)</string>
-    <string name="home_savings_this_year_format">This year (target: %1$s)</string>
-    <string name="home_account_salary_name">Salary</string>
+    <string name="home_expenses_and_savings">Expenses &amp; Savings</string>
+    <string name="home_expenses_share">Expenses</string>
+    <string name="home_savings_share">Savings</string>
+    <string name="home_deductions_share">Deductions</string>
+    <string name="home_include_deductions">Include deductions</string>
 
     <!-- Reports -->
     <string name="reports_generated_at_yesterday_format">Generated at %1$s yesterday</string>

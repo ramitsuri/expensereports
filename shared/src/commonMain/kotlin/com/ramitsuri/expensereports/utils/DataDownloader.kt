@@ -11,7 +11,7 @@ import com.ramitsuri.expensereports.network.NetworkResponse
 import com.ramitsuri.expensereports.network.report.ReportApi
 import com.ramitsuri.expensereports.network.transactiongroups.TransactionGroupsApi
 import com.ramitsuri.expensereports.network.transactions.TransactionsApi
-import com.ramitsuri.expensereports.repository.ConfigRepository
+import com.ramitsuri.expensereports.repository.MiscellaneousRepository
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
@@ -26,7 +26,7 @@ class DataDownloader(
     private val transactionsDao: TransactionsDao,
     private val transactionsApi: TransactionsApi,
     private val transactionGroupsApi: TransactionGroupsApi,
-    private val configRepository: ConfigRepository,
+    private val miscellaneousRepository: MiscellaneousRepository,
     private val clock: Clock,
     private val timeZone: TimeZone,
     private val prefManager: PrefManager
@@ -35,7 +35,7 @@ class DataDownloader(
         downloadAndSaveReports()
         downloadAndSaveTransactions()
         downloadAndSaveTransactionGroups()
-        configRepository.downloadAndSave()
+        miscellaneousRepository.downloadAndSave()
         prefManager.setLastDownloadTime(clock.now())
     }
 
@@ -63,6 +63,7 @@ class DataDownloader(
             is NetworkResponse.Failure -> {
                 LogHelper.e(TAG, "Error: $response.error, message: ${response.throwable?.message}")
             }
+
             is NetworkResponse.Success -> {
                 val report =
                     Report(response.data, fetchedAt = clock.now(), type, year)
@@ -91,6 +92,7 @@ class DataDownloader(
             is NetworkResponse.Failure -> {
                 LogHelper.e(TAG, "Error: $response.error, message: ${response.throwable?.message}")
             }
+
             is NetworkResponse.Success -> {
                 val transactions = response.data.transactions.map { Transaction(it) }
                 if (transactionsApi.allowsCaching) {
@@ -106,11 +108,14 @@ class DataDownloader(
             is NetworkResponse.Failure -> {
                 LogHelper.e(TAG, "Error: $response.error, message: ${response.throwable?.message}")
             }
+
             is NetworkResponse.Success -> {
                 val transactionGroup =
                     response.data.transactionGroups.map { TransactionGroup(it) }.firstOrNull()
                 if (transactionsApi.allowsCaching && transactionGroup != null) {
                     prefManager.setTransactionGroup(transactionGroup)
+                } else {
+                    prefManager.setTransactionGroup(null)
                 }
             }
         }

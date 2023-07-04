@@ -640,7 +640,7 @@ fun TransactionItem(
                                 Divider(
                                     modifier = Modifier
                                         .height(0.5.dp)
-                                        .fillMaxWidth(0.4f),
+                                        .fillMaxWidth(0.5f),
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                 )
                             }

@@ -67,14 +67,11 @@
 
 /* Home */
 "home_net_worth" = "Net Worth";
-"home_savings" = "Savings";
-"home_expenses" = "Expenses";
-"home_incomes" = "Incomes";
-"home_expense_this_month_format" = "This month (budget: %@)";
-"home_expense_this_year_format" = "This year (budget: %@)";
-"home_savings_this_month_format" = "This month (target: %@)";
-"home_savings_this_year_format" = "This year (target: %@)";
-"home_account_salary_name" = "Salary";
+"home_expenses_and_savings" = "Expenses & Savings";
+"home_expenses_share" = "Expenses";
+"home_savings_share" = "Savings";
+"home_deductions_share" = "Deductions";
+"home_include_deductions" = "Include deductions";
 
 /* Reports */
 "reports_generated_at_yesterday_format" = "Generated at %@ yesterday";

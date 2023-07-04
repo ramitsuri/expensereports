@@ -1,16 +1,17 @@
 package com.ramitsuri.expensereports.data
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ramitsuri.expensereports.network.AccountBalanceDto
 import com.ramitsuri.expensereports.network.AccountTotalDto
 import com.ramitsuri.expensereports.network.BigDecimalSerializer
-import com.ramitsuri.expensereports.network.ConfigDto
-import com.ramitsuri.expensereports.network.InstantSerializer
 import com.ramitsuri.expensereports.network.IntBigDecimalMapSerializer
+import com.ramitsuri.expensereports.network.MiscellaneousDto
 import com.ramitsuri.expensereports.network.ReportDto
 import com.ramitsuri.expensereports.network.SplitDto
 import com.ramitsuri.expensereports.network.TransactionDto
 import com.ramitsuri.expensereports.network.TransactionGroupDto
 import com.ramitsuri.expensereports.utils.Constants
+import com.ramitsuri.expensereports.utils.bd
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Contextual
@@ -110,31 +111,32 @@ private fun Int.isNotIn(selectedMonths: List<Int>?): Boolean {
 
 
 @Serializable
-data class Config(
-    val ignoredExpenseAccounts: List<String>,
-    val mainAssetAccounts: List<String>,
-    val mainLiabilityAccounts: List<String>,
-    val mainIncomeAccounts: List<String>,
+data class Miscellaneous(
     @Serializable(with = BigDecimalSerializer::class)
-    val annualBudget: BigDecimal,
+    @SerialName("incomeTotal")
+    val incomeTotal: BigDecimal,
+
     @Serializable(with = BigDecimalSerializer::class)
-    val annualSavingsTarget: BigDecimal
+    @SerialName("expensesTotal")
+    val expensesTotal: BigDecimal,
+
+    @Serializable(with = BigDecimalSerializer::class)
+    @SerialName("expensesAfterDeductionTotal")
+    val expensesAfterDeductionTotal: BigDecimal,
+
+    @Serializable(with = BigDecimalSerializer::class)
+    @SerialName("savingsTotal")
+    val savingsTotal: BigDecimal,
+
+    @SerialName("accountBalances")
+    val accountBalances: List<AccountBalance>
 ) {
-    constructor(dto: ConfigDto) : this(
-        ignoredExpenseAccounts = dto.ignoredExpenseAccounts,
-        mainAssetAccounts = dto.mainAssetAccounts,
-        mainLiabilityAccounts = dto.mainLiabilityAccounts,
-        mainIncomeAccounts = dto.mainIncomeAccounts,
-        annualBudget = try {
-            BigDecimal.parseString(dto.annualBudget)
-        } catch (e: Exception) {
-            BigDecimal.ZERO
-        },
-        annualSavingsTarget = try {
-            BigDecimal.parseString(dto.annualSavingsTarget)
-        } catch (e: Exception) {
-            BigDecimal.ZERO
-        },
+    constructor(dto: MiscellaneousDto) : this(
+        incomeTotal = dto.incomeTotal.bd(),
+        expensesTotal = dto.expensesTotal.bd(),
+        expensesAfterDeductionTotal = dto.expensesAfterDeductionTotal.bd(),
+        savingsTotal = dto.savingsTotal.bd(),
+        accountBalances = dto.accountBalances.map { AccountBalance(it) }
     )
 }
 
@@ -176,5 +178,20 @@ data class TransactionGroup(
     constructor(dto: TransactionGroupDto) : this(
         name = dto.name,
         total = BigDecimal.parseString(dto.total)
+    )
+}
+
+@Serializable
+data class AccountBalance(
+    @SerialName("name")
+    val name: String,
+
+    @Serializable(with = BigDecimalSerializer::class)
+    @SerialName("balance")
+    val balance: BigDecimal
+) {
+    constructor(dto: AccountBalanceDto) : this(
+        name = dto.name,
+        balance = dto.balance.bd()
     )
 }

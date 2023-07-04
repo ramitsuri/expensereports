@@ -1,21 +1,20 @@
-package com.ramitsuri.expensereports.network.config
+package com.ramitsuri.expensereports.network.miscellaneous
 
-import com.ramitsuri.expensereports.network.ConfigDto
+import com.ramitsuri.expensereports.network.MiscellaneousDataDto
 import com.ramitsuri.expensereports.network.NetworkResponse
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
-internal class DummyConfigApiImpl(private val json: Json) : ConfigApi {
+internal class DummyMiscellaneousApiImpl(private val json: Json) : MiscellaneousApi {
 
-    override suspend fun get(): NetworkResponse<ConfigDto> {
-        val dto = json.decodeFromString<ConfigDto>(getJson())
+    override suspend fun get(): NetworkResponse<MiscellaneousDataDto> {
+        val dto = json.decodeFromString<MiscellaneousDataDto>(getJson())
         return NetworkResponse.Success(dto)
     }
 
     private fun getJson(): String {
         return """
             {
-              "ignored_expense_accounts": [],
               "main_asset_accounts": [
                 "Assets:Current Assets:Checking",
                 "Assets:Current Assets:Savings",

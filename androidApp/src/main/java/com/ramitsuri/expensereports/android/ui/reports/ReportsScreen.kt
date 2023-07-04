@@ -3,7 +3,6 @@ package com.ramitsuri.expensereports.android.ui.reports
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckBox
@@ -48,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -197,6 +194,7 @@ private fun ReportView(
         is ReportView.ByAccount -> {
             BarChartAccount(report.accountTotals, report.total)
         }
+
         else -> {
             ReportUnavailable()
         }
@@ -431,12 +429,14 @@ private fun TableView(
                                     isHeader = true
                                 )
                             }
+
                             columns - 1 -> {
                                 TableCell(
                                     text = stringResource(id = R.string.total),
                                     isHeader = true
                                 )
                             }
+
                             else -> {
                                 TableCell(
                                     text = stringResource(id = sortedMonths[columnIndex - 1].string()),
@@ -445,6 +445,7 @@ private fun TableView(
                             }
                         }
                     }
+
                     1 -> { // Totals Account row
                         when (columnIndex) {
                             0 -> {
@@ -453,9 +454,11 @@ private fun TableView(
                                     isHeader = true
                                 )
                             }
+
                             columns - 1 -> {
                                 TableCell(text = total.total.format(), isHeader = true)
                             }
+
                             else -> {
                                 val month = sortedMonths[columnIndex - 1]
                                 TableCell(
@@ -465,6 +468,7 @@ private fun TableView(
                             }
                         }
                     }
+
                     else -> { // Other Accounts
                         val account = accountTotals[rowIndex - 2]
                         when (columnIndex) {
@@ -475,12 +479,14 @@ private fun TableView(
                                 }
                                 TableCell(text = prefix + account.name, isHeader = true)
                             }
+
                             columns - 1 -> {
                                 TableCell(
                                     text = account.total.format(),
                                     isHeader = true
                                 )
                             }
+
                             else -> {
                                 val month = sortedMonths[columnIndex - 1]
                                 TableCell(
@@ -658,7 +664,7 @@ private fun FilterRow(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountsFilterDialog(
     accounts: List<Account>,
@@ -752,24 +758,31 @@ fun ReportType.string(): String {
         ReportType.EXPENSE -> {
             R.string.report_type_expense
         }
+
         ReportType.EXPENSE_AFTER_DEDUCTION -> {
             R.string.report_type_expense_after_deduction
         }
+
         ReportType.ASSETS -> {
             R.string.report_type_assets
         }
+
         ReportType.LIABILITIES -> {
             R.string.report_type_liabilities
         }
+
         ReportType.INCOME -> {
             R.string.report_type_income
         }
+
         ReportType.NET_WORTH -> {
             R.string.report_type_net_worth
         }
+
         ReportType.SAVINGS -> {
             R.string.report_type_savings
         }
+
         ReportType.NONE -> {
             R.string.report_type_none
         }
@@ -782,30 +795,43 @@ fun Int.string(): Int {
     return when (this) {
         1 ->
             R.string.header_jan
+
         2 ->
             R.string.header_feb
+
         3 ->
             R.string.header_mar
+
         4 ->
             R.string.header_apr
+
         5 ->
             R.string.header_may
+
         6 ->
             R.string.header_jun
+
         7 ->
             R.string.header_jul
+
         8 ->
             R.string.header_aug
+
         9 ->
             R.string.header_sep
+
         10 ->
             R.string.header_oct
+
         11 ->
             R.string.header_nov
+
         12 ->
             R.string.header_dec
+
         13 ->
             R.string.header_total
+
         else ->
             R.string.header_invalid
     }

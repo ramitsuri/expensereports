@@ -2,14 +2,15 @@ package com.ramitsuri.expensereports.android.ui.home
 
 
 import android.graphics.PointF
-import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,11 +20,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,9 +41,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -51,21 +54,18 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.drawText
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
+import com.ramitsuri.expensereports.android.ui.views.PieChart
+import com.ramitsuri.expensereports.android.ui.views.Value
 import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.formatRounded
 import com.ramitsuri.expensereports.android.utils.monthYear
-import com.ramitsuri.expensereports.viewmodel.AccountBalance
-import com.ramitsuri.expensereports.viewmodel.Balance
+import com.ramitsuri.expensereports.data.AccountBalance
+import com.ramitsuri.expensereports.viewmodel.ExpenseSavingsShare
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
 import com.ramitsuri.expensereports.viewmodel.MonthAccountBalance
 import org.koin.androidx.compose.getViewModel
@@ -75,26 +75,22 @@ fun HomeScreen(
     viewModel: HomeViewModel = getViewModel()
 ) {
     val viewState = viewModel.state.collectAsState().value
-
     HomeContent(
         netWorth = viewState.netWorth,
-        expenseBalance = viewState.expenses,
-        savingsBalance = viewState.savings,
-        salary = viewState.monthSalary,
-        liabilityAccountBalances = viewState.liabilityAccountBalances,
-        assetAccountBalances = viewState.assetAccountBalances,
-        transactionGroups = viewState.transactionGroups
+        expenseSavingsShare = viewState.expenseSavingsShare,
+        onIncludeDeductionsChanged = viewModel::onIncludeDeductionsChanged,
+        accountBalances = viewState.accountBalances,
+        transactionGroups = viewState.transactionGroups,
     )
 }
+
 
 @Composable
 private fun HomeContent(
     netWorth: List<MonthAccountBalance>,
-    expenseBalance: Balance,
-    savingsBalance: Balance,
-    salary: BigDecimal,
-    assetAccountBalances: List<AccountBalance>,
-    liabilityAccountBalances: List<AccountBalance>,
+    expenseSavingsShare: ExpenseSavingsShare,
+    onIncludeDeductionsChanged: () -> Unit,
+    accountBalances: List<AccountBalance>,
     transactionGroups: List<AccountBalance>,
     modifier: Modifier = Modifier
 ) {
@@ -106,28 +102,16 @@ private fun HomeContent(
     ) {
         NetWorthContent(netWorth, modifier = modifier.heightIn(min = 200.dp, max = 240.dp))
         Spacer(modifier = modifier.height(8.dp))
-        MainAccountContent(
-            titleRes = R.string.home_savings,
-            monthRes = R.string.home_savings_this_month_format,
-            annualRes = R.string.home_savings_this_year_format,
-            balance = savingsBalance,
-            modifier = modifier.heightIn(128.dp, max = 152.dp)
-        )
-        Spacer(modifier = modifier.height(8.dp))
-        MainAccountContent(
-            titleRes = R.string.home_expenses,
-            monthRes = R.string.home_expense_this_month_format,
-            annualRes = R.string.home_expense_this_year_format,
-            balance = expenseBalance,
-            modifier = modifier.heightIn(128.dp, max = 152.dp)
+        SavingsExpenseIncomeContent(
+            expenseSavingsShare = expenseSavingsShare,
+            onIncludeDeductionsChanged = onIncludeDeductionsChanged,
+            modifier = modifier.heightIn(min = 160.dp, max = 176.dp)
         )
         Spacer(modifier = modifier.height(8.dp))
         AccountBalancesContent(
-            salary = salary,
-            assetAccountBalances = assetAccountBalances,
-            liabilityAccountBalances = liabilityAccountBalances,
+            accountBalances = accountBalances,
             transactionGroups = transactionGroups,
-            modifier = modifier.heightIn(120.dp, max = 144.dp)
+            modifier = modifier.heightIn(min = 64.dp, max = 64.dp)
         )
     }
 }
@@ -165,86 +149,175 @@ private fun NetWorthContent(
 }
 
 @Composable
-private fun MainAccountContent(
-    @StringRes titleRes: Int,
-    @StringRes monthRes: Int,
-    @StringRes annualRes: Int,
-    balance: Balance,
+private fun SavingsExpenseIncomeContent(
+    expenseSavingsShare: ExpenseSavingsShare,
+    onIncludeDeductionsChanged: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val values = buildList {
+        add(
+            Value(
+                color = Color(0xff47B39C),
+                sharePercent = expenseSavingsShare.expensesSharePercent
+            )
+        )
+        add(
+            Value(
+                color = Color(0xffb12c21),
+                sharePercent = expenseSavingsShare.savingsSharePercent
+            )
+        )
+        if (expenseSavingsShare.includeDeductions) {
+            add(
+                Value(
+                    color = Color(0xff00658f),
+                    sharePercent = expenseSavingsShare.deductionsSharePercent
+                )
+            )
+        }
+    }
     Card(
-        modifier = modifier
-            .fillMaxSize()
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = modifier
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = stringResource(id = titleRes),
+                text = stringResource(id = R.string.home_expenses_and_savings),
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(top = 4.dp)
             )
-            Column(
-                modifier = Modifier.fillMaxHeight(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Month
-                ConsumedBar(
-                    consumedText = balance.month.format(),
-                    helpText = stringResource(id = monthRes, balance.monthMax.format()),
-                    fillPercent = if (balance.monthMax != BigDecimal.ZERO) {
-                        balance.month.divide(balance.monthMax, DecimalMode.US_CURRENCY)
-                            .floatValue(exactRequired = false)
-                    } else {
-                        BigDecimal.ZERO.floatValue(exactRequired = false)
-                    },
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(0.5f),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    PieChart(values)
+                }
+                Divider(
+                    modifier = Modifier
+                        .fillMaxHeight(0.8f)
+                        .width(0.5.dp),
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                // Annual
-                ConsumedBar(
-                    consumedText = balance.annual.format(),
-                    helpText = stringResource(id = annualRes, balance.annualMax.format()),
-                    fillPercent = if (balance.annualMax != BigDecimal.ZERO) {
-                        balance.annual.divide(balance.annualMax, DecimalMode.US_CURRENCY)
-                            .floatValue(exactRequired = false)
-                    } else {
-                        BigDecimal.ZERO.floatValue(exactRequired = false)
-                    },
-                    color = MaterialTheme.colorScheme.onBackground,
-                    segments = 12,
-                    segmentColor = MaterialTheme.colorScheme.surfaceVariant
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(0.5f)
+                        .padding(top = 8.dp, bottom = 8.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    SimpleRow(
+                        text = stringResource(id = R.string.home_expenses_share),
+                        value = expenseSavingsShare.expensesSharePercent.formatPercent(),
+                        color = values[0].color,
+                        modifier = Modifier
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SimpleRow(
+                        text = stringResource(id = R.string.home_savings_share),
+                        value = expenseSavingsShare.savingsSharePercent.formatPercent(),
+                        color = values[1].color,
+                        modifier = Modifier
+                    )
+                    if (expenseSavingsShare.includeDeductions) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SimpleRow(
+                            text = stringResource(id = R.string.home_deductions_share),
+                            value = expenseSavingsShare.deductionsSharePercent.formatPercent(),
+                            color = values[2].color,
+                            modifier = Modifier
+                        )
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .toggleable(
+                        value = expenseSavingsShare.includeDeductions,
+                        onValueChange = { onIncludeDeductionsChanged() },
+                        role = Role.Checkbox
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = stringResource(id = R.string.home_include_deductions),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                Checkbox(
+                    modifier = Modifier
+                        .size(16.dp),
+                    checked = expenseSavingsShare.includeDeductions,
+                    onCheckedChange = null
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SimpleRow(text: String, value: String, color: Color, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .background(color = color, shape = CircleShape)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            modifier = Modifier
+                .basicMarquee(iterations = 10)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            modifier = Modifier
+                .basicMarquee(iterations = 10)
+        )
+    }
+}
+
 @Composable
 private fun AccountBalancesContent(
-    salary: BigDecimal,
-    assetAccountBalances: List<AccountBalance>,
-    liabilityAccountBalances: List<AccountBalance>,
+    accountBalances: List<AccountBalance>,
     transactionGroups: List<AccountBalance>,
     modifier: Modifier = Modifier
 ) {
-    val itemsInRow = 4
-    val accounts = listOf(
-        AccountBalance(
-            name = stringResource(id = R.string.home_account_salary_name),
-            balance = salary
-        )
-    )
+    val itemsInRow = 3
+    val accounts = accountBalances
         .plus(transactionGroups)
-        .plus(assetAccountBalances)
-        .plus(liabilityAccountBalances)
     val accountChunks = accounts.chunked(itemsInRow)
     accountChunks.forEachIndexed { index, chunk ->
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             chunk.forEach { account ->
@@ -291,12 +364,12 @@ private fun AccountItem(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = name,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelSmall,
                     maxLines = 1,
                     modifier = Modifier
                         .basicMarquee(iterations = 10)
@@ -304,7 +377,8 @@ private fun AccountItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = balance.format(),
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     modifier = Modifier
                         .basicMarquee(iterations = 10)
@@ -314,123 +388,6 @@ private fun AccountItem(
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
-@Composable
-private fun ConsumedBar(
-    consumedText: String,
-    helpText: String,
-    fillPercent: Float,
-    modifier: Modifier = Modifier,
-    barHeight: Dp = 8.dp,
-    cornerRadius: Dp = 8.dp,
-    color: Color,
-    segments: Int = 0,
-    segmentColor: Color = Color.White
-) {
-    val fill = if (fillPercent < 0f) {
-        0f
-    } else if (fillPercent > 1f) {
-        1f
-    } else {
-        fillPercent
-    }
-    val animationProgress = remember {
-        Animatable(0f)
-    }
-    LaunchedEffect(fill, block = {
-        animationProgress.animateTo(fill, tween(3000))
-    })
-    val textMeasurer = rememberTextMeasurer()
-
-    Column(
-        modifier = modifier
-            .padding(horizontal = 8.dp)
-    ) {
-        val textStyle = MaterialTheme.typography.labelSmall.copy(
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Light
-        )
-        Canvas(
-            modifier = Modifier
-                .height(12.dp)
-                .fillMaxWidth()
-        ) {
-            val measuredText = textMeasurer.measure(AnnotatedString(consumedText))
-            val minOffset = 4.dp.toPx() // Left padding
-            val maxOffset = size.width - measuredText.size.width - 4.dp.toPx()
-            var offset = size.width * fill - (measuredText.size.width / 2)
-            if (offset > maxOffset) {
-                offset = maxOffset
-            } else if (offset < minOffset) {
-                offset = minOffset
-            }
-            drawText(
-                textMeasurer,
-                consumedText,
-                style = textStyle,
-                topLeft = Offset(
-                    x = offset,
-                    y = (size.height - measuredText.size.height) / 2
-                )
-            )
-        }
-        Canvas(
-            modifier = Modifier
-                .height(16.dp)
-                .fillMaxWidth()
-        ) {
-            val containerHeight = size.height
-            val containerWidth = size.width
-            val outlineStrokeWidth = 1.dp.toPx()
-            drawRoundRect(
-                color = color,
-                topLeft = Offset(x = 0f, y = (containerHeight - barHeight.toPx()) / 2),
-                size = size.copy(height = barHeight.toPx()),
-                cornerRadius = CornerRadius(cornerRadius.toPx()),
-                style = Stroke(width = outlineStrokeWidth)
-            )
-            drawRoundRect(
-                color = color,
-                topLeft = Offset(x = 0f, y = (containerHeight - barHeight.toPx()) / 2),
-                size = Size(
-                    width = animationProgress.value * containerWidth,
-                    height = barHeight.toPx()
-                ),
-                cornerRadius = CornerRadius(cornerRadius.toPx()),
-            )
-            if (segments > 0) {
-                val segmentWidth = containerWidth / segments
-                repeat(segments - 1) { segment ->
-                    val xOffset = (segment + 1) * segmentWidth
-                    drawLine(
-                        color = segmentColor,
-                        start = Offset(
-                            x = xOffset,
-                            y = (containerHeight - barHeight.toPx() + outlineStrokeWidth) / 2
-                        ),
-                        end = Offset(
-                            x = xOffset,
-                            y = (containerHeight + barHeight.toPx() - outlineStrokeWidth) / 2
-                        ),
-                        strokeWidth = 1.dp.toPx()
-                    )
-                }
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = helpText,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp),
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-    }
-}
 
 @Composable
 private fun LineChart(
@@ -505,8 +462,9 @@ private fun LineChart(
             var previousY = pathContainerHeight
             netWorth.forEachIndexed { index, value ->
                 val newX = index * widthPerDataPoint
-                val newY = (pathContainerHeight - (value.balance.doubleValue(false) - minValue) *
-                        heightPxPerValuePoint).toFloat()
+                val newY =
+                    (pathContainerHeight - (value.balance.doubleValue(false) - minValue) *
+                            heightPxPerValuePoint).toFloat()
 
                 if (index == 0) {
                     mainPath.moveTo(0f, newY)
@@ -591,3 +549,5 @@ private fun LineChart(
         }
     }
 }
+
+private fun Float.formatPercent(): String = "$this%"

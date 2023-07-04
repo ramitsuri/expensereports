@@ -4,7 +4,7 @@ import com.ramitsuri.expensereports.data.db.Database
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.data.prefs.SettingsKeyValueStore
 import com.ramitsuri.expensereports.db.ReportsDb
-import com.ramitsuri.expensereports.repository.ConfigRepository
+import com.ramitsuri.expensereports.repository.MiscellaneousRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DataDownloader
 import com.ramitsuri.expensereports.utils.DispatcherProvider
@@ -62,7 +62,7 @@ fun initKoinIos(
         single<HomeCallbackViewModel> {
             HomeCallbackViewModel(
                 get<ReportsRepository>(),
-                get<ConfigRepository>(),
+                get<MiscellaneousRepository>(),
                 get<Clock>(),
                 get<DispatcherProvider>()
             )

@@ -6,6 +6,10 @@ import kotlinx.datetime.Instant
 
 class PrefManager(private val keyValueStore: KeyValueStore) {
 
+    init {
+        removeLegacyPrefs()
+    }
+
     fun setServerUrl(server: String) {
         val key = Key.SERVER_URL
         putString(key, server)
@@ -31,13 +35,13 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         }
     }
 
-    fun setConfigJson(config: String) {
-        val key = Key.CONFIG
-        putString(key, config)
+    fun setMiscellaneousJson(json: String) {
+        val key = Key.MISCELLANEOUS
+        putString(key, json)
     }
 
-    fun getConfigJson(): String? {
-        val key = Key.CONFIG
+    fun getMiscellaneousJson(): String? {
+        val key = Key.MISCELLANEOUS
         return getString(key, null)
     }
 
@@ -51,9 +55,14 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         return getBoolean(key, true)
     }
 
-    fun setTransactionGroup(transactionGroup: TransactionGroup) {
-        putString(Key.TRANSACTION_GROUP_NAME, transactionGroup.name)
-        putString(Key.TRANSACTION_GROUP_TOTAL, transactionGroup.total.toPlainString())
+    fun setTransactionGroup(transactionGroup: TransactionGroup?) {
+        if (transactionGroup != null) {
+            putString(Key.TRANSACTION_GROUP_NAME, transactionGroup.name)
+            putString(Key.TRANSACTION_GROUP_TOTAL, transactionGroup.total.toPlainString())
+        } else {
+            getKeyValueStore(Key.TRANSACTION_GROUP_NAME).remove(Key.TRANSACTION_GROUP_NAME.key)
+            getKeyValueStore(Key.TRANSACTION_GROUP_TOTAL).remove(Key.TRANSACTION_GROUP_TOTAL.key)
+        }
     }
 
     fun getTransactionGroup(): TransactionGroup? {
@@ -124,11 +133,19 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         }
     }
 
-    companion object {
-        private const val KV = "KV"
-        private const val SKV = "SKV"
+    private fun removeLegacyPrefs() {
+        val legacyPrefs = Key.values().filter { it.isLegacy }
+        legacyPrefs.forEach { key ->
+            getKeyValueStore(key).remove(key.key)
+        }
+    }
 
-        private enum class Key(val key: String, val isSecure: Boolean = false) {
+    companion object {
+        private enum class Key(
+            val key: String,
+            val isSecure: Boolean = false,
+            val isLegacy: Boolean = false
+        ) {
             SERVER_URL(
                 key = "server_url"
             ),
@@ -137,8 +154,8 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
                 key = "last_download_time"
             ),
 
-            CONFIG(
-                key = "config"
+            MISCELLANEOUS(
+                key = "miscellaneous"
             ),
 
             DOWNLOAD_RECENT_DATA(
@@ -151,6 +168,12 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
 
             TRANSACTION_GROUP_TOTAL(
                 key = "transaction_group_total"
+            ),
+
+            // Legacy - no longer used and should be removed
+            CONFIG(
+                key = "config",
+                isLegacy = true
             )
         }
     }

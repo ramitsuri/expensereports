@@ -12,7 +12,7 @@ import com.ramitsuri.expensereports.android.work.DataDownloadWorker
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.di.AppInfo
 import com.ramitsuri.expensereports.di.initKoin
-import com.ramitsuri.expensereports.repository.ConfigRepository
+import com.ramitsuri.expensereports.repository.MiscellaneousRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.repository.TransactionsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
@@ -76,7 +76,7 @@ class MainApplication : Application(), LifecycleEventObserver {
                 viewModel {
                     HomeViewModel(
                         get<ReportsRepository>(),
-                        get<ConfigRepository>(),
+                        get<MiscellaneousRepository>(),
                         get<PrefManager>(),
                         get<Clock>(),
                         get<DispatcherProvider>()

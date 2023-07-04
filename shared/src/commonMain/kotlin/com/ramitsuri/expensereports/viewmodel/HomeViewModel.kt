@@ -1,15 +1,14 @@
 package com.ramitsuri.expensereports.viewmodel
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ramitsuri.expensereports.data.AccountTotal
+import com.ionspin.kotlin.bignum.decimal.DecimalMode
+import com.ramitsuri.expensereports.data.AccountBalance
 import com.ramitsuri.expensereports.data.ReportType
-import com.ramitsuri.expensereports.data.isIn
 import com.ramitsuri.expensereports.data.prefs.PrefManager
-import com.ramitsuri.expensereports.repository.ConfigRepository
+import com.ramitsuri.expensereports.repository.MiscellaneousRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.utils.DispatcherProvider
-import com.ramitsuri.expensereports.utils.by
-import com.ramitsuri.expensereports.utils.inverse
+import com.ramitsuri.expensereports.utils.bd
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -23,10 +22,10 @@ import kotlinx.datetime.toLocalDateTime
 
 class HomeViewModel(
     private val repository: ReportsRepository,
-    private val configRepository: ConfigRepository,
+    private val miscellaneousRepository: MiscellaneousRepository,
     private val prefManager: PrefManager,
     private val clock: Clock,
-    dispatcherProvider: DispatcherProvider
+    private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
     private val timeZone = TimeZone.currentSystemDefault()
@@ -35,105 +34,8 @@ class HomeViewModel(
     val state: StateFlow<HomeViewState> = _state
 
     init {
-        viewModelScope.launch(dispatcherProvider.io) {
-            val date = clock.now().toLocalDateTime(timeZone).date
-            val generalReportTypes =
-                listOf(typeExpenses, typeSavings, typeIncome, typeAssets, typeLiabilities)
-            repository.get(listOf(date.year), generalReportTypes).collect() { generalReports ->
-                // Expenses
-                var expenseBalance = Balance()
-                val expenseReport = generalReports.firstOrNull { it.type == typeExpenses }
-                if (expenseReport != null) {
-                    val monthAmount = expenseReport.accountTotal.monthAmounts[date.monthNumber]
-                        ?: BigDecimal.ZERO
-                    val accountTotal = expenseReport.accountTotal as? AccountTotal
-                    val annualAmount = accountTotal?.total ?: BigDecimal.ZERO
-                    val annualMax = configRepository.getAnnualBudget()
-                    expenseBalance = expenseBalance.copy(
-                        date = date,
-                        month = monthAmount,
-                        annual = annualAmount,
-                        monthMax = annualMax.by("12"),
-                        annualMax = annualMax
-                    )
-                }
-
-                // Savings
-                var savingsBalance = Balance()
-                val savingReport = generalReports.firstOrNull { it.type == typeSavings }
-                if (savingReport != null) {
-                    val monthAmount = savingReport.accountTotal.monthAmounts[date.monthNumber]
-                        ?: BigDecimal.ZERO
-                    val accountTotal = savingReport.accountTotal as? AccountTotal
-                    val annualAmount = accountTotal?.total ?: BigDecimal.ZERO
-                    val annualMax = configRepository.getAnnualSavingsTarget()
-                    savingsBalance = savingsBalance.copy(
-                        date = date,
-                        month = monthAmount,
-                        annual = annualAmount,
-                        monthMax = annualMax.by("12"),
-                        annualMax = annualMax
-                    )
-                }
-
-                // Incomes
-                var monthIncomeBalance = BigDecimal.ZERO
-                val incomeReport = generalReports.firstOrNull { it.type == typeIncome }
-                if (incomeReport != null) {
-                    val filteredIncomes = getFilteredAccounts(
-                        incomeReport.accountTotal,
-                        date,
-                        configRepository.getIncomeAccounts()
-                    ) { accountTotal ->
-                        val balance = accountTotal.monthAmounts[date.monthNumber] ?: BigDecimal.ZERO
-                        MonthAccountBalance(balance, date)
-                    }
-                    var incomeBalance = BigDecimal.ZERO
-                    for (filteredIncome in filteredIncomes) {
-                        incomeBalance += filteredIncome.balance
-                    }
-                    monthIncomeBalance = incomeBalance.inverse()
-                }
-
-                // Liability accounts
-                val liabilityAccountBalances = mutableListOf<AccountBalance>()
-                val liabilityReport = generalReports.firstOrNull { it.type == typeLiabilities }
-                if (liabilityReport != null) {
-                    liabilityAccountBalances.addAll(getFilteredAccounts(
-                        accountTotal = liabilityReport.accountTotal,
-                        date = date,
-                        includeAccounts = configRepository.getLiabilityAccounts()
-                    ) { accountTotal ->
-                        val balance = accountTotal.monthAmounts[date.monthNumber] ?: BigDecimal.ZERO
-                        AccountBalance(name = accountTotal.name, balance = balance)
-                    })
-                }
-
-                // Asset accounts
-                val assetAccountBalances = mutableListOf<AccountBalance>()
-                val assetReport = generalReports.firstOrNull { it.type == typeAssets }
-                if (assetReport != null) {
-                    assetAccountBalances.addAll(getFilteredAccounts(
-                        accountTotal = assetReport.accountTotal,
-                        date = date,
-                        includeAccounts = configRepository.getAssetAccounts()
-                    ) { accountTotal ->
-                        val balance = accountTotal.monthAmounts[date.monthNumber] ?: BigDecimal.ZERO
-                        AccountBalance(name = accountTotal.name, balance = balance)
-                    })
-                }
-
-                _state.update { previousState ->
-                    previousState.copy(
-                        expenses = expenseBalance,
-                        savings = savingsBalance,
-                        monthSalary = monthIncomeBalance,
-                        liabilityAccountBalances = liabilityAccountBalances,
-                        assetAccountBalances = assetAccountBalances
-                    )
-                }
-            }
-        }
+        // Miscellaneous
+        updateExpenseSavingsShare()
 
         viewModelScope.launch(dispatcherProvider.io) {
             // NetWorth
@@ -174,21 +76,58 @@ class HomeViewModel(
         }
     }
 
+    fun onIncludeDeductionsChanged() {
+        _state.update { previousState ->
+            val previousExpenseSavingsShare = previousState.expenseSavingsShare
+            val newExpenseSavingsShare = previousState.expenseSavingsShare.copy(
+                includeDeductions = !previousExpenseSavingsShare.includeDeductions
+            )
+            previousState.copy(expenseSavingsShare = newExpenseSavingsShare)
+        }
+        updateExpenseSavingsShare()
+    }
 
-    private fun <T> getFilteredAccounts(
-        accountTotal: AccountTotal,
-        date: LocalDate,
-        includeAccounts: List<String>,
-        mapper: (AccountTotal) -> T
-    ): List<T> {
-        val result = mutableListOf<T>()
-        if (accountTotal.isIn(includeAccounts, fullName = true)) {
-            result.add(mapper(accountTotal))
+    private fun updateExpenseSavingsShare() {
+        viewModelScope.launch(dispatcherProvider.io) {
+            // Miscellaneous
+            _state.update { previousState ->
+                val income = miscellaneousRepository.getIncomeTotal()
+                if (income.compare(BigDecimal.ZERO) == 0) {
+                    return@launch
+                }
+                val expenses = miscellaneousRepository.getExpensesTotal()
+                val expensesAfterDeductions =
+                    miscellaneousRepository.getExpensesAfterDeductionsTotal()
+                val deductions = expenses.subtract(expensesAfterDeductions)
+                val incomeAfterDeductions = income.subtract(deductions)
+                val savings = incomeAfterDeductions.subtract(expensesAfterDeductions)
+                val previousExpenseSavingsShare = previousState.expenseSavingsShare
+                val newExpenseSavingsShare =
+                    if (previousState.expenseSavingsShare.includeDeductions) {
+                        val expensesShare = expensesAfterDeductions.shareIn(income)
+                        val savingsShare = savings.shareIn(income)
+                        val deductionsShare = 10000 - savingsShare - expensesShare
+                        previousExpenseSavingsShare.copy(
+                            expensesSharePercent = expensesShare.div(100f),
+                            savingsSharePercent = savingsShare.div(100f),
+                            deductionsSharePercent = deductionsShare.div(100f)
+                        )
+                    } else {
+                        val expensesShare = expensesAfterDeductions.shareIn(incomeAfterDeductions)
+                        val savingsShare = savings.shareIn(incomeAfterDeductions)
+                        val deductionsShare = 0f
+                        previousExpenseSavingsShare.copy(
+                            expensesSharePercent = expensesShare.div(100f),
+                            savingsSharePercent = savingsShare.div(100f),
+                            deductionsSharePercent = deductionsShare
+                        )
+                    }
+                previousState.copy(
+                    expenseSavingsShare = newExpenseSavingsShare,
+                    accountBalances = miscellaneousRepository.getAccountBalances()
+                )
+            }
         }
-        for (childAccountTotal in accountTotal.children) {
-            result.addAll(getFilteredAccounts(childAccountTotal, date, includeAccounts, mapper))
-        }
-        return result
     }
 
     private fun getMonths(numberOfMonths: Int): List<LocalDate> {
@@ -201,46 +140,37 @@ class HomeViewModel(
         return dates
     }
 
+    private fun BigDecimal.shareIn(other: BigDecimal): Int {
+        if (other.compareTo(BigDecimal.ZERO) == 0) {
+            return 0
+        }
+        return this.multiply("10000".bd()).divide(other, DecimalMode.US_CURRENCY)
+            .floatValue(exactRequired = false).toInt()
+    }
+
     companion object {
         private const val TAG = "HomeVM"
-
         private const val MONTHS_FOR_NET_WORTH = 24
-        private const val MONTHS_GENERAL = 1
-
         private val typeNetWorth = ReportType.NET_WORTH
-        private val typeSavings = ReportType.SAVINGS
-        private val typeExpenses = ReportType.EXPENSE_AFTER_DEDUCTION
-        private val typeIncome = ReportType.INCOME
-        private val typeAssets = ReportType.ASSETS
-        private val typeLiabilities = ReportType.LIABILITIES
     }
 }
 
 data class HomeViewState(
     val loading: Boolean = false,
     val netWorth: List<MonthAccountBalance> = listOf(),
-    val expenses: Balance = Balance(),
-    val savings: Balance = Balance(),
-    val topExpenses: List<AccountBalance> = listOf(),
-    val assetAccountBalances: List<AccountBalance> = listOf(),
-    val liabilityAccountBalances: List<AccountBalance> = listOf(),
-    val transactionGroups: List<AccountBalance> = listOf(),
-    val monthSalary: BigDecimal = BigDecimal.ZERO
+    val expenseSavingsShare: ExpenseSavingsShare = ExpenseSavingsShare(),
+    val accountBalances: List<AccountBalance> = listOf(),
+    val transactionGroups: List<AccountBalance> = listOf()
+)
+
+data class ExpenseSavingsShare(
+    val expensesSharePercent: Float = 0f,
+    val savingsSharePercent: Float = 0f,
+    val deductionsSharePercent: Float = 0f,
+    val includeDeductions: Boolean = false,
 )
 
 data class MonthAccountBalance(
     val balance: BigDecimal = BigDecimal.ZERO,
     val date: LocalDate = LocalDate.fromEpochDays(0)
 )
-
-data class AccountBalance(val name: String, val balance: BigDecimal)
-
-data class Balance(
-    val date: LocalDate = LocalDate.fromEpochDays(0),
-    val month: BigDecimal = BigDecimal.ZERO,
-    val annual: BigDecimal = BigDecimal.ZERO,
-    val monthMax: BigDecimal = BigDecimal.ZERO,
-    val annualMax: BigDecimal = BigDecimal.ZERO
-)
-
-data class ChildAccountBalance(val name: String, val date: LocalDate, val balance: BigDecimal)
