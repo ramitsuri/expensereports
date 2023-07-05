@@ -263,8 +263,8 @@ private fun FilterRow(
         onFilterUpdated(
             startDate.value.localDate(),
             endDate.value.localDate(),
-            minAmount.value.toBigDecimal(),
-            maxAmount.value.toBigDecimal(),
+            minAmount.value.bigDecimal(),
+            maxAmount.value.bigDecimal(),
         )
     }
     if (startDateFilterDialogState.value) {
