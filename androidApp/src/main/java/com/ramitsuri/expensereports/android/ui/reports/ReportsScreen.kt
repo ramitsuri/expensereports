@@ -59,6 +59,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ramitsuri.expensereports.android.R
+import com.ramitsuri.expensereports.android.ui.views.AccountsFilterDialog
 import com.ramitsuri.expensereports.android.ui.views.Table
 import com.ramitsuri.expensereports.android.ui.views.TableCell
 import com.ramitsuri.expensereports.android.utils.format
@@ -95,10 +96,8 @@ fun ReportsScreen(
         views = viewState.views,
         onViewSelected = viewModel::onViewSelected,
         onErrorShown = viewModel::onErrorShown,
-        accounts = viewState.accountsFilter,
-        onAccountClicked = viewModel::onAccountClicked,
+        accounts = viewState.accounts,
         onAccountFiltersApplied = viewModel::onAccountFiltersApplied,
-        onAccountFiltersNotApplied = viewModel::onAccountFiltersNotApplied,
         months = viewState.months,
         onMonthClicked = viewModel::onMonthClicked,
         reportView = viewState.report,
@@ -118,9 +117,7 @@ private fun ReportsContent(
     onViewSelected: (View) -> Unit,
     onErrorShown: () -> Unit,
     accounts: List<Account>,
-    onAccountClicked: (account: Account) -> Unit,
-    onAccountFiltersApplied: () -> Unit,
-    onAccountFiltersNotApplied: () -> Unit,
+    onAccountFiltersApplied: (List<Account>) -> Unit,
     months: List<FilterItem>,
     onMonthClicked: (item: FilterItem) -> Unit,
     reportView: ReportView?,
@@ -157,9 +154,7 @@ private fun ReportsContent(
             )
             FilterRow(
                 accounts = accounts,
-                onAccountClicked = onAccountClicked,
                 onAccountFiltersApplied = onAccountFiltersApplied,
-                onAccountFiltersNotApplied = onAccountFiltersNotApplied,
                 items = months,
                 onItemClicked = onMonthClicked
             )
@@ -615,9 +610,7 @@ private fun Selector(
 @Composable
 private fun FilterRow(
     accounts: List<Account>,
-    onAccountClicked: (Account) -> Unit,
-    onAccountFiltersApplied: () -> Unit,
-    onAccountFiltersNotApplied: () -> Unit,
+    onAccountFiltersApplied: (List<Account>) -> Unit,
     items: List<FilterItem>,
     onItemClicked: (item: FilterItem) -> Unit,
     modifier: Modifier = Modifier
@@ -656,89 +649,9 @@ private fun FilterRow(
     if (dialogState.value) {
         AccountsFilterDialog(
             accounts = accounts,
-            onAccountClicked = onAccountClicked,
             onAccountFiltersApplied = onAccountFiltersApplied,
-            onAccountFiltersNotApplied = onAccountFiltersNotApplied,
             dialogState = dialogState
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AccountsFilterDialog(
-    accounts: List<Account>,
-    onAccountClicked: (Account) -> Unit,
-    onAccountFiltersApplied: () -> Unit,
-    onAccountFiltersNotApplied: () -> Unit,
-    modifier: Modifier = Modifier,
-    dialogState: MutableState<Boolean>
-) {
-    Dialog(
-        onDismissRequest = { dialogState.value = false },
-        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)
-    ) {
-        Card(modifier = modifier.padding(16.dp)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.8f)
-                    .padding(16.dp)
-            ) {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.weight(1f, false)
-                ) {
-                    accounts.forEach { account ->
-                        item {
-                            Row(
-                                modifier = Modifier
-                                    .clickable { onAccountClicked(account) }
-                                    .fillMaxWidth()
-                                    .padding(4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                repeat(account.level) {
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                }
-                                Icon(
-                                    imageVector = if (account.selected) {
-                                        Icons.Filled.CheckBox
-                                    } else {
-                                        Icons.Filled.CheckBoxOutlineBlank
-                                    },
-                                    contentDescription = null,
-                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = account.name,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = {
-                        onAccountFiltersNotApplied()
-                        dialogState.value = false
-                    }) {
-                        Text(text = stringResource(id = R.string.cancel))
-                    }
-                    TextButton(onClick = {
-                        onAccountFiltersApplied()
-                        dialogState.value = false
-                    }) {
-                        Text(text = stringResource(id = R.string.apply))
-                    }
-                }
-            }
-        }
     }
 }
 

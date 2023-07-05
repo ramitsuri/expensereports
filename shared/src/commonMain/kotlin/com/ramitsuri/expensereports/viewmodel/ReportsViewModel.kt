@@ -95,34 +95,14 @@ class ReportsViewModel(
         recalculate()
     }
 
-    fun onAccountClicked(account: Account) {
-        val currentAccounts = _state.value.accountsFilter
-        val newAccounts = currentAccounts.map {
-            if (it.fullName == account.fullName) {
-                it.copy(selected = !it.selected)
-            } else {
-                it
-            }
-        }
-        _state.update {
-            it.copy(accountsFilter = newAccounts)
-        }
-    }
-
-    fun onAccountFiltersApplied() {
+    fun onAccountFiltersApplied(accountsFilter: List<Account>) {
         _state.update {
             it.copy(loading = true)
         }
         _state.update {
-            it.copy(accounts = it.accountsFilter)
+            it.copy(accounts = accountsFilter)
         }
         recalculate()
-    }
-
-    fun onAccountFiltersNotApplied() {
-        _state.update {
-            it.copy(accountsFilter = it.accounts)
-        }
     }
 
     fun onViewSelected(selectedView: View) {
@@ -204,7 +184,6 @@ class ReportsViewModel(
                 report = calculatedReport,
                 months = months,
                 accounts = accounts,
-                accountsFilter = accounts
             )
         }
     }
@@ -230,7 +209,6 @@ data class ReportsViewState(
         .map { ReportSelection(it) },
     val months: List<FilterItem> = listOf(),
     val accounts: List<Account> = listOf(),
-    val accountsFilter: List<Account> = listOf(),
     val report: ReportView? = null,
     val error: Error? = null
 )
