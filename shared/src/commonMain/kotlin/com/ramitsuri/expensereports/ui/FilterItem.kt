@@ -56,6 +56,36 @@ data class Account(
 
     fun isChildOf(parentFullName: String) =
         fullName.startsWith(prefix = parentFullName)
+
+    fun removeRoot(): Account {
+        return copy(fullName = fullName.removePrefix("$ROOT:"))
+    }
+
+    companion object {
+        fun fromFullName(fullName: String, selected: Boolean = false): Account {
+            val fullNameWithPrefix = "$ROOT:$fullName"
+            val nameParts = fullNameWithPrefix.split(":")
+            val name = nameParts.last()
+            val level = fullNameWithPrefix.count { it == ':' }
+            return Account(
+                name = name,
+                fullName = fullNameWithPrefix,
+                level = level,
+                selected = selected
+            )
+        }
+
+        fun rootAccount(selected: Boolean = false): Account {
+            return Account(
+                name = ROOT,
+                fullName = ROOT,
+                level = 0,
+                selected = selected
+            )
+        }
+
+        private const val ROOT = "All Accounts"
+    }
 }
 
 fun Account.getStateFromClick(currentState: List<Account>): List<Account> {

@@ -56,6 +56,9 @@ getTransactions:
 SELECT * FROM TransactionEntity
 WHERE year IN :years AND month IN :months;
 
+getAllTransactions:
+SELECT * FROM TransactionEntity;
+
 insertTransaction:
 INSERT OR REPLACE INTO
 TransactionEntity(year, month, date, description, total, splits, num)

@@ -72,10 +72,12 @@ import androidx.compose.ui.window.DialogProperties
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import com.ramitsuri.expensereports.android.R
+import com.ramitsuri.expensereports.android.ui.views.AccountsFilterDialog
 import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.monthDateYear
 import com.ramitsuri.expensereports.data.Split
 import com.ramitsuri.expensereports.data.Transaction
+import com.ramitsuri.expensereports.ui.Account
 import com.ramitsuri.expensereports.viewmodel.TransactionsFilter
 import com.ramitsuri.expensereports.viewmodel.TransactionsViewModel
 import kotlinx.datetime.Instant
@@ -109,9 +111,9 @@ fun TransactionsScreen(
 fun TransactionsContent(
     isLoading: Boolean,
     transactions: List<Transaction>,
-    filter: TransactionsFilter,
-    onFilterUpdated: (startDate: LocalDate?, endDate: LocalDate?, minAmount: BigDecimal?, maxAmount: BigDecimal?) -> Unit,
-    modifier: Modifier = Modifier
+    filter: TransactionsFilter?,
+    onFilterUpdated: (startDate: LocalDate, endDate: LocalDate, minAmount: BigDecimal, maxAmount: BigDecimal, fromAccounts: List<Account>, toAccounts: List<Account>) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
@@ -161,29 +163,34 @@ private fun Transactions(transactions: List<Transaction>) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FilterRow(
-    filter: TransactionsFilter,
-    onFilterUpdated: (startDate: LocalDate?, endDate: LocalDate?, minAmount: BigDecimal?, maxAmount: BigDecimal?) -> Unit,
+    filter: TransactionsFilter?,
+    onFilterUpdated: (startDate: LocalDate, endDate: LocalDate, minAmount: BigDecimal, maxAmount: BigDecimal, fromAccounts: List<Account>, toAccounts: List<Account>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val startDateFilterDialogState = rememberSaveable { mutableStateOf(false) }
     val endDateFilterDialogState = rememberSaveable { mutableStateOf(false) }
     val amountFilterDialogState = rememberSaveable { mutableStateOf(false) }
+    val fromAccountsDialogState = rememberSaveable { mutableStateOf(false) }
+    val toAccountsDialogState = rememberSaveable { mutableStateOf(false) }
 
     val startDate: MutableState<String> =
-        rememberSaveable { mutableStateOf(filter.startDate.string()) }
-    val startDateValue = startDate.value.localDate() ?: filter.startDate
+        rememberSaveable { mutableStateOf(filter?.startDate.string()) }
+    val startDateValue = startDate.value.localDate() ?: filter?.startDate
 
     val endDate: MutableState<String> =
-        rememberSaveable { mutableStateOf(filter.endDate.string()) }
-    val endDateValue = endDate.value.localDate() ?: filter.endDate
+        rememberSaveable { mutableStateOf(filter?.endDate.string()) }
+    val endDateValue = endDate.value.localDate() ?: filter?.endDate
 
     val minAmount: MutableState<String> =
-        rememberSaveable { mutableStateOf(filter.minAmount.string()) }
-    val minAmountValue = minAmount.value.bigDecimal() ?: filter.minAmount
+        rememberSaveable { mutableStateOf(filter?.minAmount.string()) }
+    val minAmountValue = minAmount.value.bigDecimal() ?: filter?.minAmount
 
     val maxAmount: MutableState<String> =
-        rememberSaveable { mutableStateOf(filter.maxAmount.string()) }
-    val maxAmountValue = maxAmount.value.bigDecimal() ?: filter.maxAmount
+        rememberSaveable { mutableStateOf(filter?.maxAmount.string()) }
+    val maxAmountValue = maxAmount.value.bigDecimal() ?: filter?.maxAmount
+
+    val fromAccounts = rememberSaveable { mutableStateOf(filter?.fromAccounts ?: listOf()) }
+    val toAccounts = rememberSaveable { mutableStateOf(filter?.toAccounts ?: listOf()) }
 
     Row(
         modifier = modifier.fillMaxWidth()
@@ -257,14 +264,56 @@ private fun FilterRow(
                     }
                 )
             }
+            item { // From accounts filter
+                FilterChip(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.KeyboardArrowDown,
+                            contentDescription = stringResource(id = R.string.transactions_filter_amount_range),
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    },
+                    selected = true,
+                    onClick = {
+                        fromAccountsDialogState.value = true
+                    },
+                    label = {
+                        Text(
+                            text = "From accounts"
+                        )
+                    }
+                )
+            }
+            item { // To accounts filter
+                FilterChip(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.KeyboardArrowDown,
+                            contentDescription = stringResource(id = R.string.transactions_filter_amount_range),
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    },
+                    selected = true,
+                    onClick = {
+                        toAccountsDialogState.value = true
+                    },
+                    label = {
+                        Text(
+                            text = "To accounts"
+                        )
+                    }
+                )
+            }
         }
     }
     fun updateFilter() {
         onFilterUpdated(
-            startDate.value.localDate(),
-            endDate.value.localDate(),
-            minAmount.value.bigDecimal(),
-            maxAmount.value.bigDecimal(),
+            startDate.value.localDate()!!,
+            endDate.value.localDate()!!,
+            minAmount.value.bigDecimal()!!,
+            maxAmount.value.bigDecimal()!!,
+            fromAccounts.value,
+            toAccounts.value
         )
     }
     if (startDateFilterDialogState.value) {
@@ -299,6 +348,26 @@ private fun FilterRow(
                 updateFilter()
             },
             dialogState = amountFilterDialogState
+        )
+    }
+    if (fromAccountsDialogState.value) {
+        AccountsFilterDialog(
+            accounts = fromAccounts.value,
+            onAccountFiltersApplied = { accounts ->
+                fromAccounts.value = accounts
+                updateFilter()
+            },
+            dialogState = fromAccountsDialogState
+        )
+    }
+    if (toAccountsDialogState.value) {
+        AccountsFilterDialog(
+            accounts = toAccounts.value,
+            onAccountFiltersApplied = { accounts ->
+                toAccounts.value = accounts
+                updateFilter()
+            },
+            dialogState = toAccountsDialogState
         )
     }
 }
@@ -571,8 +640,8 @@ fun TransactionItem(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val debitSplits = transaction.splits.filter { it.amount < BigDecimal.ZERO }
-                    val creditSplits = transaction.splits.filter { it.amount >= BigDecimal.ZERO }
+                    val debitSplits = transaction.splits.filter { it.isDebit() }
+                    val creditSplits = transaction.splits.filter { it.isCredit() }
                     Column(
                         modifier = Modifier
                             .width(0.dp)

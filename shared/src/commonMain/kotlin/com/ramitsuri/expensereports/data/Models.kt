@@ -169,6 +169,10 @@ data class Split(
         account = dto.account,
         amount = BigDecimal.parseString(dto.amount)
     )
+
+    fun isDebit() = amount < BigDecimal.ZERO
+
+    fun isCredit() = !isDebit()
 }
 
 data class TransactionGroup(

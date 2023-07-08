@@ -10,9 +10,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.withContext
 
 interface TransactionsDao {
     fun get(years: List<Int>, months: List<Int>): Flow<List<Transaction>>
+
+    suspend fun getAll(): List<Transaction>
 
     suspend fun insert(year: Int, month: Int, transactions: List<Transaction>)
 }
@@ -33,6 +36,16 @@ class TransactionsDaoImpl(
                 }
             }
             .flowOn(ioDispatcher)
+    }
+
+    override suspend fun getAll(): List<Transaction> {
+        return withContext(ioDispatcher) {
+            dbQueries.getAllTransactions()
+                .executeAsList()
+                .mapNotNull { transactionEntity ->
+                    mapper(transactionEntity)
+                }
+        }
     }
 
     override suspend fun insert(year: Int, month: Int, transactions: List<Transaction>) {

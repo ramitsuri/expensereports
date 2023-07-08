@@ -33,6 +33,10 @@ class TransactionsRepository(
         }
     }
 
+    suspend fun getAllTransactions(): List<Transaction> {
+        return dao.getAll()
+    }
+
     private fun getDates(startDate: LocalDate, endDate: LocalDate): List<LocalDate> {
         val dates = mutableSetOf<LocalDate>()
         var date = startDate
