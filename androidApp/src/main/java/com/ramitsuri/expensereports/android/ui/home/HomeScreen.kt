@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -98,20 +97,20 @@ private fun HomeContent(
         modifier = modifier
             .fillMaxSize()
             .padding(8.dp)
-            .verticalScroll(rememberScrollState())
     ) {
-        NetWorthContent(netWorth, modifier = modifier.heightIn(min = 200.dp, max = 240.dp))
-        Spacer(modifier = modifier.height(8.dp))
+        NetWorthContent(netWorth, modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
         SavingsExpenseIncomeContent(
             expenseSavingsShare = expenseSavingsShare,
             onIncludeDeductionsChanged = onIncludeDeductionsChanged,
-            modifier = modifier.heightIn(min = 160.dp, max = 176.dp)
+            modifier = Modifier.weight(1f)
         )
-        Spacer(modifier = modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         AccountBalancesContent(
             accountBalances = accountBalances,
             transactionGroups = transactionGroups,
-            modifier = modifier.heightIn(min = 64.dp, max = 64.dp)
+            modifier = Modifier
+                .weight(1f)
         )
     }
 }
@@ -127,7 +126,7 @@ private fun NetWorthContent(
             .fillMaxWidth()
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -177,10 +176,11 @@ private fun SavingsExpenseIncomeContent(
         }
     }
     Card(
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxSize()
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -311,38 +311,42 @@ private fun AccountBalancesContent(
     transactionGroups: List<AccountBalance>,
     modifier: Modifier = Modifier
 ) {
-    val itemsInRow = 3
-    val accounts = accountBalances
-        .plus(transactionGroups)
-    val accountChunks = accounts.chunked(itemsInRow)
-    accountChunks.forEachIndexed { index, chunk ->
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            chunk.forEach { account ->
-                AccountItem(
-                    name = account.name,
-                    balance = account.balance,
-                    modifier = Modifier
-                        .width(0.dp)
-                        .weight(1 / itemsInRow.toFloat())
-                )
+    Column(modifier = modifier
+        .fillMaxSize()
+        .verticalScroll(rememberScrollState())) {
+        val itemsInRow = 3
+        val accounts = accountBalances
+            .plus(transactionGroups)
+        val accountChunks = accounts.chunked(itemsInRow)
+        accountChunks.forEachIndexed { index, chunk ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                chunk.forEach { account ->
+                    AccountItem(
+                        name = account.name,
+                        balance = account.balance,
+                        modifier = Modifier
+                            .width(0.dp)
+                            .weight(1 / itemsInRow.toFloat())
+                    )
+                }
+                repeat(itemsInRow - chunk.size) {
+                    Spacer(
+                        modifier = Modifier
+                            .width(0.dp)
+                            .weight(1 / itemsInRow.toFloat())
+                    )
+                }
             }
-            repeat(itemsInRow - chunk.size) {
+            if (index != accountChunks.lastIndex) {
                 Spacer(
                     modifier = Modifier
-                        .width(0.dp)
-                        .weight(1 / itemsInRow.toFloat())
+                        .fillMaxWidth()
+                        .height(8.dp)
                 )
             }
-        }
-        if (index != accountChunks.lastIndex) {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-            )
         }
     }
 }
