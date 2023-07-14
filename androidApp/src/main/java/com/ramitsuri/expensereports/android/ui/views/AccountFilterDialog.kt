@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,7 +51,7 @@ fun AccountsFilterDialog(
     modifier: Modifier = Modifier,
     dialogState: MutableState<Boolean>
 ) {
-    var selectionState by rememberSaveable { mutableStateOf(accounts) }
+    var selectionState by remember { mutableStateOf(accounts) }
 
     Dialog(
         onDismissRequest = { dialogState.value = false },

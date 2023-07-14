@@ -53,6 +53,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -160,6 +162,32 @@ private fun Transactions(transactions: List<Transaction>) {
     }
 }
 
+val AccountSaver = run {
+    val nameKey = "Name"
+    val fullNameKey = "FullName"
+    val levelKey = "Level"
+    val selectedKey = "Selected"
+    mapSaver<Account>(
+        save = {
+            mapOf(
+                nameKey to it.name,
+                fullNameKey to it.fullName,
+                levelKey to it.level,
+                selectedKey to it.selected
+            )
+        },
+        restore = {
+            Account(
+                name = it[nameKey] as String,
+                fullName = it[fullNameKey] as String,
+                level = it[levelKey] as Int,
+                selected = it[selectedKey] as Boolean
+            )
+        }
+    )
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FilterRow(
@@ -189,8 +217,8 @@ private fun FilterRow(
         rememberSaveable { mutableStateOf(filter?.maxAmount.string()) }
     val maxAmountValue = maxAmount.value.bigDecimal() ?: filter?.maxAmount
 
-    val fromAccounts = rememberSaveable { mutableStateOf(filter?.fromAccounts ?: listOf()) }
-    val toAccounts = rememberSaveable { mutableStateOf(filter?.toAccounts ?: listOf()) }
+    val fromAccounts = remember { mutableStateOf(filter?.fromAccounts ?: listOf()) }
+    val toAccounts = remember { mutableStateOf(filter?.toAccounts ?: listOf()) }
 
     Row(
         modifier = modifier.fillMaxWidth()
