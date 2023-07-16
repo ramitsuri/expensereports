@@ -79,8 +79,8 @@ class HomeViewModel(
     fun onIncludeDeductionsChanged() {
         _state.update { previousState ->
             val previousExpenseSavingsShare = previousState.expenseSavingsShare
-            val newExpenseSavingsShare = previousState.expenseSavingsShare.copy(
-                includeDeductions = !previousExpenseSavingsShare.includeDeductions
+            val newExpenseSavingsShare = previousState.expenseSavingsShare?.copy(
+                includeDeductions = previousExpenseSavingsShare?.includeDeductions?.not() ?: false
             )
             previousState.copy(expenseSavingsShare = newExpenseSavingsShare)
         }
@@ -103,23 +103,25 @@ class HomeViewModel(
                 val savings = incomeAfterDeductions.subtract(expensesAfterDeductions)
                 val previousExpenseSavingsShare = previousState.expenseSavingsShare
                 val newExpenseSavingsShare =
-                    if (previousState.expenseSavingsShare.includeDeductions) {
+                    if (previousExpenseSavingsShare?.includeDeductions == true) {
                         val expensesShare = expensesAfterDeductions.shareIn(income)
                         val savingsShare = savings.shareIn(income)
                         val deductionsShare = 10000 - savingsShare - expensesShare
-                        previousExpenseSavingsShare.copy(
+                        ExpenseSavingsShare(
                             expensesSharePercent = expensesShare.div(100f),
                             savingsSharePercent = savingsShare.div(100f),
-                            deductionsSharePercent = deductionsShare.div(100f)
+                            deductionsSharePercent = deductionsShare.div(100f),
+                            includeDeductions = true
                         )
                     } else {
                         val expensesShare = expensesAfterDeductions.shareIn(incomeAfterDeductions)
                         val savingsShare = savings.shareIn(incomeAfterDeductions)
                         val deductionsShare = 0f
-                        previousExpenseSavingsShare.copy(
+                        ExpenseSavingsShare(
                             expensesSharePercent = expensesShare.div(100f),
                             savingsSharePercent = savingsShare.div(100f),
-                            deductionsSharePercent = deductionsShare
+                            deductionsSharePercent = deductionsShare,
+                            includeDeductions = false
                         )
                     }
                 previousState.copy(
@@ -158,16 +160,16 @@ class HomeViewModel(
 data class HomeViewState(
     val loading: Boolean = false,
     val netWorth: List<MonthAccountBalance> = listOf(),
-    val expenseSavingsShare: ExpenseSavingsShare = ExpenseSavingsShare(),
+    val expenseSavingsShare: ExpenseSavingsShare? = null,
     val accountBalances: List<AccountBalance> = listOf(),
     val transactionGroups: List<AccountBalance> = listOf()
 )
 
 data class ExpenseSavingsShare(
-    val expensesSharePercent: Float = 0f,
-    val savingsSharePercent: Float = 0f,
-    val deductionsSharePercent: Float = 0f,
-    val includeDeductions: Boolean = false,
+    val expensesSharePercent: Float,
+    val savingsSharePercent: Float,
+    val deductionsSharePercent: Float,
+    val includeDeductions: Boolean,
 )
 
 data class MonthAccountBalance(

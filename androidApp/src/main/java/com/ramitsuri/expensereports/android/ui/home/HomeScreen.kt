@@ -87,7 +87,7 @@ fun HomeScreen(
 @Composable
 private fun HomeContent(
     netWorth: List<MonthAccountBalance>,
-    expenseSavingsShare: ExpenseSavingsShare,
+    expenseSavingsShare: ExpenseSavingsShare?,
     onIncludeDeductionsChanged: () -> Unit,
     accountBalances: List<AccountBalance>,
     transactionGroups: List<AccountBalance>,
@@ -149,125 +149,127 @@ private fun NetWorthContent(
 
 @Composable
 private fun SavingsExpenseIncomeContent(
-    expenseSavingsShare: ExpenseSavingsShare,
+    expenseSavingsShare: ExpenseSavingsShare?,
     onIncludeDeductionsChanged: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val values = buildList {
-        add(
-            Value(
-                color = Color(0xff47B39C),
-                sharePercent = expenseSavingsShare.expensesSharePercent
-            )
-        )
-        add(
-            Value(
-                color = Color(0xffb12c21),
-                sharePercent = expenseSavingsShare.savingsSharePercent
-            )
-        )
-        if (expenseSavingsShare.includeDeductions) {
+    if (expenseSavingsShare != null) {
+        val values = buildList {
             add(
                 Value(
-                    color = Color(0xff00658f),
-                    sharePercent = expenseSavingsShare.deductionsSharePercent
+                    color = Color(0xff47B39C),
+                    sharePercent = expenseSavingsShare.expensesSharePercent
                 )
             )
-        }
-    }
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(id = R.string.home_expenses_and_savings),
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(0.5f),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    PieChart(values)
-                }
-                Divider(
-                    modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .width(0.5.dp),
-                    color = MaterialTheme.colorScheme.onBackground
+            add(
+                Value(
+                    color = Color(0xffb12c21),
+                    sharePercent = expenseSavingsShare.savingsSharePercent
                 )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(0.5f)
-                        .padding(top = 8.dp, bottom = 8.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    SimpleRow(
-                        text = stringResource(id = R.string.home_expenses_share),
-                        value = expenseSavingsShare.expensesSharePercent.formatPercent(),
-                        color = values[0].color,
-                        modifier = Modifier
+            )
+            if (expenseSavingsShare.includeDeductions) {
+                add(
+                    Value(
+                        color = Color(0xff00658f),
+                        sharePercent = expenseSavingsShare.deductionsSharePercent
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SimpleRow(
-                        text = stringResource(id = R.string.home_savings_share),
-                        value = expenseSavingsShare.savingsSharePercent.formatPercent(),
-                        color = values[1].color,
-                        modifier = Modifier
-                    )
-                    if (expenseSavingsShare.includeDeductions) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        SimpleRow(
-                            text = stringResource(id = R.string.home_deductions_share),
-                            value = expenseSavingsShare.deductionsSharePercent.formatPercent(),
-                            color = values[2].color,
-                            modifier = Modifier
-                        )
-                    }
-                }
+                )
             }
-            Row(
+        }
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            modifier = modifier.fillMaxSize()
+        ) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .toggleable(
-                        value = expenseSavingsShare.includeDeductions,
-                        onValueChange = { onIncludeDeductionsChanged() },
-                        role = Role.Checkbox
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = stringResource(id = R.string.home_include_deductions),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    text = stringResource(id = R.string.home_expenses_and_savings),
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
-                Checkbox(
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
                     modifier = Modifier
-                        .size(16.dp),
-                    checked = expenseSavingsShare.includeDeductions,
-                    onCheckedChange = null
-                )
+                        .weight(1f)
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(0.5f),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        PieChart(values)
+                    }
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxHeight(0.8f)
+                            .width(0.5.dp),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(0.5f)
+                            .padding(top = 8.dp, bottom = 8.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        SimpleRow(
+                            text = stringResource(id = R.string.home_expenses_share),
+                            value = expenseSavingsShare.expensesSharePercent.formatPercent(),
+                            color = values[0].color,
+                            modifier = Modifier
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SimpleRow(
+                            text = stringResource(id = R.string.home_savings_share),
+                            value = expenseSavingsShare.savingsSharePercent.formatPercent(),
+                            color = values[1].color,
+                            modifier = Modifier
+                        )
+                        if (expenseSavingsShare.includeDeductions) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            SimpleRow(
+                                text = stringResource(id = R.string.home_deductions_share),
+                                value = expenseSavingsShare.deductionsSharePercent.formatPercent(),
+                                color = values[2].color,
+                                modifier = Modifier
+                            )
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .toggleable(
+                            value = expenseSavingsShare.includeDeductions,
+                            onValueChange = { onIncludeDeductionsChanged() },
+                            role = Role.Checkbox
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.home_include_deductions),
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                    Checkbox(
+                        modifier = Modifier
+                            .size(16.dp),
+                        checked = expenseSavingsShare.includeDeductions,
+                        onCheckedChange = null
+                    )
+                }
             }
         }
     }
@@ -311,9 +313,11 @@ private fun AccountBalancesContent(
     transactionGroups: List<AccountBalance>,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier
-        .fillMaxSize()
-        .verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
         val itemsInRow = 3
         val accounts = accountBalances
             .plus(transactionGroups)

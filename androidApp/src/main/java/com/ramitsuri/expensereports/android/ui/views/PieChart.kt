@@ -18,15 +18,24 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun PieChart(values: List<Value>) {
-    val animateFloat = remember { Animatable(0f) }
-    LaunchedEffect(animateFloat, values) {
-        animateFloat.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 3000, easing = LinearEasing)
-        )
+    val totalAnimationDuration = 3000L
+    val animateFloats = remember {
+        values.map { Animatable(0f) }
+    }
+    LaunchedEffect(animateFloats, values) {
+        values.forEachIndexed { index, value ->
+            val animationDuration = (totalAnimationDuration * value.sharePercent) / 100
+            animateFloats[index].animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = animationDuration.toInt(),
+                    easing = LinearEasing
+                )
+            )
+        }
     }
     val sweepAngles = values.map { value ->
-        (360 * value.sharePercent)/100
+        (360 * value.sharePercent) / 100
     }
 
     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -36,7 +45,7 @@ fun PieChart(values: List<Value>) {
             drawArc(
                 color = value.color,
                 startAngle = startAngle,
-                sweepAngle = sweepAngles[index] * animateFloat.value,
+                sweepAngle = sweepAngles[index] * animateFloats[index].value,
                 useCenter = false,
                 topLeft = Offset((size.width - 2 * radius) / 2, (size.height - 2 * radius) / 2),
                 size = Size(radius * 2, radius * 2),
