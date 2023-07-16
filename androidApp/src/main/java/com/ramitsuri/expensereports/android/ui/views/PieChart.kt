@@ -7,7 +7,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -19,9 +18,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun PieChart(values: List<Value>) {
     val totalAnimationDuration = 3000L
-    val animateFloats = remember {
-        values.map { Animatable(0f) }
-    }
+    val animateFloats = values.map { Animatable(0f) }
     LaunchedEffect(animateFloats, values) {
         values.forEachIndexed { index, value ->
             val animationDuration = (totalAnimationDuration * value.sharePercent) / 100
@@ -49,7 +46,7 @@ fun PieChart(values: List<Value>) {
                 useCenter = false,
                 topLeft = Offset((size.width - 2 * radius) / 2, (size.height - 2 * radius) / 2),
                 size = Size(radius * 2, radius * 2),
-                style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Butt)
+                style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Butt)
             )
             startAngle += sweepAngles[index]
         }

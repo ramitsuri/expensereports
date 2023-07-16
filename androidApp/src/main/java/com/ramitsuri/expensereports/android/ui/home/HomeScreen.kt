@@ -157,13 +157,13 @@ private fun SavingsExpenseIncomeContent(
         val values = buildList {
             add(
                 Value(
-                    color = Color(0xff47B39C),
+                    color = Color(0xffb12c21),
                     sharePercent = expenseSavingsShare.expensesSharePercent
                 )
             )
             add(
                 Value(
-                    color = Color(0xffb12c21),
+                    color = Color(0xff47B39C),
                     sharePercent = expenseSavingsShare.savingsSharePercent
                 )
             )
