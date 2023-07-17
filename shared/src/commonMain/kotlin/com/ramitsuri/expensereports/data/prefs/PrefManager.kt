@@ -35,16 +35,6 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         }
     }
 
-    fun setMiscellaneousJson(json: String) {
-        val key = Key.MISCELLANEOUS
-        putString(key, json)
-    }
-
-    fun getMiscellaneousJson(): String? {
-        val key = Key.MISCELLANEOUS
-        return getString(key, null)
-    }
-
     fun setDownloadRecentData(downloadRecentData: Boolean) {
         val key = Key.DOWNLOAD_RECENT_DATA
         putBoolean(key, downloadRecentData)
@@ -154,10 +144,6 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
                 key = "last_download_time"
             ),
 
-            MISCELLANEOUS(
-                key = "miscellaneous"
-            ),
-
             DOWNLOAD_RECENT_DATA(
                 key = "download_recent_data"
             ),
@@ -173,6 +159,11 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
             // Legacy - no longer used and should be removed
             CONFIG(
                 key = "config",
+                isLegacy = true
+            ),
+
+            MISCELLANEOUS(
+                key = "miscellaneous",
                 isLegacy = true
             )
         }

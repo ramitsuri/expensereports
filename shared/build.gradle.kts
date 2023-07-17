@@ -53,6 +53,7 @@ kotlin {
                 implementation(libs.kotlinx.dateTime)
                 api(libs.touchlab.kermit)
                 implementation(libs.kotlin.bignum)
+                implementation(libs.datastore.preferences.core)
             }
         }
         val commonTest by getting {

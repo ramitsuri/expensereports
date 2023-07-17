@@ -22,6 +22,7 @@ androidx-activity-compose = "1.5.1"
 androidx-lifecycle = "2.5.1"
 androidx-navigation = "2.5.3"
 android-material = "1.7.0-alpha03"
+dataStoreVersion = "1.1.0-alpha04"
 
 junit = "4.13.2"
 
@@ -52,6 +53,9 @@ androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", 
 androidx-test-junit = { module = "androidx.test.ext:junit-ktx", version.ref = "androidx-test-junit" }
 android-material = { module = "com.google.android.material:material", version.ref = "android-material" }
 android-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+
+datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "dataStoreVersion" }
+datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "dataStoreVersion" }
 
 compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "composeCompiler" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }

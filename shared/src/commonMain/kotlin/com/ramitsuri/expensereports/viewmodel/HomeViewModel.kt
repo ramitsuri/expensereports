@@ -90,44 +90,46 @@ class HomeViewModel(
     private fun updateExpenseSavingsShare() {
         viewModelScope.launch(dispatcherProvider.io) {
             // Miscellaneous
-            _state.update { previousState ->
-                val income = miscellaneousRepository.getIncomeTotal()
-                if (income.compare(BigDecimal.ZERO) == 0) {
-                    return@launch
+            miscellaneousRepository.get().collect { miscellaneous ->
+                if (miscellaneous == null) {
+                    return@collect
                 }
-                val expenses = miscellaneousRepository.getExpensesTotal()
-                val expensesAfterDeductions =
-                    miscellaneousRepository.getExpensesAfterDeductionsTotal()
-                val deductions = expenses.subtract(expensesAfterDeductions)
-                val incomeAfterDeductions = income.subtract(deductions)
-                val savings = incomeAfterDeductions.subtract(expensesAfterDeductions)
-                val previousExpenseSavingsShare = previousState.expenseSavingsShare
-                val newExpenseSavingsShare =
-                    if (previousExpenseSavingsShare?.includeDeductions == true) {
-                        val expensesShare = expensesAfterDeductions.shareIn(income)
-                        val savingsShare = savings.shareIn(income)
-                        val deductionsShare = 10000 - savingsShare - expensesShare
-                        ExpenseSavingsShare(
-                            expensesSharePercent = expensesShare.div(100f),
-                            savingsSharePercent = savingsShare.div(100f),
-                            deductionsSharePercent = deductionsShare.div(100f),
-                            includeDeductions = true
-                        )
-                    } else {
-                        val expensesShare = expensesAfterDeductions.shareIn(incomeAfterDeductions)
-                        val savingsShare = savings.shareIn(incomeAfterDeductions)
-                        val deductionsShare = 0f
-                        ExpenseSavingsShare(
-                            expensesSharePercent = expensesShare.div(100f),
-                            savingsSharePercent = savingsShare.div(100f),
-                            deductionsSharePercent = deductionsShare,
-                            includeDeductions = false
-                        )
-                    }
-                previousState.copy(
-                    expenseSavingsShare = newExpenseSavingsShare,
-                    accountBalances = miscellaneousRepository.getAccountBalances()
-                )
+                _state.update { previousState ->
+                    val income = miscellaneous.incomeTotal
+                    val expenses = miscellaneous.expensesTotal
+                    val expensesAfterDeductions = miscellaneous.expensesAfterDeductionTotal
+                    val deductions = expenses.subtract(expensesAfterDeductions)
+                    val incomeAfterDeductions = income.subtract(deductions)
+                    val savings = incomeAfterDeductions.subtract(expensesAfterDeductions)
+                    val previousExpenseSavingsShare = previousState.expenseSavingsShare
+                    val newExpenseSavingsShare =
+                        if (previousExpenseSavingsShare?.includeDeductions == true) {
+                            val expensesShare = expensesAfterDeductions.shareIn(income)
+                            val savingsShare = savings.shareIn(income)
+                            val deductionsShare = 10000 - savingsShare - expensesShare
+                            ExpenseSavingsShare(
+                                expensesSharePercent = expensesShare.div(100f),
+                                savingsSharePercent = savingsShare.div(100f),
+                                deductionsSharePercent = deductionsShare.div(100f),
+                                includeDeductions = true
+                            )
+                        } else {
+                            val expensesShare =
+                                expensesAfterDeductions.shareIn(incomeAfterDeductions)
+                            val savingsShare = savings.shareIn(incomeAfterDeductions)
+                            val deductionsShare = 0f
+                            ExpenseSavingsShare(
+                                expensesSharePercent = expensesShare.div(100f),
+                                savingsSharePercent = savingsShare.div(100f),
+                                deductionsSharePercent = deductionsShare,
+                                includeDeductions = false
+                            )
+                        }
+                    previousState.copy(
+                        expenseSavingsShare = newExpenseSavingsShare,
+                        accountBalances = miscellaneous.accountBalances
+                    )
+                }
             }
         }
     }

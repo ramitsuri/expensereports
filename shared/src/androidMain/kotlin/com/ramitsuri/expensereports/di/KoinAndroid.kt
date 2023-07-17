@@ -1,10 +1,13 @@
 package com.ramitsuri.expensereports.di
 
 import android.content.Context
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.ramitsuri.expensereports.data.db.Database
 import com.ramitsuri.expensereports.data.prefs.PrefManager
 import com.ramitsuri.expensereports.data.prefs.SettingsKeyValueStore
+import com.ramitsuri.expensereports.data.prefs.Store
 import com.ramitsuri.expensereports.db.ReportsDb
+import com.ramitsuri.expensereports.utils.Constants
 import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.utils.Logger
 import com.russhwolf.settings.SharedPreferencesSettings
@@ -12,6 +15,7 @@ import com.squareup.sqldelight.android.AndroidSqliteDriver
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.serialization.json.Json
+import okio.Path.Companion.toPath
 import org.koin.dsl.module
 
 actual val platformModule = module {
@@ -50,6 +54,15 @@ actual val platformModule = module {
             ),
             get<DispatcherProvider>(),
             get<Json>()
+        )
+    }
+
+    single<Store> {
+        val producePath = {
+            get<Context>().filesDir.resolve(Constants.STORE_FILE).absolutePath
+        }
+        Store(
+            PreferenceDataStoreFactory.createWithPath(produceFile = { producePath().toPath() })
         )
     }
 }
