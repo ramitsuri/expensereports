@@ -15,19 +15,47 @@ internal class DummyMiscellaneousApiImpl(private val json: Json) : Miscellaneous
     private fun getJson(): String {
         return """
             {
-              "main_asset_accounts": [
-                "Assets:Current Assets:Checking",
-                "Assets:Current Assets:Savings",
-                "Assets:Investments:Retirement:401K"
-              ],
-              "main_liability_accounts": [
-                "Liabilities:CreditCard:CreditCard1"
-              ],
-              "main_income_accounts": [
-                "Income:Salary"
-              ],
-              "annual_budget": "12000",
-              "annual_savings_target": "12000"
+              "time": "2023-07-16T14:30:43Z",
+              "miscellaneous": {
+                "income_total": "250",
+                "expense_total": "150",
+                "expense_after_deduction_total": "100",
+                "savings_total": "100",
+                "account_balances": [
+                  {
+                    "name": "Checking",
+                    "balance": "100.00"
+                  },
+                  {
+                    "name": "Cash",
+                    "balance": "40"
+                  },
+                  {
+                    "name": "Savings",
+                    "balance": "1000.00"
+                  },
+                  {
+                    "name": "401K 1",
+                    "balance": "220.50"
+                  },
+                  {
+                    "name": "401K 2",
+                    "balance": "250.47"
+                  },
+                  {
+                    "name": "Credit Card 1",
+                    "balance": "47.85"
+                  },
+                  {
+                    "name": "Credit Card 2",
+                    "balance": "99.12"
+                  },
+                  {
+                    "name": "Credit Card 3",
+                    "balance": "1.45"
+                  }
+                ]
+              }
             }
         """.trimIndent()
     }
