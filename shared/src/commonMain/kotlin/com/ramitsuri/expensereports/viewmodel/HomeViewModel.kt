@@ -116,7 +116,7 @@ class HomeViewModel(
                         } else {
                             val expensesShare =
                                 expensesAfterDeductions.shareIn(incomeAfterDeductions)
-                            val savingsShare = savings.shareIn(incomeAfterDeductions)
+                            val savingsShare = 10000 - expensesShare
                             val deductionsShare = 0f
                             ExpenseSavingsShare(
                                 expensesSharePercent = expensesShare.div(100f),

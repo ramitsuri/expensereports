@@ -12,9 +12,9 @@ actual fun LocalDateTime.timeDateMonthYear(
     now: LocalDateTime
 ): String {
     val (formatSameYear, formatDifferentYear) = if (this.minute == 0) {
-        Pair("K a MMM d", "K a MMM d, uuuu")
+        Pair("h a MMM d", "h a MMM d, uuuu")
     } else {
-        Pair("K:mm a MMM d", "K:mm a MMM d, uuuu")
+        Pair("h:mm a MMM d", "h:mm a MMM d, uuuu")
     }
     return format(
         this,
