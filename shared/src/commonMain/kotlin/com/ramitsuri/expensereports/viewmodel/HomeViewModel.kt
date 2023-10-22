@@ -100,13 +100,12 @@ class HomeViewModel(
                     val expensesAfterDeductions = miscellaneous.expensesAfterDeductionTotal
                     val deductions = expenses.subtract(expensesAfterDeductions)
                     val incomeAfterDeductions = income.subtract(deductions)
-                    val savings = incomeAfterDeductions.subtract(expensesAfterDeductions)
                     val previousExpenseSavingsShare = previousState.expenseSavingsShare
                     val newExpenseSavingsShare =
                         if (previousExpenseSavingsShare?.includeDeductions == true) {
                             val expensesShare = expensesAfterDeductions.shareIn(income)
-                            val savingsShare = savings.shareIn(income)
-                            val deductionsShare = 10000 - savingsShare - expensesShare
+                            val deductionsShare = deductions.shareIn(income)
+                            val savingsShare = 10000 - deductionsShare - expensesShare
                             ExpenseSavingsShare(
                                 expensesSharePercent = expensesShare.div(100f),
                                 savingsSharePercent = savingsShare.div(100f),
@@ -116,8 +115,8 @@ class HomeViewModel(
                         } else {
                             val expensesShare =
                                 expensesAfterDeductions.shareIn(incomeAfterDeductions)
-                            val savingsShare = 10000 - expensesShare
                             val deductionsShare = 0f
+                            val savingsShare = 10000 - expensesShare
                             ExpenseSavingsShare(
                                 expensesSharePercent = expensesShare.div(100f),
                                 savingsSharePercent = savingsShare.div(100f),

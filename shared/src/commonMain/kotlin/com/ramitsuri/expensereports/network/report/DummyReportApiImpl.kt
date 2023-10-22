@@ -17,24 +17,31 @@ internal class DummyReportApiImpl(private val json: Json) : ReportApi {
             ReportType.NONE -> {
                 ""
             }
+
             ReportType.EXPENSE -> {
                 getExpenseReportJson(year)
             }
+
             ReportType.EXPENSE_AFTER_DEDUCTION -> {
                 getExpenseAfterDeductionReportJson(year)
             }
+
             ReportType.ASSETS -> {
                 getAssetsReportJson(year)
             }
+
             ReportType.LIABILITIES -> {
                 getLiabilitiesReportJson(year)
             }
+
             ReportType.INCOME -> {
                 getIncomeReportJson(year)
             }
+
             ReportType.NET_WORTH -> {
                 getNetWorthReportJson(year)
             }
+
             ReportType.SAVINGS -> {
                 getSavingsReportJson(year)
             }
@@ -549,29 +556,66 @@ internal class DummyReportApiImpl(private val json: Json) : ReportApi {
 }"""
 
     private fun getNetWorthReportJson(year: Int) = """
-        {
-          "name": "$year NetWorth",
-          "time": "$year-02-19T13:55:15Z",
-          "account_total": {
-            "name": "Networth",
-            "fullName": "Networth",
-            "children": [],
-            "monthAmounts": {
-              "1": "100",
-              "2": "200",
-              "3": "300",
-              "4": "400",
-              "5": "500",
-              "6": "600",
-              "7": "700",
-              "8": "800",
-              "9": "900",
-              "10": "1000",
-              "11": "1100",
-              "12": "1200"
-            }
-          }
-        }
+               {
+  "name": "$year NetWorth",
+  "time": "$year-08-21T12:30:45Z",
+  "account_total": {
+    "name": "Networth",
+    "fullname": "Networth",
+    "children": [],
+    "balances": [
+      {
+        "month": 1,
+        "amount": "1000"
+      },
+      {
+        "month": 2,
+        "amount": "1100"
+      },
+      {
+        "month": 3,
+        "amount": "1200"
+      },
+      {
+        "month": 4,
+        "amount": "1300"
+      },
+      {
+        "month": 5,
+        "amount": "1400"
+      },
+      {
+        "month": 6,
+        "amount": "1500"
+      },
+      {
+        "month": 7,
+        "amount": "1600"
+      },
+      {
+        "month": 8,
+        "amount": "1700"
+      },
+      {
+        "month": 9,
+        "amount": "1800"
+      },
+      {
+        "month": 10,
+        "amount": "1900"
+      },
+      {
+        "month": 11,
+        "amount": "2000"
+      },
+      {
+        "month": 12,
+        "amount": "2100"
+      }
+    ],
+    "total": "0.0"
+  }
+}
     """.trimIndent()
 
     private fun getSavingsReportJson(year: Int) = """
