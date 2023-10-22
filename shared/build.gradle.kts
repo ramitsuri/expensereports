@@ -7,6 +7,7 @@ plugins {
 }
 
 android {
+    namespace = "com.ramitsuri.expensereports"
     compileSdk = libs.versions.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -29,7 +30,8 @@ android {
 version = "1.0"
 
 kotlin {
-    android()
+    jvmToolchain(8)
+    androidTarget()
     ios()
     // Note: iosSimulatorArm64 target requires that all dependencies have M1 support
     iosSimulatorArm64()

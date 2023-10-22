@@ -4,11 +4,12 @@ plugins {
 }
 
 android {
-    compileSdk = 33
+    namespace = "com.ramitsuri.expensereports.android"
+    compileSdk = 34
     defaultConfig {
         applicationId = "com.ramitsuri.expensereports.android"
         minSdk = 28
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 23
         versionName = "2.3"
     }
@@ -25,7 +26,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
+        freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all-compatibility"
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
