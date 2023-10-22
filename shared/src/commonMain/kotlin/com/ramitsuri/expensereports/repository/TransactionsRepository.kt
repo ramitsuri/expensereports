@@ -15,14 +15,15 @@ class TransactionsRepository(
 
     fun getTransactions(
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
+        searchTerm: String
     ): Flow<List<Transaction>> {
         val dateRange = startDate.rangeTo(endDate)
         val dates = getDates(startDate, endDate)
         val years = dates.map { it.year }.distinct()
         val months = dates.map { it.month.number }.distinct()
 
-        return dao.get(years, months).map { list ->
+        return dao.get(years, months, searchTerm).map { list ->
             list.mapNotNull { transaction ->
                 if (dateRange.contains(transaction.date)) {
                     transaction

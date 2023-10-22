@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
 
 interface TransactionsDao {
-    fun get(years: List<Int>, months: List<Int>): Flow<List<Transaction>>
+    fun get(years: List<Int>, months: List<Int>, searchTerm: String): Flow<List<Transaction>>
 
     suspend fun getAll(): List<Transaction>
 
@@ -24,10 +24,16 @@ class TransactionsDaoImpl(
     private val dbQueries: ReportsQueries,
     private val ioDispatcher: CoroutineDispatcher,
 ) : TransactionsDao {
-    override fun get(years: List<Int>, months: List<Int>): Flow<List<Transaction>> {
+    override fun get(
+        years: List<Int>,
+        months: List<Int>,
+        searchTerm: String
+    ): Flow<List<Transaction>> {
         return dbQueries.getTransactions(
             years = years.map { it.toLong() },
-            months = months.map { it.toLong() })
+            months = months.map { it.toLong() },
+            searchTerm = searchTerm
+        )
             .asFlow()
             .mapToList()
             .mapNotNull { transactionEntities ->

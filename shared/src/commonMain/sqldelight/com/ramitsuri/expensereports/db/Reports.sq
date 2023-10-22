@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS TransactionEntity(
 
 getTransactions:
 SELECT * FROM TransactionEntity
-WHERE year IN :years AND month IN :months;
+WHERE year IN :years AND month IN :months AND description LIKE '%' || :searchTerm || '%';
 
 getAllTransactions:
 SELECT * FROM TransactionEntity;

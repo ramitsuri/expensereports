@@ -41,7 +41,8 @@ class TransactionsViewModel(
         minAmount: BigDecimal,
         maxAmount: BigDecimal,
         fromAccounts: List<Account>,
-        toAccounts: List<Account>
+        toAccounts: List<Account>,
+        searchTerm: String,
     ) {
         _state.update {
             it.copy(
@@ -51,7 +52,8 @@ class TransactionsViewModel(
                     minAmount = minAmount,
                     maxAmount = maxAmount,
                     fromAccounts = fromAccounts,
-                    toAccounts = toAccounts
+                    toAccounts = toAccounts,
+                    searchTerm = searchTerm,
                 )
             )
         }
@@ -68,8 +70,10 @@ class TransactionsViewModel(
         val startDate = filter?.startDate ?: now.toLocalDateTime(timeZone).date.startOfMonth()
         val endDate = filter?.endDate ?: now.toLocalDateTime(timeZone).date.endOfMonth()
 
+        val searchTerm = filter?.searchTerm ?: ""
+
         viewModelScope.launch(dispatchers.io) {
-            repository.getTransactions(startDate, endDate).collect { transactions ->
+            repository.getTransactions(startDate, endDate, searchTerm).collect { transactions ->
                 val filteredTransactions = transactions
                     .asSequence()
                     .filter { transaction ->
@@ -170,7 +174,8 @@ class TransactionsViewModel(
                 minAmount = MIN_AMOUNT.bd(),
                 maxAmount = MAX_AMOUNT.bd(),
                 fromAccounts = fromAccounts,
-                toAccounts = toAccounts
+                toAccounts = toAccounts,
+                searchTerm = ""
             )
             _state.update { previousState ->
                 previousState.copy(filter = filter)
@@ -198,4 +203,5 @@ data class TransactionsFilter(
     val maxAmount: BigDecimal,
     val fromAccounts: List<Account>,
     val toAccounts: List<Account>,
+    val searchTerm: String,
 )

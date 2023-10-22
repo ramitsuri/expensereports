@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -53,7 +54,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -65,6 +65,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -114,7 +115,7 @@ fun TransactionsContent(
     isLoading: Boolean,
     transactions: List<Transaction>,
     filter: TransactionsFilter?,
-    onFilterUpdated: (startDate: LocalDate, endDate: LocalDate, minAmount: BigDecimal, maxAmount: BigDecimal, fromAccounts: List<Account>, toAccounts: List<Account>) -> Unit,
+    onFilterUpdated: (startDate: LocalDate, endDate: LocalDate, minAmount: BigDecimal, maxAmount: BigDecimal, fromAccounts: List<Account>, toAccounts: List<Account>, searchTerm: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -192,7 +193,7 @@ val AccountSaver = run {
 @Composable
 private fun FilterRow(
     filter: TransactionsFilter?,
-    onFilterUpdated: (startDate: LocalDate, endDate: LocalDate, minAmount: BigDecimal, maxAmount: BigDecimal, fromAccounts: List<Account>, toAccounts: List<Account>) -> Unit,
+    onFilterUpdated: (startDate: LocalDate, endDate: LocalDate, minAmount: BigDecimal, maxAmount: BigDecimal, fromAccounts: List<Account>, toAccounts: List<Account>, searchTerm: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val startDateFilterDialogState = rememberSaveable { mutableStateOf(false) }
@@ -200,6 +201,7 @@ private fun FilterRow(
     val amountFilterDialogState = rememberSaveable { mutableStateOf(false) }
     val fromAccountsDialogState = rememberSaveable { mutableStateOf(false) }
     val toAccountsDialogState = rememberSaveable { mutableStateOf(false) }
+    val searchTermDialogState = rememberSaveable { mutableStateOf(false) }
 
     val startDate: MutableState<String> =
         rememberSaveable { mutableStateOf(filter?.startDate.string()) }
@@ -220,12 +222,35 @@ private fun FilterRow(
     val fromAccounts = remember { mutableStateOf(filter?.fromAccounts ?: listOf()) }
     val toAccounts = remember { mutableStateOf(filter?.toAccounts ?: listOf()) }
 
+    val searchTerm = remember { mutableStateOf("") }
+    val searchTermValue = searchTerm.value
+
     Row(
         modifier = modifier.fillMaxWidth()
     ) {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            item { // Description search
+                FilterChip(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = stringResource(id = R.string.transactions_filter_description_label),
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    },
+                    selected = true,
+                    onClick = {
+                        searchTermDialogState.value = true
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(id = R.string.transactions_filter_description_label)
+                        )
+                    }
+                )
+            }
             item { // Start date
                 FilterChip(
                     leadingIcon = {
@@ -341,7 +366,18 @@ private fun FilterRow(
             minAmount.value.bigDecimal()!!,
             maxAmount.value.bigDecimal()!!,
             fromAccounts.value,
-            toAccounts.value
+            toAccounts.value,
+            searchTerm.value,
+        )
+    }
+    if (searchTermDialogState.value) {
+        SearchTermFilterDialog(
+            searchTerm = searchTermValue,
+            onSearchTermUpdated = {
+                searchTerm.value = it
+                updateFilter()
+            },
+            dialogState = searchTermDialogState
         )
     }
     if (startDateFilterDialogState.value) {
@@ -400,6 +436,63 @@ private fun FilterRow(
     }
 }
 
+@Composable
+private fun SearchTermFilterDialog(
+    searchTerm: String,
+    onSearchTermUpdated: (String) -> Unit,
+    dialogState: MutableState<Boolean>,
+    modifier: Modifier = Modifier
+) {
+    var enteredSearchTerm: String by remember { mutableStateOf(searchTerm) }
+    Dialog(
+        onDismissRequest = { dialogState.value = false },
+        properties = DialogProperties(dismissOnClickOutside = true, usePlatformDefaultWidth = false)
+    ) {
+        Card(modifier = modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                val title = stringResource(id = R.string.transactions_filter_amount_range)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                FilterField(
+                    text = enteredSearchTerm,
+                    labelRes = R.string.transactions_filter_description_label,
+                    placeholderRes = R.string.transactions_filter_description_hint,
+                    textUpdated = { enteredSearchTerm = it },
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        autoCorrect = false,
+                        keyboardType = KeyboardType.Text,
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = {
+                        dialogState.value = false
+                    }) {
+                        Text(text = stringResource(id = R.string.cancel))
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    TextButton(onClick = {
+                        dialogState.value = false
+                        onSearchTermUpdated(enteredSearchTerm)
+                    }) {
+                        Text(text = stringResource(id = R.string.ok))
+                    }
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -515,14 +608,20 @@ private fun AmountRangeFilterDialog(
                         text = selectedMinValue.string(),
                         labelRes = R.string.transactions_filter_min_amount_label,
                         placeholderRes = R.string.transactions_filter_amount_format_hint,
-                        textUpdated = { selectedMinValue = it.bigDecimal() }
+                        textUpdated = { selectedMinValue = it.bigDecimal() },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     FilterField(
                         text = selectedMaxValue.string(),
                         labelRes = R.string.transactions_filter_max_amount_label,
                         placeholderRes = R.string.transactions_filter_amount_format_hint,
-                        textUpdated = { selectedMaxValue = it.bigDecimal() }
+                        textUpdated = { selectedMaxValue = it.bigDecimal() },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
                     )
                 }
 
@@ -556,6 +655,7 @@ private fun FilterField(
     @StringRes labelRes: Int,
     @StringRes placeholderRes: Int,
     textUpdated: (String) -> Unit,
+    keyboardOptions: KeyboardOptions,
     modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
@@ -575,9 +675,7 @@ private fun FilterField(
         },
         singleLine = true,
         onValueChange = { textUpdated(it) },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number
-        ),
+        keyboardOptions = keyboardOptions,
         modifier = modifier.fillMaxWidth()
     )
 }
