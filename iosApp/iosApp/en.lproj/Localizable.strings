@@ -17,9 +17,8 @@
 "bottom_nav_misc" = "Misc";
 
 /* View Type */
-"report_view_table" = "Full";
-"report_view_bar_month" = "Months";
-"report_view_bar_account" = "Accounts";
+"report_view_table" = "Table";
+"report_view_chart" = "Chart";
 
 /* Report Types */
 "report_type_expense" = "Expenses";

@@ -128,8 +128,7 @@ class ReportsViewModel(
             val selectedBy = when (_state.value.views
                 .first { it.selected }.type) {
                 ViewType.TABLE -> ReportCalculator.By.FULL
-                ViewType.BAR_MONTH -> ReportCalculator.By.MONTH
-                ViewType.BAR_ACCOUNT -> ReportCalculator.By.ACCOUNT
+                ViewType.CHART -> ReportCalculator.By.MONTH
             }
 
             val reportView = calculator.calculate(
@@ -202,8 +201,7 @@ data class ReportsViewState(
     ),
     val views: List<View> = listOf(
         View(ViewType.TABLE),
-        View(ViewType.BAR_ACCOUNT),
-        View(ViewType.BAR_MONTH)
+        View(ViewType.CHART),
     ),
     val reports: List<ReportSelection> = ReportType.values().filter { it != ReportType.NONE }
         .map { ReportSelection(it) },
@@ -234,8 +232,7 @@ sealed interface Selector {
 
 enum class ViewType {
     TABLE,
-    BAR_MONTH,
-    BAR_ACCOUNT
+    CHART
 }
 
 private const val DEFAULT_YEAR = 2023

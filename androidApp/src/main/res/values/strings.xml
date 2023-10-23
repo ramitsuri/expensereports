@@ -19,9 +19,8 @@
     <string name="bottom_nav_misc">Misc</string>
 
     <!-- View Type -->
-    <string name="report_view_table">Full</string>
-    <string name="report_view_bar_month">Months</string>
-    <string name="report_view_bar_account">Accounts</string>
+    <string name="report_view_table">Table</string>
+    <string name="report_view_chart">Chart</string>
 
     <!-- Report Types -->
     <string name="report_type_expense">Expenses</string>

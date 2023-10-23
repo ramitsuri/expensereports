@@ -71,7 +71,6 @@ class ReportCalculator(
         return@withContext when (by) {
             By.FULL -> resultWithNoZeros
             By.MONTH -> resultWithNoZeros.toByMonth()
-            By.ACCOUNT -> resultWithNoZeros.toByAccount()
         }
     }
 
@@ -197,7 +196,6 @@ class ReportCalculator(
     enum class By {
         FULL,
         MONTH,
-        ACCOUNT
     }
 }
 
@@ -225,17 +223,6 @@ fun ReportView.Full.toByMonth(): ReportView.ByMonth {
     val totalsAccount = this.total
     return ReportView.ByMonth(
         monthTotals = totalsAccount.monthAmounts,
-        total = totalsAccount.total,
-        generatedAt = this.generatedAt
-    )
-}
-
-fun ReportView.Full.toByAccount(): ReportView.ByAccount {
-    val totalsAccount = this.total
-    val otherAccounts = this.accountTotals
-        .associate { Pair(it.name, it.total) }
-    return ReportView.ByAccount(
-        accountTotals = otherAccounts,
         total = totalsAccount.total,
         generatedAt = this.generatedAt
     )

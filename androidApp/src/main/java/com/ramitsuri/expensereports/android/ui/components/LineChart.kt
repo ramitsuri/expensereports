@@ -34,13 +34,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.formatRounded
 
 @Composable
 fun LineChart(
     balances: List<LineChartValue>,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    formatNumericValueRounded: Boolean = true,
 ) {
     val data = balances.map { it.numericValue.doubleValue(exactRequired = false) }
     if (data.size < 2) {
@@ -182,8 +184,13 @@ fun LineChart(
             if (verticalX != null) {
                 val value = xValueToBalanceMap[verticalX]
                 if (value != null) {
+                    val formatted = if (formatNumericValueRounded) {
+                        value.numericValue.formatRounded()
+                    } else {
+                        value.numericValue.format()
+                    }
                     Text(
-                        text = "${value.label}: ${value.numericValue.formatRounded()}",
+                        text = "${value.label}: $formatted",
                         style = MaterialTheme.typography.labelSmall
                     )
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
