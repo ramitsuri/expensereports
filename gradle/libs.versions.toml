@@ -3,8 +3,8 @@ kotlin = "1.9.0"
 
 ## SDK Versions
 minSdk = "26"
-targetSdk = "33"
-compileSdk = "33"
+targetSdk = "34"
+compileSdk = "34"
 
 # Dependencies
 android-gradle-plugin = "8.1.1"
