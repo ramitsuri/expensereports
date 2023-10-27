@@ -49,24 +49,29 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -83,6 +88,7 @@ import com.ramitsuri.expensereports.data.Transaction
 import com.ramitsuri.expensereports.ui.Account
 import com.ramitsuri.expensereports.viewmodel.TransactionsFilter
 import com.ramitsuri.expensereports.viewmodel.TransactionsViewModel
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -143,51 +149,35 @@ fun TransactionsContent(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Transactions(transactions: List<Transaction>) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        val transactionsGrouped = transactions.groupBy { it.date }
-        transactionsGrouped.forEach { (date, transactions) ->
-            stickyHeader {
-                TransactionItemHeader(date = date)
-            }
-            items(transactions) { item ->
-                TransactionItem(item)
-            }
+    if (transactions.isEmpty()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = stringResource(id = R.string.transactions_filter_no_transactions))
         }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
+    } else {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            val transactionsGrouped = transactions.groupBy { it.date }
+            transactionsGrouped.forEach { (date, transactions) ->
+                stickyHeader {
+                    TransactionItemHeader(date = date)
+                }
+                items(transactions) { item ->
+                    TransactionItem(item)
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }
-
-val AccountSaver = run {
-    val nameKey = "Name"
-    val fullNameKey = "FullName"
-    val levelKey = "Level"
-    val selectedKey = "Selected"
-    mapSaver<Account>(
-        save = {
-            mapOf(
-                nameKey to it.name,
-                fullNameKey to it.fullName,
-                levelKey to it.level,
-                selectedKey to it.selected
-            )
-        },
-        restore = {
-            Account(
-                name = it[nameKey] as String,
-                fullName = it[fullNameKey] as String,
-                level = it[levelKey] as Int,
-                selected = it[selectedKey] as Boolean
-            )
-        }
-    )
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -443,6 +433,18 @@ private fun SearchTermFilterDialog(
     dialogState: MutableState<Boolean>,
     modifier: Modifier = Modifier
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val showKeyboard by remember { mutableStateOf(true) }
+    val keyboard = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(focusRequester) {
+        if (showKeyboard) {
+            delay(100)
+            focusRequester.requestFocus()
+            keyboard?.show()
+        }
+    }
+
     var enteredSearchTerm: String by remember { mutableStateOf(searchTerm) }
     Dialog(
         onDismissRequest = { dialogState.value = false },
@@ -450,7 +452,7 @@ private fun SearchTermFilterDialog(
     ) {
         Card(modifier = modifier.padding(16.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
-                val title = stringResource(id = R.string.transactions_filter_amount_range)
+                val title = stringResource(id = R.string.transactions_filter_description_label)
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall
@@ -467,7 +469,8 @@ private fun SearchTermFilterDialog(
                         capitalization = KeyboardCapitalization.Sentences,
                         autoCorrect = false,
                         keyboardType = KeyboardType.Text,
-                    )
+                    ),
+                    modifier = Modifier.focusRequester(focusRequester)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -658,8 +661,9 @@ private fun FilterField(
     keyboardOptions: KeyboardOptions,
     modifier: Modifier = Modifier
 ) {
+    var selection by remember { mutableStateOf(TextRange(text.length)) }
     OutlinedTextField(
-        value = text,
+        value = TextFieldValue(text = text, selection = selection),
         label = {
             Text(text = stringResource(id = labelRes))
         },
@@ -674,7 +678,10 @@ private fun FilterField(
             }
         },
         singleLine = true,
-        onValueChange = { textUpdated(it) },
+        onValueChange = {
+            textUpdated(it.text)
+            selection = it.selection
+        },
         keyboardOptions = keyboardOptions,
         modifier = modifier.fillMaxWidth()
     )

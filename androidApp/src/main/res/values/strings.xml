@@ -82,6 +82,7 @@
     <!-- Transactions -->
     <string name="transactions_filter_description_label">Description</string>
     <string name="transactions_filter_description_hint" />
+    <string name="transactions_filter_no_transactions">No transactions</string>
     <string name="transactions_filter_start_date_label">Start Date</string>
     <string name="transactions_filter_end_date_label">End Date</string>
     <string name="transactions_filter_date_format_hint">MM-DD-YYYY</string>
