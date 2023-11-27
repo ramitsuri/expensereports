@@ -11,7 +11,7 @@ android-gradle-plugin = "8.1.1"
 ktlint-gradle = "11.0.0"
 gradle-versions = "0.42.0"
 
-compose = "1.6.0-alpha08"
+compose = "1.6.0-beta01"
 compose-m3 = "1.2.0-alpha10"
 composeCompiler = "1.5.2"
 
