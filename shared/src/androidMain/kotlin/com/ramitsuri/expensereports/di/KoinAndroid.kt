@@ -35,7 +35,7 @@ actual val platformModule = module {
             context.applicationContext.getSharedPreferences(fileName, Context.MODE_PRIVATE)
         val keyValueStore = SettingsKeyValueStore(SharedPreferencesSettings(sharedPrefs))
 
-        PrefManager(keyValueStore)
+        PrefManager(keyValueStore, get<Json>())
     }
 
     single<Logger> {

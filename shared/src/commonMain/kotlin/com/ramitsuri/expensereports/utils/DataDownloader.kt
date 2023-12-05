@@ -110,12 +110,9 @@ class DataDownloader(
             }
 
             is NetworkResponse.Success -> {
-                val transactionGroup =
-                    response.data.transactionGroups.map { TransactionGroup(it) }.firstOrNull()
-                if (transactionsApi.allowsCaching && transactionGroup != null) {
-                    prefManager.setTransactionGroup(transactionGroup)
-                } else {
-                    prefManager.setTransactionGroup(null)
+                val transactionGroups = response.data.transactionGroups.map { TransactionGroup(it) }
+                if (transactionsApi.allowsCaching) {
+                    prefManager.setTransactionGroups(transactionGroups)
                 }
             }
         }

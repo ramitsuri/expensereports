@@ -175,8 +175,13 @@ data class Split(
     fun isCredit() = !isDebit()
 }
 
+@Serializable
 data class TransactionGroup(
+    @SerialName("name")
     val name: String,
+
+    @Serializable(with = BigDecimalSerializer::class)
+    @SerialName("total")
     val total: BigDecimal
 ) {
     constructor(dto: TransactionGroupDto) : this(

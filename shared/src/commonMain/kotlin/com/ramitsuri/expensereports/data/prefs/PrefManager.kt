@@ -1,10 +1,14 @@
 package com.ramitsuri.expensereports.data.prefs
 
 import com.ramitsuri.expensereports.data.TransactionGroup
-import com.ramitsuri.expensereports.utils.bd
 import kotlinx.datetime.Instant
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 
-class PrefManager(private val keyValueStore: KeyValueStore) {
+class PrefManager(
+    private val keyValueStore: KeyValueStore,
+    private val json: Json,
+) {
 
     init {
         removeLegacyPrefs()
@@ -45,24 +49,15 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
         return getBoolean(key, true)
     }
 
-    fun setTransactionGroup(transactionGroup: TransactionGroup?) {
-        if (transactionGroup != null) {
-            putString(Key.TRANSACTION_GROUP_NAME, transactionGroup.name)
-            putString(Key.TRANSACTION_GROUP_TOTAL, transactionGroup.total.toPlainString())
-        } else {
-            getKeyValueStore(Key.TRANSACTION_GROUP_NAME).remove(Key.TRANSACTION_GROUP_NAME.key)
-            getKeyValueStore(Key.TRANSACTION_GROUP_TOTAL).remove(Key.TRANSACTION_GROUP_TOTAL.key)
-        }
+    fun setTransactionGroups(transactionGroups: List<TransactionGroup>) {
+        val transactionGroupsJson =
+            json.encodeToString(ListSerializer(TransactionGroup.serializer()), transactionGroups)
+        putString(Key.TRANSACTION_GROUPS, transactionGroupsJson)
     }
 
-    fun getTransactionGroup(): TransactionGroup? {
-        val name = getString(Key.TRANSACTION_GROUP_NAME, "")
-        val total = getString(Key.TRANSACTION_GROUP_TOTAL, "")
-        return if (name.isNullOrEmpty() || total.isNullOrEmpty()) {
-            null
-        } else {
-            return TransactionGroup(name, total.bd())
-        }
+    fun getTransactionGroups(): List<TransactionGroup> {
+        val transactionGroupsJson = getString(Key.TRANSACTION_GROUPS, null) ?: return listOf()
+        return json.decodeFromString(transactionGroupsJson)
     }
 
     private fun putString(key: Key, value: String) {
@@ -148,15 +143,22 @@ class PrefManager(private val keyValueStore: KeyValueStore) {
                 key = "download_recent_data"
             ),
 
-            TRANSACTION_GROUP_NAME(
-                key = "transaction_group_name"
-            ),
-
-            TRANSACTION_GROUP_TOTAL(
-                key = "transaction_group_total"
+            TRANSACTION_GROUPS(
+                key = "transaction_group_name",
+                isLegacy = true,
             ),
 
             // Legacy - no longer used and should be removed
+            TRANSACTION_GROUP_NAME(
+                key = "transaction_group_name",
+                isLegacy = true,
+            ),
+
+            TRANSACTION_GROUP_TOTAL(
+                key = "transaction_group_total",
+                isLegacy = true,
+            ),
+
             CONFIG(
                 key = "config",
                 isLegacy = true

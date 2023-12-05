@@ -65,13 +65,11 @@ class HomeViewModel(
 
         viewModelScope.launch(dispatcherProvider.io) {
             // Transaction Groups
-            val transactionGroup = prefManager.getTransactionGroup()
-            if (transactionGroup != null) {
-                val transactionGroupAccountBalance =
-                    AccountBalance(name = transactionGroup.name, balance = transactionGroup.total)
-                _state.update { previousState ->
-                    previousState.copy(transactionGroups = listOf(transactionGroupAccountBalance))
-                }
+            val transactionGroups = prefManager.getTransactionGroups().map {
+                AccountBalance(name = it.name, balance = it.total)
+            }
+            _state.update { previousState ->
+                previousState.copy(transactionGroups = transactionGroups)
             }
         }
     }
