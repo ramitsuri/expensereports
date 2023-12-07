@@ -144,8 +144,7 @@ class PrefManager(
             ),
 
             TRANSACTION_GROUPS(
-                key = "transaction_group_name",
-                isLegacy = true,
+                key = "transaction_groups",
             ),
 
             // Legacy - no longer used and should be removed
