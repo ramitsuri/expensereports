@@ -10,8 +10,8 @@ android {
         applicationId = "com.ramitsuri.expensereports.android"
         minSdk = 28
         targetSdk = 34
-        versionCode = 30
-        versionName = "3.0"
+        versionCode = 31
+        versionName = "3.1"
     }
     packagingOptions {
         resources.excludes.add("META-INF/*.kotlin_module")
