@@ -69,7 +69,9 @@ class MainApplication : Application(), LifecycleEventObserver {
                 viewModel {
                     ReportsViewModel(
                         get<ReportsRepository>(),
-                        get<DispatcherProvider>()
+                        get<DispatcherProvider>(),
+                        get<Clock>(),
+                        get<TimeZone>(),
                     )
                 }
 

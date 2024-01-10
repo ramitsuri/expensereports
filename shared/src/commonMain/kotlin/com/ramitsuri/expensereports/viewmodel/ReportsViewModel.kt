@@ -17,18 +17,28 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class ReportsViewModel(
     private val repository: ReportsRepository,
-    private val dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider,
+    clock: Clock,
+    timeZone: TimeZone,
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<ReportsViewState> = MutableStateFlow(ReportsViewState())
     val state: StateFlow<ReportsViewState> = _state
 
     private lateinit var calculator: ReportCalculator
+    private val currentYear = clock.now().toLocalDateTime(timeZone).year
 
     init {
+        val years = (currentYear downTo 2021)
+            .toList()
+            .map { Year(it, selected = it == currentYear) }
+        _state.update { it.copy(years = years) }
         reportSelected()
     }
 
@@ -60,7 +70,7 @@ class ReportsViewModel(
         _state.update {
             it.copy(loading = true)
         }
-        val year = _state.value.years.firstOrNull { it.selected }?.year ?: DEFAULT_YEAR
+        val year = _state.value.years.firstOrNull { it.selected }?.year ?: currentYear
         val type = _state.value.reports.firstOrNull { it.selected }?.type ?: DEFAULT_REPORT_TYPE
         viewModelScope.launch(dispatchers.io) {
             repository.getReport(year, type).collect { response ->
@@ -194,11 +204,7 @@ class ReportsViewModel(
 
 data class ReportsViewState(
     val loading: Boolean = false,
-    val years: List<Year> = listOf(
-        Year(2023),
-        Year(2022),
-        Year(2021)
-    ),
+    val years: List<Year> = listOf(),
     val views: List<View> = listOf(
         View(ViewType.TABLE),
         View(ViewType.CHART),
@@ -213,7 +219,7 @@ data class ReportsViewState(
 
 data class Year(
     val year: Int,
-    override val selected: Boolean = year == DEFAULT_YEAR
+    override val selected: Boolean
 ) : Selector
 
 data class View(
@@ -235,6 +241,5 @@ enum class ViewType {
     CHART
 }
 
-private const val DEFAULT_YEAR = 2023
 private val DEFAULT_CHART = ViewType.TABLE
 private val DEFAULT_REPORT_TYPE = ReportType.EXPENSE_AFTER_DEDUCTION
