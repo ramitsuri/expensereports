@@ -15,7 +15,6 @@ import com.ramitsuri.expensereports.network.transactiongroups.TransactionGroupsA
 import com.ramitsuri.expensereports.network.transactions.DummyTransactionsApiImpl
 import com.ramitsuri.expensereports.network.transactions.TransactionsApi
 import com.ramitsuri.expensereports.network.transactions.TransactionsApiImpl
-import com.ramitsuri.expensereports.utils.DispatcherProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.DefaultRequest

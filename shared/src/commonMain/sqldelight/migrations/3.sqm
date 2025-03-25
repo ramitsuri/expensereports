@@ -1,1 +1,0 @@
-ALTER TABLE TransactionEntity ADD COLUMN num TEXT NOT NULL DEFAULT '';

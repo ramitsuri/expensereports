@@ -15,7 +15,6 @@ import com.ramitsuri.expensereports.di.initKoin
 import com.ramitsuri.expensereports.repository.MiscellaneousRepository
 import com.ramitsuri.expensereports.repository.ReportsRepository
 import com.ramitsuri.expensereports.repository.TransactionsRepository
-import com.ramitsuri.expensereports.utils.DispatcherProvider
 import com.ramitsuri.expensereports.utils.DataDownloader
 import com.ramitsuri.expensereports.viewmodel.ReportsViewModel
 import com.ramitsuri.expensereports.viewmodel.HomeViewModel
