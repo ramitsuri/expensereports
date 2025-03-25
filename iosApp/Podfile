@@ -1,9 +1,0 @@
-use_frameworks!
-
-platform :ios, '12.4'
-
-install! 'cocoapods', :deterministic_uuids => false
-
-target 'iosApp' do
-    pod 'shared', :path => '../shared/'
-end

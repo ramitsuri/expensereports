@@ -1,23 +1,10 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.gradleVersions)
-    alias(libs.plugins.ktlint) apply false
-
-    id("com.android.application") version libs.versions.android.gradle.plugin.get() apply false
-    kotlin("multiplatform") version libs.versions.kotlin.get() apply false
-    kotlin("plugin.serialization") version libs.versions.kotlin.get() apply false
-    id("com.squareup.sqldelight") version libs.versions.sqlDelight.get() apply false
-    id("com.android.library") version libs.versions.android.gradle.plugin.get() apply false
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://jitpack.io")
-    }
-}
-
-tasks.register("clean", Delete::class) {
-    delete(rootProject.buildDir)
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.composeCompiler) apply false
+    alias(libs.plugins.kotlin) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }
