@@ -33,9 +33,9 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ramitsuri.expensereports.android.utils.format
 import com.ramitsuri.expensereports.android.utils.formatRounded
+import java.math.BigDecimal
 
 @Composable
 fun LineChart(
@@ -44,7 +44,7 @@ fun LineChart(
     modifier: Modifier = Modifier,
     formatNumericValueRounded: Boolean = true,
 ) {
-    val data = balances.map { it.numericValue.doubleValue(exactRequired = false) }
+    val data = balances.map { it.numericValue.toDouble() }
     if (data.size < 2) {
         return
     }
@@ -101,8 +101,8 @@ fun LineChart(
             val numberOfEntries = balances.size - 1
             val widthPerDataPoint = pathContainerWidth / numberOfEntries
 
-            val maxValue = balances.maxBy { it.numericValue }.numericValue.doubleValue(false)
-            val minValue = balances.minBy { it.numericValue }.numericValue.doubleValue(false)
+            val maxValue = balances.maxBy { it.numericValue }.numericValue.toDouble()
+            val minValue = balances.minBy { it.numericValue }.numericValue.toDouble()
             val range = maxValue - minValue
 
             val heightPxPerValuePoint = pathContainerHeight / range
@@ -112,7 +112,7 @@ fun LineChart(
             balances.forEachIndexed { index, value ->
                 val newX = index * widthPerDataPoint
                 val newY =
-                    (pathContainerHeight - (value.numericValue.doubleValue(false) - minValue) *
+                    (pathContainerHeight - (value.numericValue.toDouble() - minValue) *
                             heightPxPerValuePoint).toFloat()
 
                 if (index == 0) {

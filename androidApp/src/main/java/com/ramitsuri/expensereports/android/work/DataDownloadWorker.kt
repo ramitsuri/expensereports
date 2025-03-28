@@ -8,29 +8,14 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.ramitsuri.expensereports.android.MainApplication
-import com.ramitsuri.expensereports.utils.LogHelper
-import com.ramitsuri.expensereports.utils.DataDownloader
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.time.Duration
 
 class DataDownloadWorker(
     context: Context,
     workerParams: WorkerParameters
-) : CoroutineWorker(context, workerParams), KoinComponent {
-
-    private val downloader: DataDownloader by inject()
+) : CoroutineWorker(context, workerParams){
 
     override suspend fun doWork(): Result {
-        val app = applicationContext as? MainApplication ?: return Result.failure()
-
-        if (app.isInForeground) {
-            LogHelper.v(TAG, "App in foreground will retry downloading reports")
-            return Result.retry()
-        }
-
-        downloader.download()
 
         return Result.success()
     }

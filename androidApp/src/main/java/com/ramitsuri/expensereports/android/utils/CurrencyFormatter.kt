@@ -1,11 +1,10 @@
 package com.ramitsuri.expensereports.android.utils
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Locale
-import java.math.BigDecimal as JvmBigDecimal
+import java.math.BigDecimal
 
 fun BigDecimal.format(stripZeros: Boolean = true, locale: Locale = Locale.US): String {
     val value = currencyFormatter(locale).format(roundForCalculation(this, locale))
@@ -28,17 +27,17 @@ fun BigDecimal.formatRounded(stripZeros: Boolean = true, locale: Locale = Locale
     }
 }
 
-private fun roundForCalculation(amount: BigDecimal, locale: Locale): JvmBigDecimal {
+private fun roundForCalculation(amount: BigDecimal, locale: Locale): BigDecimal {
     val jvmBigDecimal = amount.toJvm()
     val newScale = currencyFormatter(locale).maximumFractionDigits
     return jvmBigDecimal.setScale(newScale, RoundingMode.HALF_EVEN)
 }
 
-private fun BigDecimal.toJvm() = JvmBigDecimal(this.toPlainString())
+private fun BigDecimal.toJvm() = BigDecimal(this.toPlainString())
 
 private fun currencyFormatter(locale: Locale): DecimalFormat {
     return NumberFormat.getCurrencyInstance(locale) as DecimalFormat
 }
 
-private val thousand = BigDecimal.parseString("1000")
+private val thousand = BigDecimal("1000")
 private val million = thousand.multiply(thousand)
