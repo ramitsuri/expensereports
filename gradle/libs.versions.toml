@@ -13,7 +13,7 @@ firebaseCrashlytics = "3.0.3"
 googleServices = "4.4.2"
 jsystemthemedetector = "3.6"
 kermit = "2.0.4"
-koin = "4.0.1"
+koin = "4.0.3"
 kotlin-datetime = "0.6.2"
 kotlin-serialization = "1.8.0"
 kotlinxCoroutines = "1.10.1"
@@ -75,6 +75,7 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
 ktor-content-negotation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 ktor-serialization = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }

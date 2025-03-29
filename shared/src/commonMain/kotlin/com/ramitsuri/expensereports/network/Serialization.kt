@@ -1,47 +1,18 @@
 package com.ramitsuri.expensereports.network
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
-import kotlinx.serialization.ExperimentalSerializationApi
+import com.ramitsuri.expensereports.model.MonthYear
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.serializer
+import java.math.BigDecimal
 
-object InstantSerializer : KSerializer<Instant> {
-    override val descriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
-
-    override fun deserialize(decoder: Decoder): Instant {
-        return Instant.parse(decoder.decodeString())
-    }
-
-    override fun serialize(encoder: Encoder, value: Instant) {
-        encoder.encodeString(value.toString())
-    }
-}
-
-object LocalDateSerializer : KSerializer<LocalDate> {
-    override val descriptor = PrimitiveSerialDescriptor("LocalDate", PrimitiveKind.STRING)
-
-    override fun deserialize(decoder: Decoder): LocalDate {
-        return LocalDate.parse(decoder.decodeString())
-    }
-
-    override fun serialize(encoder: Encoder, value: LocalDate) {
-        encoder.encodeString(value.toString())
-    }
-}
-
-object BigDecimalSerializer : KSerializer<BigDecimal> {
+class BigDecimalSerializer : KSerializer<BigDecimal> {
     override val descriptor = PrimitiveSerialDescriptor("BigDecimal", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): BigDecimal {
-        return BigDecimal.parseString(decoder.decodeString())
+        return BigDecimal(decoder.decodeString())
     }
 
     override fun serialize(encoder: Encoder, value: BigDecimal) {
@@ -49,19 +20,16 @@ object BigDecimalSerializer : KSerializer<BigDecimal> {
     }
 }
 
-object IntBigDecimalMapSerializer : KSerializer<Map<Int, BigDecimal>> {
-    private val serializer: KSerializer<Map<Int, BigDecimal>> =
-        MapSerializer(serializer(), BigDecimalSerializer)
+class MonthYearSerializer : KSerializer<MonthYear> {
+    override val descriptor = PrimitiveSerialDescriptor("MonthYear", PrimitiveKind.STRING)
 
-    @OptIn(ExperimentalSerializationApi::class)
-    override val descriptor: SerialDescriptor
-        get() = SerialDescriptor(serialName = "IntBigDecimalMap", original = serializer.descriptor)
-
-    override fun deserialize(decoder: Decoder): Map<Int, BigDecimal> {
-        return serializer.deserialize(decoder)
+    override fun serialize(encoder: Encoder, value: MonthYear) {
+        encoder.encodeString(value.string())
     }
 
-    override fun serialize(encoder: Encoder, value: Map<Int, BigDecimal>) {
-        serializer.serialize(encoder, value)
+    override fun deserialize(decoder: Decoder): MonthYear {
+        return decoder.decodeString().let { string ->
+            MonthYear.fromString(string)
+        }
     }
 }

@@ -7,14 +7,16 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.material.color.DynamicColors
 import com.ramitsuri.expensereports.android.work.DataDownloadWorker
+import com.ramitsuri.expensereports.initSdk
+import org.koin.core.component.KoinComponent
 
-class MainApplication : Application(), LifecycleEventObserver {
+class MainApplication : Application(), LifecycleEventObserver, KoinComponent {
     var isInForeground: Boolean = false
         private set
 
     override fun onCreate() {
         super.onCreate()
-        initDependencyInjection()
+        initSdk(this)
         DynamicColors.applyToActivitiesIfAvailable(this)
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
@@ -35,8 +37,5 @@ class MainApplication : Application(), LifecycleEventObserver {
             return
         }
         DataDownloadWorker.enqueuePeriodic(this)
-    }
-
-    private fun initDependencyInjection() {
     }
 }

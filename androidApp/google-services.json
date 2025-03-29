@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "516955222413",
+    "project_id": "expensereports-8298d",
+    "storage_bucket": "expensereports-8298d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516955222413:android:1d0d9b9fd80ad926cf0dc4",
+        "android_client_info": {
+          "package_name": "com.ramitsuri.expensereports.android.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIU9jlE3p2VQ1p4N-nvArDjo9c7oPXaps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

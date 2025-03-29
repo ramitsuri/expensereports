@@ -5,11 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -30,8 +28,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ramitsuri.expensereports.android.ui.AppTheme
 import com.ramitsuri.expensereports.android.ui.home.HomeScreen
-import com.ramitsuri.expensereports.android.ui.reports.ReportsScreen
-import com.ramitsuri.expensereports.android.ui.settings.SettingsScreen
 import com.ramitsuri.expensereports.android.ui.transactions.TransactionsScreen
 
 class MainActivity : ComponentActivity() {
@@ -64,14 +60,11 @@ private fun BottomNavGraph(navController: NavHostController) {
                 .padding(innerPadding)
         ) {
             composable(BottomNav.Home.route) { HomeScreen() }
-            composable(BottomNav.Reports.route) { ReportsScreen() }
             composable(BottomNav.Transactions.route) { TransactionsScreen() }
-            composable(BottomNav.Misc.route) { SettingsScreen() }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BottomNavBar(navController: NavHostController) {
     NavigationBar {

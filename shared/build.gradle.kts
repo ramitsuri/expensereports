@@ -47,10 +47,7 @@ kotlin {
             implementation(libs.room.ktx)
             implementation(libs.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
-
-            implementation(libs.koin.android)
-            implementation(libs.koin.workmanager)
-
+            implementation(libs.koin.core)
             implementation(libs.kotlin.datetime)
 
             implementation(libs.kotlin.serialization)
@@ -69,8 +66,10 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.playservices.coroutines)
             implementation(libs.androidx.work.runtime.ktx)
+            implementation(libs.koin.android)
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.workmanager)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.client.android)
         }
@@ -84,6 +83,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
             implementation(libs.koin.test.junit)
+            implementation(libs.ktor.client.java)
             implementation(libs.turbine)
         }
     }

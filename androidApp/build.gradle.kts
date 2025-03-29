@@ -96,6 +96,11 @@ dependencies {
     implementation(libs.playservices.coroutines)
 
     implementation(libs.kotlin.datetime)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.android)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose.viewmodel)
+    implementation(libs.koin.core)
 
     testImplementation(libs.junit)
 
