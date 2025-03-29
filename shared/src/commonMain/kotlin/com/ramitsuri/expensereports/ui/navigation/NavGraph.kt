@@ -6,14 +6,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ramitsuri.expensereports.ui.home.HomeScreen
+import com.ramitsuri.expensereports.ui.home.HomeViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsScreen
 import com.ramitsuri.expensereports.ui.theme.AppTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun NavGraph(
@@ -41,7 +45,9 @@ fun NavGraph(
                 ),
             ) {
                 composable<Destination.Home> {
-                    HomeScreen()
+                    val viewModel = koinViewModel<HomeViewModel>()
+                    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+                    HomeScreen(viewState = viewState)
                 }
 
                 composable<Destination.Settings> {

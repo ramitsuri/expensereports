@@ -1,4 +1,4 @@
-package com.ramitsuri.expensereports.android.utils
+package com.ramitsuri.expensereports.utils
 
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -26,6 +26,23 @@ fun BigDecimal.formatRounded(stripZeros: Boolean = true, locale: Locale = Locale
         "${this.divide(million).format(stripZeros, locale)}M"
     }
 }
+
+fun BigDecimal.formatPercent(locale: Locale = Locale.US) =
+    "${roundForCalculation((this * BigDecimal(100)), locale)}"
+        .let {
+            if (it.contains(".0")) {
+                it.replace(".0*$".toRegex(), "")
+            } else {
+                it
+            }
+        }
+        .plus("%")
+
+fun BigDecimal.div(divisor: BigDecimal): BigDecimal = this.divide(
+    divisor,
+    10,
+    RoundingMode.HALF_EVEN
+)
 
 private fun roundForCalculation(amount: BigDecimal, locale: Locale): BigDecimal {
     val jvmBigDecimal = amount.toJvm()

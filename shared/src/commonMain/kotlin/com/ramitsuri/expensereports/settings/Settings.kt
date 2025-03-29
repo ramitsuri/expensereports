@@ -3,7 +3,7 @@ package com.ramitsuri.expensereports.settings
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 
-internal class Settings internal constructor(
+class Settings internal constructor(
     private val keyValueStore: KeyValueStore,
 ) {
     suspend fun getLastTxFetchTime(): Instant {

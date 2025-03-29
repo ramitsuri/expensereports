@@ -12,6 +12,7 @@ import com.ramitsuri.expensereports.repository.MainRepository
 import com.ramitsuri.expensereports.settings.DataStoreKeyValueStore
 import com.ramitsuri.expensereports.settings.Settings
 import com.ramitsuri.expensereports.shared.BuildKonfig
+import com.ramitsuri.expensereports.ui.home.HomeViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -26,6 +27,7 @@ import okio.Path
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -132,6 +134,13 @@ internal val coreModule = module {
 
     factory<Boolean>(qualifier = KoinQualifier.IS_DEBUG) {
         BuildKonfig.IS_DEBUG
+    }
+
+    viewModel<HomeViewModel> {
+        HomeViewModel(
+            mainRepository = get<MainRepository>(),
+            settings = get<Settings>(),
+        )
     }
 }
 
