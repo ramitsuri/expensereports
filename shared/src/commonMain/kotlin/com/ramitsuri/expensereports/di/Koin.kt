@@ -11,6 +11,7 @@ import com.ramitsuri.expensereports.network.api.impl.ApiImpl
 import com.ramitsuri.expensereports.repository.MainRepository
 import com.ramitsuri.expensereports.settings.DataStoreKeyValueStore
 import com.ramitsuri.expensereports.settings.Settings
+import com.ramitsuri.expensereports.shared.BuildKonfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -127,6 +128,10 @@ internal val coreModule = module {
 
     factory<CurrentBalancesDao> {
         get<AppDatabase>().currentBalancesDao()
+    }
+
+    factory<Boolean>(qualifier = KoinQualifier.IS_DEBUG) {
+        BuildKonfig.IS_DEBUG
     }
 }
 

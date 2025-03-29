@@ -21,10 +21,6 @@ val testModule = module {
         Java.create()
     }
 
-    factory<Boolean>(qualifier = KoinQualifier.IS_DEBUG) {
-        true
-    }
-
     factory<RoomDatabase.Builder<AppDatabase>> {
         Room.inMemoryDatabaseBuilder<AppDatabase>()
     }

@@ -24,10 +24,6 @@ fun initSdk(application: Application) {
                 Android.create()
             }
 
-            factory<Boolean>(qualifier = KoinQualifier.IS_DEBUG) {
-                BuildConfig.DEBUG
-            }
-
             factory<RoomDatabase.Builder<AppDatabase>> {
                 val dbName = get<String>(qualifier = KoinQualifier.DATABASE_NAME)
                 val dbFile = application.getDatabasePath(dbName)

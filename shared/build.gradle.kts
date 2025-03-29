@@ -49,6 +49,8 @@ kotlin {
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.koin.core)
             implementation(libs.kotlin.datetime)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.compose.viewmodel.navigation)
 
             implementation(libs.kotlin.serialization)
             implementation(libs.kotlinx.coroutines.core)
@@ -69,6 +71,7 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.compose.viewmodel.navigation)
             implementation(libs.koin.workmanager)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.client.android)
@@ -77,13 +80,13 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.jsystemthemedetector)
+            implementation(libs.ktor.client.java)
         }
         jvmTest.dependencies {
             implementation(libs.androidx.room.testing)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
             implementation(libs.koin.test.junit)
-            implementation(libs.ktor.client.java)
             implementation(libs.turbine)
         }
     }
