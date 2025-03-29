@@ -47,7 +47,10 @@ fun NavGraph(
                 composable<Destination.Home> {
                     val viewModel = koinViewModel<HomeViewModel>()
                     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
-                    HomeScreen(viewState = viewState)
+                    HomeScreen(
+                        viewState = viewState,
+                        onNetWorthPeriodSelected = viewModel::onNetWorthPeriodSelected,
+                    )
                 }
 
                 composable<Destination.Settings> {

@@ -15,8 +15,11 @@ import androidx.compose.ui.window.rememberWindowState
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.ramitsuri.expensereports.ui.navigation.NavGraph
 import com.ramitsuri.expensereports.ui.theme.AppTheme
+import expensereports.shared.generated.resources.Res
+import expensereports.shared.generated.resources.app_name
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import org.jetbrains.compose.resources.stringResource
 
 fun main() =
     application {
@@ -31,7 +34,7 @@ fun main() =
 
         Window(
             onCloseRequest = ::exitApplication,
-            title = "Expense Reports",
+            title = stringResource(Res.string.app_name),
             state = windowState,
         ) {
             AppTheme {

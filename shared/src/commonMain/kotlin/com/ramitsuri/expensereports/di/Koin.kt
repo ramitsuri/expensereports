@@ -139,7 +139,6 @@ internal val coreModule = module {
     viewModel<HomeViewModel> {
         HomeViewModel(
             mainRepository = get<MainRepository>(),
-            settings = get<Settings>(),
         )
     }
 }

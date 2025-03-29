@@ -1,7 +1,6 @@
 package com.ramitsuri.expensereports.settings
 
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
 
 class Settings internal constructor(
     private val keyValueStore: KeyValueStore,
@@ -54,14 +53,6 @@ class Settings internal constructor(
         keyValueStore.putString(Key.LAST_CURRENT_BALANCES_FETCH_TIME, time.toString())
     }
 
-    suspend fun getTimeZone(): TimeZone {
-        return keyValueStore
-            .getString(Key.TIME_ZONE, null)
-            ?.let {
-                TimeZone.of(it)
-            } ?: TimeZone.currentSystemDefault()
-    }
-
     suspend fun getLastFullFetchTime(): Instant {
         return keyValueStore
             .getString(Key.LAST_FULL_FETCH_TIME, null)
@@ -79,7 +70,7 @@ class Settings internal constructor(
     }
 
     suspend fun getBaseUrl(): String {
-        return keyValueStore.getString(Key.BASE_URL, "") ?: ""
+        return keyValueStore.getString(Key.BASE_URL, "http://192.168.1.166/json-v2") ?: ""
     }
 
     suspend fun setBaseUrl(baseUrl: String) {

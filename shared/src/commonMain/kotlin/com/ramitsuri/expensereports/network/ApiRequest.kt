@@ -18,7 +18,7 @@ internal suspend inline fun <reified T> apiRequest(
             when {
                 response.status == HttpStatusCode.OK -> {
                     val data: T = response.body()
-                    logI(TAG) { "Success and have data: $data" }
+                    logI(TAG) { "Success and have data" }
                     Result.success(data)
                 }
 

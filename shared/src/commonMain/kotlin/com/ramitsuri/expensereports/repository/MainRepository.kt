@@ -10,6 +10,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
 
@@ -20,6 +21,7 @@ class MainRepository internal constructor(
     private val reportsDao: ReportsDao,
     private val settings: Settings,
     private val clock: Clock = Clock.System,
+    private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ) {
     suspend fun refresh() {
         val fetchFromStart = clock.now().minus(settings.getLastFullFetchTime()) >= 21.days
@@ -88,11 +90,10 @@ class MainRepository internal constructor(
         return false
     }
 
-    private suspend fun Instant.toSince(fetchFromStart: Boolean) =
+    private fun Instant.toSince(fetchFromStart: Boolean) =
         if (fetchFromStart) {
             MonthYear(Month.JANUARY, 2019)
         } else {
-            toLocalDateTime(settings.getTimeZone())
-                .let { MonthYear(it.month, it.year) }
+            toLocalDateTime(timeZone).let { MonthYear(it.month, it.year) }
         }
 }

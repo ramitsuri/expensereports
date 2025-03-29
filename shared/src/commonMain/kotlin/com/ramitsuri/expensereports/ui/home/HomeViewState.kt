@@ -2,6 +2,7 @@ package com.ramitsuri.expensereports.ui.home
 
 import com.ramitsuri.expensereports.model.CurrentBalance
 import com.ramitsuri.expensereports.model.MonthYear
+import java.math.BigDecimal
 
 data class HomeViewState(
     val currentBalanceGroups: List<CurrentBalanceGroup> = listOf(),
@@ -9,6 +10,7 @@ data class HomeViewState(
     val selectedNetWorthPeriod: Period,
     val selectedSavingsRatePeriod: Period,
     val savingsRates: List<SavingsRate> = listOf(),
+    val periods: List<Period> = listOf()
 ) {
     data class CurrentBalanceGroup(
         val groupName: String? = null,
@@ -18,7 +20,7 @@ data class HomeViewState(
 
     data class NetWorth(
         val monthYear: MonthYear,
-        val netWorth: String,
+        val netWorth: BigDecimal,
     )
 
     data class SavingsRate(

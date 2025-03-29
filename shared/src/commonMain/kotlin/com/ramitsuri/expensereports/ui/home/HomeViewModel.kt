@@ -8,10 +8,8 @@ import com.ramitsuri.expensereports.model.Report
 import com.ramitsuri.expensereports.model.ReportNames
 import com.ramitsuri.expensereports.model.toList
 import com.ramitsuri.expensereports.repository.MainRepository
-import com.ramitsuri.expensereports.settings.Settings
 import com.ramitsuri.expensereports.utils.format
 import com.ramitsuri.expensereports.utils.formatPercent
-import com.ramitsuri.expensereports.utils.formatRounded
 import com.ramitsuri.expensereports.utils.minus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,16 +21,19 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.Month
+import kotlinx.datetime.TimeZone
 import java.math.BigDecimal
 
 class HomeViewModel(
     private val mainRepository: MainRepository,
     private val clock: Clock = Clock.System,
-    private val settings: Settings,
+    private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ) : ViewModel() {
 
-    private val selectedNetWorthPeriod = MutableStateFlow(HomeViewState.Period.AllTime)
-    private val selectedSavingsRatePeriod = MutableStateFlow(HomeViewState.Period.ThisYear)
+    private val selectedNetWorthPeriod: MutableStateFlow<HomeViewState.Period> =
+        MutableStateFlow(HomeViewState.Period.AllTime)
+    private val selectedSavingsRatePeriod: MutableStateFlow<HomeViewState.Period> =
+        MutableStateFlow(HomeViewState.Period.ThisYear)
 
     init {
         viewModelScope.launch {
@@ -63,7 +64,13 @@ class HomeViewModel(
                 netWorths = getNetWorths(netWorthReport),
                 selectedNetWorthPeriod = selectedNetWorthPeriod,
                 selectedSavingsRatePeriod = selectedSavingsRatePeriod,
-                savingsRates = getSavingsRates(savingsRatesReport)
+                savingsRates = getSavingsRates(savingsRatesReport),
+                periods = listOf(
+                    HomeViewState.Period.ThisYear,
+                    HomeViewState.Period.OneYear,
+                    HomeViewState.Period.LastThreeYears,
+                    HomeViewState.Period.AllTime,
+                ),
             )
         }
     }.stateIn(
@@ -74,6 +81,10 @@ class HomeViewModel(
             selectedSavingsRatePeriod = selectedSavingsRatePeriod.value,
         ),
     )
+
+    fun onNetWorthPeriodSelected(period: HomeViewState.Period) {
+        selectedNetWorthPeriod.value = period
+    }
 
     private fun getSavingsRates(report: Report?): List<HomeViewState.SavingsRate> {
         if (report == null) {
@@ -107,7 +118,7 @@ class HomeViewModel(
             .map { (monthYear, total) ->
                 HomeViewState.NetWorth(
                     monthYear = monthYear,
-                    netWorth = total.formatRounded(),
+                    netWorth = total,
                 )
             }
     }
@@ -128,23 +139,22 @@ class HomeViewModel(
             }
         }
 
-    private suspend fun HomeViewState.Period.toMonthYears(): List<MonthYear> {
-        val timeZone = settings.getTimeZone()
+    private fun HomeViewState.Period.toMonthYears(): List<MonthYear> {
         val now = MonthYear.now(clock, timeZone)
         val start = when (this) {
-            HomeViewState.Period.AllTime -> {
+            is HomeViewState.Period.AllTime -> {
                 MonthYear(Month.JANUARY, 2021)
             }
 
-            HomeViewState.Period.LastThreeYears -> {
+            is HomeViewState.Period.LastThreeYears -> {
                 now.minus(DateTimePeriod(years = 3))
             }
 
-            HomeViewState.Period.OneYear -> {
+            is HomeViewState.Period.OneYear -> {
                 now.minus(DateTimePeriod(years = 1))
             }
 
-            HomeViewState.Period.ThisYear -> {
+            is HomeViewState.Period.ThisYear -> {
                 now.copy(month = Month.JANUARY)
             }
         }
