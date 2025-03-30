@@ -25,14 +25,14 @@ class MainRepository internal constructor(
     private val clock: Clock = Clock.System,
     private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ) {
-    suspend fun refresh() {
+    suspend fun refresh(forced: Boolean = false) {
         val now = clock.now()
         val lastFetch = settings.getLastFetchTime()
-        if (now.minus(lastFetch) < 6.hours) {
+        if ((now.minus(lastFetch) < 6.hours) && !forced) {
             logI(TAG) { "Skipping refresh, less than 6 hours since last fetch" }
             return
         }
-        val fetchFromStart = now.minus(settings.getLastFullFetchTime()) >= 21.days
+        val fetchFromStart = (now.minus(settings.getLastFullFetchTime()) >= 21.days) || forced
         listOf(
             refreshTransactions(fetchFromStart),
             refreshCurrentBalances(fetchFromStart),
@@ -67,6 +67,9 @@ class MainRepository internal constructor(
             baseUrl = baseUrl,
             since = settings.getLastTxFetchTime().toSince(fetchFromStart)
         ).onSuccess {
+            if (fetchFromStart) {
+                transactionsDao.deleteAll()
+            }
             transactionsDao.insert(it)
             settings.setLastTxFetchTime(clock.now())
             return true
@@ -80,6 +83,9 @@ class MainRepository internal constructor(
             baseUrl = baseUrl,
             since = settings.getLastCurrentBalancesFetchTime().toSince(fetchFromStart)
         ).onSuccess {
+            if (fetchFromStart) {
+                currentBalancesDao.deleteAll()
+            }
             currentBalancesDao.insert(it)
             settings.setLastCurrentBalancesFetchTime(clock.now())
             return true
@@ -93,6 +99,9 @@ class MainRepository internal constructor(
             baseUrl = baseUrl,
             since = settings.getLastReportsFetchTime().toSince(fetchFromStart)
         ).onSuccess {
+            if (fetchFromStart) {
+                reportsDao.deleteAll()
+            }
             reportsDao.insert(it)
             settings.setLastReportsFetchTime(clock.now())
             return true

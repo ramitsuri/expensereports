@@ -14,4 +14,7 @@ internal interface CurrentBalancesDao {
 
      @Insert(onConflict = OnConflictStrategy.REPLACE)
      suspend fun insert(currentBalances: List<CurrentBalance>)
+
+     @Query("DELETE FROM db_current_balance")
+     suspend fun deleteAll()
 }

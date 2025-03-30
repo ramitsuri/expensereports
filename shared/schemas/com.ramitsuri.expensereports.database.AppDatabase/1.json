@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "32f3f3a9075aad8660c29b38ec2acd29",
+    "identityHash": "6f623d554be79c7f4cb74df960e47d7d",
     "entities": [
       {
         "tableName": "db_report",
@@ -135,7 +135,7 @@
       },
       {
         "tableName": "db_current_balance",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`name` TEXT NOT NULL, `balance` TEXT NOT NULL, `group_name` TEXT, PRIMARY KEY(`name`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`name` TEXT NOT NULL, `balance` TEXT NOT NULL, `group_name` TEXT NOT NULL, PRIMARY KEY(`name`, `group_name`))",
         "fields": [
           {
             "fieldPath": "name",
@@ -152,20 +152,22 @@
           {
             "fieldPath": "groupName",
             "columnName": "group_name",
-            "affinity": "TEXT"
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "name"
+            "name",
+            "group_name"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '32f3f3a9075aad8660c29b38ec2acd29')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6f623d554be79c7f4cb74df960e47d7d')"
     ]
   }
 }

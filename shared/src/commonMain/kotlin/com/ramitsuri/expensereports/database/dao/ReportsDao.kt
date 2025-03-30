@@ -82,22 +82,29 @@ internal abstract class ReportsDao {
         )
     }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    internal abstract suspend fun insertReports(reports: List<DbReport>)
+    @Transaction
+    open suspend fun deleteAll() {
+        deleteReports()
+        deleteReportAccounts()
+        deleteReportAccountTotals()
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    internal abstract suspend fun insertAccounts(accounts: List<DbReportAccount>)
+    protected abstract suspend fun insertReports(reports: List<DbReport>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    internal abstract suspend fun insertTotals(totals: List<DbReportAccountTotal>)
+    protected abstract suspend fun insertAccounts(accounts: List<DbReportAccount>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    protected abstract suspend fun insertTotals(totals: List<DbReportAccountTotal>)
 
     @Query("SELECT * FROM db_report WHERE name = :reportName")
-    internal abstract fun getReport(
+    protected abstract fun getReport(
         reportName: String,
     ): Flow<DbReport?>
 
     @Query("SELECT * FROM db_report_account WHERE report_name = :reportName")
-    internal abstract suspend fun getReportAccounts(
+    protected abstract suspend fun getReportAccounts(
         reportName: String,
     ): List<DbReportAccount>
 
@@ -107,9 +114,18 @@ internal abstract class ReportsDao {
                 "AND account_name = :accountName " +
                 "AND month_year IN (:monthYears)"
     )
-    internal abstract suspend fun getReportAccountTotals(
+    protected abstract suspend fun getReportAccountTotals(
         reportName: String,
         accountName: String,
         monthYears: List<MonthYear>
     ): List<DbReportAccountTotal>
+
+    @Query("DELETE FROM db_report")
+    protected abstract suspend fun deleteReports()
+
+    @Query("DELETE FROM db_report_account")
+    protected abstract suspend fun deleteReportAccounts()
+
+    @Query("DELETE FROM db_report_account_total")
+    protected abstract suspend fun deleteReportAccountTotals()
 }

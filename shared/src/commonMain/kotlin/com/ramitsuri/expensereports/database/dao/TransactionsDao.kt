@@ -15,4 +15,7 @@ internal interface TransactionsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transactions: List<Transaction>)
+
+    @Query("DELETE FROM db_transaction")
+    suspend fun deleteAll()
 }
