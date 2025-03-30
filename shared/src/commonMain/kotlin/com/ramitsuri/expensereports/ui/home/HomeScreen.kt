@@ -31,8 +31,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.BeachAccess
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Elderly
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Payment
+import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,6 +68,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -86,6 +94,7 @@ import expensereports.shared.generated.resources.period_all
 import expensereports.shared.generated.resources.period_last_three_years
 import expensereports.shared.generated.resources.period_one_year
 import expensereports.shared.generated.resources.period_this_year
+import expensereports.shared.generated.resources.savings_rate
 import expensereports.shared.generated.resources.value1_value2_formatted
 import kotlinx.coroutines.delay
 import kotlinx.datetime.number
@@ -281,7 +290,7 @@ private fun ExpandableCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.BeachAccess,
+                    imageVector = getExpandableCardImage(cardName),
                     contentDescription = null,
                     modifier = Modifier.size(32.dp)
                 )
@@ -340,6 +349,20 @@ private fun ExpandableCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun getExpandableCardImage(name: String): ImageVector {
+    return when (name) {
+        stringResource(Res.string.savings_rate) -> Icons.Outlined.Savings
+        "Travel" -> Icons.Outlined.BeachAccess
+        "Cash" -> Icons.Outlined.AttachMoney
+        "Retirement" -> Icons.Outlined.Elderly
+        "Credit Cards" -> Icons.Outlined.CreditCard
+        "Salary" -> Icons.Outlined.Payments
+        "Taxes" -> Icons.Outlined.AccountBalance
+        else -> Icons.Outlined.BeachAccess
     }
 }
 
