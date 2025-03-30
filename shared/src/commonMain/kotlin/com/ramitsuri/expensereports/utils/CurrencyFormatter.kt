@@ -1,12 +1,15 @@
 package com.ramitsuri.expensereports.utils
 
+import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Locale
-import java.math.BigDecimal
 
-fun BigDecimal.format(stripZeros: Boolean = true, locale: Locale = Locale.US): String {
+fun BigDecimal.format(
+    stripZeros: Boolean = true,
+    locale: Locale = Locale.US,
+): String {
     val value = currencyFormatter(locale).format(roundForCalculation(this, locale))
     return if (stripZeros && value.contains(".0")) {
         value.replace("0*$".toRegex(), "")
@@ -16,7 +19,10 @@ fun BigDecimal.format(stripZeros: Boolean = true, locale: Locale = Locale.US): S
     }
 }
 
-fun BigDecimal.formatRounded(stripZeros: Boolean = true, locale: Locale = Locale.US): String {
+fun BigDecimal.formatRounded(
+    stripZeros: Boolean = true,
+    locale: Locale = Locale.US,
+): String {
     val value = format(stripZeros, locale)
     return if (this < thousand) {
         return value
@@ -38,13 +44,17 @@ fun BigDecimal.formatPercent(locale: Locale = Locale.US) =
         }
         .plus("%")
 
-fun BigDecimal.div(divisor: BigDecimal): BigDecimal = this.divide(
-    divisor,
-    10,
-    RoundingMode.HALF_EVEN
-)
+fun BigDecimal.div(divisor: BigDecimal): BigDecimal =
+    this.divide(
+        divisor,
+        10,
+        RoundingMode.HALF_EVEN,
+    )
 
-private fun roundForCalculation(amount: BigDecimal, locale: Locale): BigDecimal {
+private fun roundForCalculation(
+    amount: BigDecimal,
+    locale: Locale,
+): BigDecimal {
     val jvmBigDecimal = amount.toJvm()
     val newScale = currencyFormatter(locale).maximumFractionDigits
     return jvmBigDecimal.setScale(newScale, RoundingMode.HALF_EVEN)

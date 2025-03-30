@@ -32,9 +32,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-fun initKoin(
-    appModule: KoinApplication.() -> Module
-): KoinApplication {
+fun initKoin(appModule: KoinApplication.() -> Module): KoinApplication {
     val koinApplication =
         startKoin {
             modules(
@@ -45,110 +43,112 @@ fun initKoin(
     return koinApplication
 }
 
-internal val coreModule = module {
-    single<Settings> {
-        val dataStore = DataStoreKeyValueStore { get<Path>() }
-        Settings(
-            keyValueStore = dataStore,
-        )
-    }
+internal val coreModule =
+    module {
+        single<Settings> {
+            val dataStore = DataStoreKeyValueStore { get<Path>() }
+            Settings(
+                keyValueStore = dataStore,
+            )
+        }
 
-    single<AppDatabase> {
-        val ioDispatcher = get<CoroutineDispatcher>(qualifier = KoinQualifier.IO_DISPATCHER)
-        AppDatabase.getDb(
-            builder = get<RoomDatabase.Builder<AppDatabase>>(),
-            dispatcher = ioDispatcher,
-            json = get<Json>()
-        )
-    }
+        single<AppDatabase> {
+            val ioDispatcher = get<CoroutineDispatcher>(qualifier = KoinQualifier.IO_DISPATCHER)
+            AppDatabase.getDb(
+                builder = get<RoomDatabase.Builder<AppDatabase>>(),
+                dispatcher = ioDispatcher,
+                json = get<Json>(),
+            )
+        }
 
-    single<CoroutineDispatcher>(qualifier = KoinQualifier.IO_DISPATCHER) {
-        Dispatchers.IO
-    }
+        single<CoroutineDispatcher>(qualifier = KoinQualifier.IO_DISPATCHER) {
+            Dispatchers.IO
+        }
 
-    single<HttpClient> {
-        HttpClient(get<HttpClientEngine>()) {
-            install(ContentNegotiation) {
-                json(get<Json>())
-            }
-            install(Logging) {
-                logger =
-                    object : Logger {
-                        override fun log(message: String) {
-                            logI("HTTP") { message }
+        single<HttpClient> {
+            HttpClient(get<HttpClientEngine>()) {
+                install(ContentNegotiation) {
+                    json(get<Json>())
+                }
+                install(Logging) {
+                    logger =
+                        object : Logger {
+                            override fun log(message: String) {
+                                logI("HTTP") { message }
+                            }
                         }
-                    }
-                level = if (get<Boolean>(qualifier = KoinQualifier.IS_DEBUG)) {
-                    LogLevel.ALL
-                } else {
-                    LogLevel.HEADERS
+                    level =
+                        if (get<Boolean>(qualifier = KoinQualifier.IS_DEBUG)) {
+                            LogLevel.ALL
+                        } else {
+                            LogLevel.HEADERS
+                        }
                 }
             }
         }
-    }
 
-    single<Json> {
-        Json {
-            prettyPrint = true
-            isLenient = true
-            ignoreUnknownKeys = true
-            allowStructuredMapKeys = true
+        single<Json> {
+            Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+                allowStructuredMapKeys = true
+            }
+        }
+
+        single<Api> {
+            ApiImpl(
+                httpClient = get<HttpClient>(),
+                ioDispatcher = get<CoroutineDispatcher>(qualifier = KoinQualifier.IO_DISPATCHER),
+            )
+        }
+
+        single<MainRepository> {
+            MainRepository(
+                transactionsDao = get<TransactionsDao>(),
+                reportsDao = get<ReportsDao>(),
+                currentBalancesDao = get<CurrentBalancesDao>(),
+                api = get<Api>(),
+                settings = get<Settings>(),
+            )
+        }
+
+        factory<String>(qualifier = KoinQualifier.DATABASE_NAME) {
+            "app_database"
+        }
+
+        factory<String>(qualifier = KoinQualifier.DATASTORE_FILE_NAME) {
+            "expense_reports.preferences_pb"
+        }
+
+        factory<TransactionsDao> {
+            get<AppDatabase>().transactionsDao()
+        }
+
+        factory<ReportsDao> {
+            get<AppDatabase>().reportsDao()
+        }
+
+        factory<CurrentBalancesDao> {
+            get<AppDatabase>().currentBalancesDao()
+        }
+
+        factory<Boolean>(qualifier = KoinQualifier.IS_DEBUG) {
+            BuildKonfig.IS_DEBUG
+        }
+
+        viewModel<HomeViewModel> {
+            HomeViewModel(
+                mainRepository = get<MainRepository>(),
+            )
+        }
+
+        viewModel<SettingsViewModel> {
+            SettingsViewModel(
+                settings = get<Settings>(),
+            )
         }
     }
-
-    single<Api> {
-        ApiImpl(
-            httpClient = get<HttpClient>(),
-            ioDispatcher = get<CoroutineDispatcher>(qualifier = KoinQualifier.IO_DISPATCHER),
-        )
-    }
-
-    single<MainRepository> {
-        MainRepository(
-            transactionsDao = get<TransactionsDao>(),
-            reportsDao = get<ReportsDao>(),
-            currentBalancesDao = get<CurrentBalancesDao>(),
-            api = get<Api>(),
-            settings = get<Settings>(),
-        )
-    }
-
-    factory<String>(qualifier = KoinQualifier.DATABASE_NAME) {
-        "app_database"
-    }
-
-    factory<String>(qualifier = KoinQualifier.DATASTORE_FILE_NAME) {
-        "expense_reports.preferences_pb"
-    }
-
-    factory<TransactionsDao> {
-        get<AppDatabase>().transactionsDao()
-    }
-
-    factory<ReportsDao> {
-        get<AppDatabase>().reportsDao()
-    }
-
-    factory<CurrentBalancesDao> {
-        get<AppDatabase>().currentBalancesDao()
-    }
-
-    factory<Boolean>(qualifier = KoinQualifier.IS_DEBUG) {
-        BuildKonfig.IS_DEBUG
-    }
-
-    viewModel<HomeViewModel> {
-        HomeViewModel(
-            mainRepository = get<MainRepository>(),
-        )
-    }
-
-    viewModel<SettingsViewModel> {
-        SettingsViewModel(
-            settings = get<Settings>(),
-        )
-    }
-}
 
 object KoinQualifier {
     val IO_DISPATCHER = named("io_dispatcher")

@@ -10,7 +10,7 @@ import java.math.BigDecimal
 
 @ProvidedTypeConverter
 class DatabaseConverters(
-    private val json: Json
+    private val json: Json,
 ) {
     @TypeConverter
     fun toBigDecimal(string: String): BigDecimal {

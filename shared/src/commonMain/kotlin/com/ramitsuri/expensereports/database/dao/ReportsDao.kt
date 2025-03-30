@@ -18,25 +18,30 @@ internal abstract class ReportsDao {
     @Query("SELECT name FROM db_report")
     abstract fun getReportNames(): Flow<List<String>>
 
-    fun get(reportName: String, monthYears: List<MonthYear>): Flow<Report?> {
+    fun get(
+        reportName: String,
+        monthYears: List<MonthYear>,
+    ): Flow<Report?> {
         return getReport(reportName).map { dbReport ->
             if (dbReport == null) {
                 return@map null
             }
-            val accounts = getReportAccounts(reportName).map { dbReportAccount ->
-                val totals = getReportAccountTotals(
-                    reportName = reportName,
-                    accountName = dbReportAccount.accountName,
-                    monthYears = monthYears
-                ).associate { dbReportAccountTotal ->
-                    dbReportAccountTotal.monthYear to dbReportAccountTotal.total
+            val accounts =
+                getReportAccounts(reportName).map { dbReportAccount ->
+                    val totals =
+                        getReportAccountTotals(
+                            reportName = reportName,
+                            accountName = dbReportAccount.accountName,
+                            monthYears = monthYears,
+                        ).associate { dbReportAccountTotal ->
+                            dbReportAccountTotal.monthYear to dbReportAccountTotal.total
+                        }
+                    Report.Account(
+                        name = dbReportAccount.accountName,
+                        order = dbReportAccount.order,
+                        monthTotals = totals,
+                    )
                 }
-                Report.Account(
-                    name = dbReportAccount.accountName,
-                    order = dbReportAccount.order,
-                    monthTotals = totals,
-                )
-            }
             Report(
                 name = dbReport.name,
                 withCumulativeBalance = dbReport.withCumulativeBalance,
@@ -51,9 +56,9 @@ internal abstract class ReportsDao {
             reports.map {
                 DbReport(
                     name = it.name,
-                    withCumulativeBalance = it.withCumulativeBalance
+                    withCumulativeBalance = it.withCumulativeBalance,
                 )
-            }
+            },
         )
         insertAccounts(
             reports.flatMap { report ->
@@ -64,7 +69,7 @@ internal abstract class ReportsDao {
                         order = accountIndex,
                     )
                 }
-            }
+            },
         )
         insertTotals(
             reports.flatMap { report ->
@@ -74,11 +79,11 @@ internal abstract class ReportsDao {
                             reportName = report.name,
                             accountName = account.name,
                             monthYear = monthYear,
-                            total = total
+                            total = total,
                         )
                     }
                 }
-            }
+            },
         )
     }
 
@@ -99,25 +104,21 @@ internal abstract class ReportsDao {
     protected abstract suspend fun insertTotals(totals: List<DbReportAccountTotal>)
 
     @Query("SELECT * FROM db_report WHERE name = :reportName")
-    protected abstract fun getReport(
-        reportName: String,
-    ): Flow<DbReport?>
+    protected abstract fun getReport(reportName: String): Flow<DbReport?>
 
     @Query("SELECT * FROM db_report_account WHERE report_name = :reportName")
-    protected abstract suspend fun getReportAccounts(
-        reportName: String,
-    ): List<DbReportAccount>
+    protected abstract suspend fun getReportAccounts(reportName: String): List<DbReportAccount>
 
     @Query(
         "SELECT * FROM db_report_account_total " +
-                "WHERE report_name = :reportName " +
-                "AND account_name = :accountName " +
-                "AND month_year IN (:monthYears)"
+            "WHERE report_name = :reportName " +
+            "AND account_name = :accountName " +
+            "AND month_year IN (:monthYears)",
     )
     protected abstract suspend fun getReportAccountTotals(
         reportName: String,
         accountName: String,
-        monthYears: List<MonthYear>
+        monthYears: List<MonthYear>,
     ): List<DbReportAccountTotal>
 
     @Query("DELETE FROM db_report")

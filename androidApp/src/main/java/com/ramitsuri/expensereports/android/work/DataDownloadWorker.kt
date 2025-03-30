@@ -12,11 +12,9 @@ import java.time.Duration
 
 class DataDownloadWorker(
     context: Context,
-    workerParams: WorkerParameters
-) : CoroutineWorker(context, workerParams){
-
+    workerParams: WorkerParameters,
+) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
-
         return Result.success()
     }
 
@@ -26,23 +24,25 @@ class DataDownloadWorker(
         private const val REPEAT_HOURS = 6L
 
         fun enqueuePeriodic(context: Context) {
-            val constraints = Constraints.Builder()
-                .setRequiresCharging(true)
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
+            val constraints =
+                Constraints.Builder()
+                    .setRequiresCharging(true)
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
 
-            val request = PeriodicWorkRequestBuilder<DataDownloadWorker>(
-                repeatInterval = Duration.ofHours(REPEAT_HOURS)
-            )
-                .addTag(TAG)
-                .setConstraints(constraints)
-                .build()
+            val request =
+                PeriodicWorkRequestBuilder<DataDownloadWorker>(
+                    repeatInterval = Duration.ofHours(REPEAT_HOURS),
+                )
+                    .addTag(TAG)
+                    .setConstraints(constraints)
+                    .build()
 
             WorkManager.getInstance(context)
                 .enqueueUniquePeriodicWork(
                     WORK_NAME,
                     ExistingPeriodicWorkPolicy.REPLACE,
-                    request
+                    request,
                 )
         }
     }

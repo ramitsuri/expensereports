@@ -7,13 +7,10 @@ import java.math.BigDecimal
 
 @Serializable
 data class Report(
-
     @SerialName("name")
     val name: String,
-
     @SerialName("with_cumulative_balance")
     val withCumulativeBalance: Boolean,
-
     // Rows
     @SerialName("accounts")
     val accounts: List<Account>,
@@ -22,12 +19,14 @@ data class Report(
     data class Account(
         @SerialName("name")
         val name: String,
-
         @SerialName("order")
         val order: Int,
-
         // Columns
         @SerialName("month_totals")
-        val monthTotals: Map<MonthYear, @Serializable(BigDecimalSerializer::class) BigDecimal>,
+        val monthTotals: Map<
+            MonthYear,
+            @Serializable(BigDecimalSerializer::class)
+            BigDecimal,
+            >,
     )
 }

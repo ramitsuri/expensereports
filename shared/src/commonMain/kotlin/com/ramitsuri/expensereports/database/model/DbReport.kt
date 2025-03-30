@@ -5,12 +5,11 @@ import androidx.room.Entity
 
 @Entity(
     tableName = "db_report",
-    primaryKeys = ["name"]
+    primaryKeys = ["name"],
 )
 internal data class DbReport(
     @ColumnInfo(name = "name")
     val name: String,
-
     @ColumnInfo(name = "with_cumulative_balance")
     val withCumulativeBalance: Boolean,
 )

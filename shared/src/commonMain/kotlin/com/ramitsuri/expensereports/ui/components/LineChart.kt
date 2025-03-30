@@ -81,8 +81,10 @@ import kotlin.math.pow
  * chart
  */
 
-
-fun Float.spaceBetween(itemCount: Int, index: Int): Float {
+fun Float.spaceBetween(
+    itemCount: Int,
+    index: Int,
+): Float {
     if (itemCount == 1) return 0f
     val itemSize = this / (itemCount - 1)
     val positions = (0 until itemCount).map { it * itemSize }
@@ -92,6 +94,7 @@ fun Float.spaceBetween(itemCount: Int, index: Int): Float {
 
 sealed class StrokeStyle {
     data object Normal : StrokeStyle()
+
     data class Dashed(val intervals: FloatArray = floatArrayOf(10f, 10f), val phase: Float = 10f) :
         StrokeStyle() {
         override fun equals(other: Any?): Boolean {
@@ -123,18 +126,18 @@ sealed class StrokeStyle {
                 }
             }
         }
-
 }
 
 sealed class AnimationMode {
     data class Together(val delayBuilder: (index: Int) -> Long = { 0 }) : AnimationMode()
+
     data object OneByOne : AnimationMode()
 }
 
 data class DividerProperties(
     val enabled: Boolean = true,
     val xAxisProperties: LineProperties = LineProperties(),
-    val yAxisProperties: LineProperties = LineProperties()
+    val yAxisProperties: LineProperties = LineProperties(),
 )
 
 data class LineProperties(
@@ -147,14 +150,14 @@ data class LineProperties(
 data class GridProperties(
     val enabled: Boolean = true,
     val xAxisProperties: AxisProperties = AxisProperties(),
-    val yAxisProperties: AxisProperties = AxisProperties()
+    val yAxisProperties: AxisProperties = AxisProperties(),
 ) {
     data class AxisProperties(
         val enabled: Boolean = true,
         val style: StrokeStyle = StrokeStyle.Normal,
         val color: Brush = SolidColor(Color.Gray),
         val thickness: Dp = (.5).dp,
-        val lineCount: Int = 5
+        val lineCount: Int = 5,
     )
 }
 
@@ -164,10 +167,11 @@ data class ZeroLineProperties(
     val color: Brush = SolidColor(Color.Gray),
     val thickness: Dp = (.5).dp,
     val animationSpec: AnimationSpec<Float> = tween(durationMillis = 1000, delayMillis = 300),
-    val zType: ZType = ZType.Under
+    val zType: ZType = ZType.Under,
 ) {
     enum class ZType {
-        Under, Above
+        Under,
+        Above,
     }
 }
 
@@ -178,9 +182,8 @@ sealed class IndicatorProperties(
     open val position: IndicatorPosition,
     open val padding: Dp,
     open val contentBuilder: (Double) -> String,
-    open val indicators: List<Double> = emptyList()
+    open val indicators: List<Double> = emptyList(),
 )
-
 
 data class VerticalIndicatorProperties(
     override val enabled: Boolean = true,
@@ -191,16 +194,16 @@ data class VerticalIndicatorProperties(
     override val contentBuilder: (Double) -> String = {
         it.toString()
     },
-    override val indicators: List<Double> = emptyList()
+    override val indicators: List<Double> = emptyList(),
 ) : IndicatorProperties(
-    enabled = enabled,
-    textStyle = textStyle,
-    count = count,
-    position = position,
-    contentBuilder = contentBuilder,
-    padding = padding,
-    indicators = indicators
-)
+        enabled = enabled,
+        textStyle = textStyle,
+        count = count,
+        position = position,
+        contentBuilder = contentBuilder,
+        padding = padding,
+        indicators = indicators,
+    )
 
 data class HorizontalIndicatorProperties(
     override val enabled: Boolean = true,
@@ -213,35 +216,36 @@ data class HorizontalIndicatorProperties(
     },
     override val indicators: List<Double> = emptyList(),
 ) : IndicatorProperties(
-    enabled = enabled,
-    textStyle = textStyle,
-    count = count,
-    position = position,
-    contentBuilder = contentBuilder,
-    padding = padding,
-    indicators = indicators
-)
+        enabled = enabled,
+        textStyle = textStyle,
+        count = count,
+        position = position,
+        contentBuilder = contentBuilder,
+        padding = padding,
+        indicators = indicators,
+    )
 
 sealed interface IndicatorPosition {
     enum class Vertical : IndicatorPosition {
         Top,
-        Bottom
+        Bottom,
     }
 
     enum class Horizontal : IndicatorPosition {
         Start,
-        End
+        End,
     }
 }
 
 sealed class IndicatorCount {
     data class CountBased(val count: Int) : IndicatorCount()
+
     data class StepBased(val stepBy: Double) : IndicatorCount()
 }
 
 data class LabelHelperProperties(
     val enabled: Boolean = true,
-    val textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp)
+    val textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
 )
 
 data class PopupProperties(
@@ -256,10 +260,11 @@ data class PopupProperties(
     val mode: Mode = Mode.Normal,
     val contentBuilder: (index: Int) -> String = {
         it.toString()
-    }
+    },
 ) {
     sealed class Mode {
         data object Normal : Mode()
+
         data class PointMode(val threshold: Dp = 16.dp) : Mode()
     }
 }
@@ -272,7 +277,7 @@ data class DotProperties(
     val strokeColor: Brush = SolidColor(Color.Unspecified),
     val strokeStyle: StrokeStyle = StrokeStyle.Normal,
     val animationEnabled: Boolean = true,
-    val animationSpec: AnimationSpec<Float> = tween(300)
+    val animationSpec: AnimationSpec<Float> = tween(300),
 )
 
 data class LabelProperties(
@@ -281,15 +286,16 @@ data class LabelProperties(
     val padding: Dp = 12.dp,
     val labels: List<String> = listOf(),
     val builder: (@Composable (modifier: Modifier, label: String, shouldRotate: Boolean, index: Int) -> Unit)? = null,
-    val rotation: Rotation = Rotation()
+    val rotation: Rotation = Rotation(),
 ) {
     data class Rotation(
         val mode: Mode = Mode.IfNecessary,
         val degree: Float = -45f,
-        val padding: Dp? = null
+        val padding: Dp? = null,
     ) {
         enum class Mode {
-            Force, IfNecessary
+            Force,
+            IfNecessary,
         }
     }
 }
@@ -328,25 +334,33 @@ fun LineChart(
     dividerProperties: DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
     zeroLineProperties: ZeroLineProperties = ZeroLineProperties(),
-    indicatorProperties: HorizontalIndicatorProperties = HorizontalIndicatorProperties(
-        textStyle = TextStyle.Default,
-        padding = 16.dp
-    ),
+    indicatorProperties: HorizontalIndicatorProperties =
+        HorizontalIndicatorProperties(
+            textStyle = TextStyle.Default,
+            padding = 16.dp,
+        ),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     labelHelperPadding: Dp = 26.dp,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
-    popupProperties: PopupProperties = PopupProperties(
-        textStyle = TextStyle.Default.copy(
-            color = Color.White,
-            fontSize = 12.sp
-        )
-    ),
+    popupProperties: PopupProperties =
+        PopupProperties(
+            textStyle =
+                TextStyle.Default.copy(
+                    color = Color.White,
+                    fontSize = 12.sp,
+                ),
+        ),
     dotsProperties: DotProperties = DotProperties(),
     labelProperties: LabelProperties = LabelProperties(enabled = false),
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it } ?: 0.0 } ?: 0.0,
-    minValue: Double = if (data.any { it.values.any { it < 0.0 } }) data.minOfOrNull {
-        it.values.minOfOrNull { it } ?: 0.0
-    } ?: 0.0 else 0.0,
+    minValue: Double =
+        if (data.any { it.values.any { it < 0.0 } }) {
+            data.minOfOrNull {
+                it.values.minOfOrNull { it } ?: 0.0
+            } ?: 0.0
+        } else {
+            0.0
+        },
 ) {
     if (data.isNotEmpty()) {
         require(minValue <= (data.minOfOrNull { it.values.minOfOrNull { it } ?: 0.0 } ?: 0.0)) {
@@ -360,57 +374,70 @@ fun LineChart(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
 
-    val pathMeasure = remember {
-        PathMeasure()
-    }
-
-    val popupAnimation = remember {
-        Animatable(0f)
-    }
-
-    val zeroLineAnimation = remember {
-        Animatable(0f)
-    }
-    val chartWidth = remember {
-        mutableFloatStateOf(0f)
-    }
-
-    val dotAnimators = remember {
-        mutableStateListOf<List<Animatable<Float, AnimationVector1D>>>()
-    }
-    val popups = remember {
-        mutableStateListOf<Popup>()
-    }
-    val popupsOffsetAnimators = remember {
-        mutableStateListOf<Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>>()
-    }
-    val linesPathData = remember {
-        mutableStateListOf<com.ramitsuri.expensereports.ui.components.PathData>()
-    }
-    val indicators = remember(indicatorProperties.indicators, minValue, maxValue) {
-        indicatorProperties.indicators.ifEmpty {
-            split(
-                count = indicatorProperties.count,
-                minValue = minValue,
-                maxValue = maxValue
-            )
+    val pathMeasure =
+        remember {
+            PathMeasure()
         }
-    }
-    val indicatorAreaWidth = remember {
-        if (indicatorProperties.enabled) {
-            indicators.maxOf { textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.width } + (indicatorProperties.padding.value * density.density)
-        } else {
-            0f
-        }
-    }
 
-    val xPadding = remember {
-        if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-            indicatorAreaWidth
-        } else {
-            0f
+    val popupAnimation =
+        remember {
+            Animatable(0f)
         }
-    }
+
+    val zeroLineAnimation =
+        remember {
+            Animatable(0f)
+        }
+    val chartWidth =
+        remember {
+            mutableFloatStateOf(0f)
+        }
+
+    val dotAnimators =
+        remember {
+            mutableStateListOf<List<Animatable<Float, AnimationVector1D>>>()
+        }
+    val popups =
+        remember {
+            mutableStateListOf<Popup>()
+        }
+    val popupsOffsetAnimators =
+        remember {
+            mutableStateListOf<Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>>()
+        }
+    val linesPathData =
+        remember {
+            mutableStateListOf<com.ramitsuri.expensereports.ui.components.PathData>()
+        }
+    val indicators =
+        remember(indicatorProperties.indicators, minValue, maxValue) {
+            indicatorProperties.indicators.ifEmpty {
+                split(
+                    count = indicatorProperties.count,
+                    minValue = minValue,
+                    maxValue = maxValue,
+                )
+            }
+        }
+    val indicatorAreaWidth =
+        remember {
+            if (indicatorProperties.enabled) {
+                indicators.maxOf {
+                    textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.width
+                } + (indicatorProperties.padding.value * density.density)
+            } else {
+                0f
+            }
+        }
+
+    val xPadding =
+        remember {
+            if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+                indicatorAreaWidth
+            } else {
+                0f
+            }
+        }
     LaunchedEffect(Unit) {
         if (zeroLineProperties.enabled) {
             zeroLineAnimation.snapTo(0f)
@@ -484,7 +511,7 @@ fun LineChart(
         if (labelHelperProperties.enabled) {
             LabelHelper(
                 data = data.map { it.label to it.color },
-                textStyle = labelHelperProperties.textStyle
+                textStyle = labelHelperProperties.textStyle,
             )
             Spacer(modifier = Modifier.height(labelHelperPadding))
         }
@@ -493,113 +520,132 @@ fun LineChart(
                 if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
                     Indicators(
                         indicatorProperties = indicatorProperties,
-                        indicators = indicators
+                        indicators = indicators,
                     )
                     Spacer(modifier = Modifier.width(indicatorProperties.padding))
                 }
             }
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 Canvas(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .pointerInput(data, minValue, maxValue, linesPathData) {
-                            if (!popupProperties.enabled) return@pointerInput
-                            detectHorizontalDragGestures(
-                                onDragEnd = {
-                                    scope.launch {
-                                        popupAnimation.animateTo(0f, animationSpec = tween(500))
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxSize()
+                            .pointerInput(data, minValue, maxValue, linesPathData) {
+                                if (!popupProperties.enabled) return@pointerInput
+                                detectHorizontalDragGestures(
+                                    onDragEnd = {
+                                        scope.launch {
+                                            popupAnimation.animateTo(0f, animationSpec = tween(500))
+                                            popups.clear()
+                                            popupsOffsetAnimators.clear()
+                                        }
+                                    },
+                                    onHorizontalDrag = { change, amount ->
+                                        val _size =
+                                            size.toSize()
+                                                .copy(height = (size.height).toFloat())
                                         popups.clear()
-                                        popupsOffsetAnimators.clear()
-                                    }
-                                },
-                                onHorizontalDrag = { change, amount ->
-                                    val _size = size.toSize()
-                                        .copy(height = (size.height).toFloat())
-                                    popups.clear()
-                                    data.forEachIndexed { index, line ->
-                                        val properties = line.popupProperties ?: popupProperties
+                                        data.forEachIndexed { index, line ->
+                                            val properties = line.popupProperties ?: popupProperties
 
-                                        val positionX =
-                                            (change.position.x).coerceIn(
-                                                0f,
-                                                size.width.toFloat()
-                                            )
-                                        val pathData = linesPathData[index]
-
-                                        if (positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
-                                            val showOnPointsThreshold =
-                                                ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
-                                                    ?: 0.dp).toPx()
-                                            val pointX =
-                                                pathData.xPositions.find { it in positionX - showOnPointsThreshold..positionX + showOnPointsThreshold }
-
-                                            if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null) {
-                                                val fraction =
-                                                    ((if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
-                                                        ?: 0f) else positionX) / size.width)
-                                                val popupValue = getPopupValue(
-                                                    points = line.values,
-                                                    fraction = fraction.toDouble(),
-                                                    rounded = line.curvedEdges ?: curvedEdges,
-                                                    size = _size,
-                                                    minValue = minValue,
-                                                    maxValue = maxValue
+                                            val positionX =
+                                                (change.position.x).coerceIn(
+                                                    0f,
+                                                    size.width.toFloat(),
                                                 )
-                                                popups.add(
-                                                    Popup(
-                                                        position = popupValue.offset,
-                                                        index = calculateValueIndex(
-                                                            fraction = fraction.toDouble(),
-                                                            values = line.values,
-                                                            pathData = pathData
-                                                        ),
-                                                        properties = properties
-                                                    )
-                                                )
+                                            val pathData = linesPathData[index]
 
-                                                if (popupsOffsetAnimators.count() < popups.count()) {
-                                                    repeat(popups.count() - popupsOffsetAnimators.count()) {
-                                                        popupsOffsetAnimators.add(
-                                                            // add fixed position for popup when mode is point mode
-                                                            if (properties.mode is PopupProperties.Mode.PointMode) {
-                                                                Animatable(popupValue.offset.x) to Animatable(
-                                                                    popupValue.offset.y
-                                                                )
-                                                            } else {
-                                                                Animatable(0f) to Animatable(0f)
-                                                            }
+                                            if (positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
+                                                val showOnPointsThreshold =
+                                                    (
+                                                        (properties.mode as? PopupProperties.Mode.PointMode)?.threshold
+                                                            ?: 0.dp
+                                                    ).toPx()
+                                                val pointX =
+                                                    pathData.xPositions.find { it in positionX - showOnPointsThreshold..positionX + showOnPointsThreshold }
+
+                                                if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null) {
+                                                    val fraction =
+                                                        (
+                                                            (
+                                                                if (properties.mode is PopupProperties.Mode.PointMode) {
+                                                                    (
+                                                                        pointX?.toFloat()
+                                                                            ?: 0f
+                                                                    )
+                                                                } else {
+                                                                    positionX
+                                                                }
+                                                            ) / size.width
                                                         )
+                                                    val popupValue =
+                                                        getPopupValue(
+                                                            points = line.values,
+                                                            fraction = fraction.toDouble(),
+                                                            rounded = line.curvedEdges ?: curvedEdges,
+                                                            size = _size,
+                                                            minValue = minValue,
+                                                            maxValue = maxValue,
+                                                        )
+                                                    popups.add(
+                                                        Popup(
+                                                            position = popupValue.offset,
+                                                            index =
+                                                                calculateValueIndex(
+                                                                    fraction = fraction.toDouble(),
+                                                                    values = line.values,
+                                                                    pathData = pathData,
+                                                                ),
+                                                            properties = properties,
+                                                        ),
+                                                    )
+
+                                                    if (popupsOffsetAnimators.count() < popups.count()) {
+                                                        repeat(popups.count() - popupsOffsetAnimators.count()) {
+                                                            popupsOffsetAnimators.add(
+                                                                // add fixed position for popup when mode is point mode
+                                                                if (properties.mode is PopupProperties.Mode.PointMode) {
+                                                                    Animatable(popupValue.offset.x) to
+                                                                        Animatable(
+                                                                            popupValue.offset.y,
+                                                                        )
+                                                                } else {
+                                                                    Animatable(0f) to Animatable(0f)
+                                                                },
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
-                                    }
-                                    scope.launch {
-                                        // animate popup (alpha)
-                                        if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                                            popupAnimation.animateTo(1f, animationSpec = tween(500))
+                                        scope.launch {
+                                            // animate popup (alpha)
+                                            if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+                                                popupAnimation.animateTo(1f, animationSpec = tween(500))
+                                            }
                                         }
-                                    }
-                                }
-                            )
-                        }
+                                    },
+                                )
+                            },
                 ) {
                     val chartAreaHeight = size.height
                     chartWidth.value = size.width
                     val drawZeroLine = {
-                        val zeroY = chartAreaHeight - calculateOffset(
-                            minValue = minValue,
-                            maxValue = maxValue,
-                            total = chartAreaHeight,
-                            value = 0f
-                        ).toFloat()
+                        val zeroY =
+                            chartAreaHeight -
+                                calculateOffset(
+                                    minValue = minValue,
+                                    maxValue = maxValue,
+                                    total = chartAreaHeight,
+                                    value = 0f,
+                                ).toFloat()
                         drawLine(
                             brush = zeroLineProperties.color,
                             start = Offset(x = 0f, y = zeroY),
                             end = Offset(x = size.width * zeroLineAnimation.value, y = zeroY),
                             pathEffect = zeroLineProperties.style.pathEffect,
-                            strokeWidth = zeroLineProperties.thickness.toPx()
+                            strokeWidth = zeroLineProperties.thickness.toPx(),
                         )
                     }
                     if (linesPathData.isEmpty() || linesPathData.count() != data.count()) {
@@ -607,9 +653,13 @@ fun LineChart(
                             val startIndex =
                                 if (it.viewRange.startIndex < 0 || it.viewRange.startIndex >= it.values.size - 1) 0 else it.viewRange.startIndex
                             val endIndex =
-                                if (it.viewRange.endIndex < 0 || it.viewRange.endIndex <= it.viewRange.startIndex
-                                    || it.viewRange.endIndex > it.values.size - 1
-                                ) it.values.size - 1 else it.viewRange.endIndex
+                                if (it.viewRange.endIndex < 0 || it.viewRange.endIndex <= it.viewRange.startIndex ||
+                                    it.viewRange.endIndex > it.values.size - 1
+                                ) {
+                                    it.values.size - 1
+                                } else {
+                                    it.viewRange.endIndex
+                                }
 
                             getLinePath(
                                 dataPoints = it.values.map { it.toFloat() },
@@ -618,7 +668,7 @@ fun LineChart(
                                 rounded = it.curvedEdges ?: curvedEdges,
                                 size = size.copy(height = chartAreaHeight),
                                 startIndex,
-                                endIndex
+                                endIndex,
                             )
                         }.also {
                             linesPathData.addAll(it)
@@ -631,7 +681,7 @@ fun LineChart(
                         xAxisProperties = gridProperties.xAxisProperties,
                         yAxisProperties = gridProperties.yAxisProperties,
                         size = size.copy(height = chartAreaHeight),
-                        gridEnabled = gridProperties.enabled
+                        gridEnabled = gridProperties.enabled,
                     )
                     if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
                         drawZeroLine()
@@ -643,23 +693,24 @@ fun LineChart(
                         pathMeasure.getSegment(
                             0f,
                             pathMeasure.length * line.strokeProgress.value,
-                            segmentedPath
+                            segmentedPath,
                         )
                         var pathEffect: PathEffect? = null
-                        val stroke: Float = when (val drawStyle = line.drawStyle) {
-                            is DrawStyle.Fill -> {
-                                0f
-                            }
+                        val stroke: Float =
+                            when (val drawStyle = line.drawStyle) {
+                                is DrawStyle.Fill -> {
+                                    0f
+                                }
 
-                            is DrawStyle.Stroke -> {
-                                pathEffect = drawStyle.strokeStyle.pathEffect
-                                drawStyle.width.toPx()
+                                is DrawStyle.Stroke -> {
+                                    pathEffect = drawStyle.strokeStyle.pathEffect
+                                    drawStyle.width.toPx()
+                                }
                             }
-                        }
                         drawPath(
                             path = segmentedPath,
                             brush = line.color,
-                            style = Stroke(width = stroke, pathEffect = pathEffect)
+                            style = Stroke(width = stroke, pathEffect = pathEffect),
                         )
 
                         var startOffset = 0f
@@ -680,7 +731,7 @@ fun LineChart(
                                 progress = line.gradientProgress.value,
                                 size = size.copy(height = chartAreaHeight),
                                 startOffset,
-                                endOffset
+                                endOffset,
                             )
                         } else if (line.drawStyle is DrawStyle.Fill) {
                             var fillColor = Color.Unspecified
@@ -694,17 +745,20 @@ fun LineChart(
                                 progress = 1f,
                                 size = size.copy(height = chartAreaHeight),
                                 startOffset,
-                                endOffset
+                                endOffset,
                             )
                         }
 
                         if ((line.dotProperties?.enabled ?: dotsProperties.enabled)) {
                             drawDots(
-                                dataPoints = line.values.mapIndexed { mapIndex, value ->
-                                    (dotAnimators.getOrNull(
-                                        index
-                                    )?.getOrNull(mapIndex) ?: Animatable(0f)) to value.toFloat()
-                                },
+                                dataPoints =
+                                    line.values.mapIndexed { mapIndex, value ->
+                                        (
+                                            dotAnimators.getOrNull(
+                                                index,
+                                            )?.getOrNull(mapIndex) ?: Animatable(0f)
+                                        ) to value.toFloat()
+                                    },
                                 properties = line.dotProperties ?: dotsProperties,
                                 linePath = segmentedPath,
                                 maxValue = maxValue.toFloat(),
@@ -713,7 +767,7 @@ fun LineChart(
                                 scope = scope,
                                 size = size.copy(height = chartAreaHeight),
                                 startIndex = pathData.startIndex,
-                                endIndex = pathData.endIndex
+                                endIndex = pathData.endIndex,
                             )
                         }
                     }
@@ -727,7 +781,7 @@ fun LineChart(
                             textMeasurer = textMeasurer,
                             scope = scope,
                             progress = popupAnimation.value,
-                            offsetAnimator = popupsOffsetAnimators.getOrNull(index)
+                            offsetAnimator = popupsOffsetAnimators.getOrNull(index),
                         )
                     }
                 }
@@ -737,7 +791,7 @@ fun LineChart(
                     Spacer(modifier = Modifier.width(indicatorProperties.padding))
                     Indicators(
                         indicatorProperties = indicatorProperties,
-                        indicators = indicators
+                        indicators = indicators,
                     )
                 }
             }
@@ -749,7 +803,7 @@ fun LineChart(
             chartWidth = chartWidth.value,
             density = density,
             textMeasurer = textMeasurer,
-            xPadding = xPadding
+            xPadding = xPadding,
         )
     }
 }
@@ -757,12 +811,13 @@ fun LineChart(
 private fun calculateValueIndex(
     fraction: Double,
     values: List<Double>,
-    pathData: PathData
+    pathData: PathData,
 ): Int {
     val xPosition = (fraction * pathData.path.getBounds().width).toFloat()
-    val closestXIndex = pathData.xPositions.indexOfFirst { x ->
-        x >= xPosition
-    }
+    val closestXIndex =
+        pathData.xPositions.indexOfFirst { x ->
+            x >= xPosition
+        }
     return if (closestXIndex >= 0) closestXIndex else values.size - 1
 }
 
@@ -777,21 +832,24 @@ internal fun getPopupValue(
     rounded: Boolean = false,
     size: Size,
     minValue: Double,
-    maxValue: Double
+    maxValue: Double,
 ): Value {
     val index = fraction * (points.count() - 1)
     val roundedIndex = floor(index).toInt()
     return if (fraction == 1.0) {
         val lastPoint = points.last()
-        val offset = Offset(
-            x = size.width,
-            y = size.height - calculateOffset(
-                minValue = minValue,
-                maxValue = maxValue,
-                total = size.height,
-                value = lastPoint.toFloat()
-            ).toFloat()
-        )
+        val offset =
+            Offset(
+                x = size.width,
+                y =
+                    size.height -
+                        calculateOffset(
+                            minValue = minValue,
+                            maxValue = maxValue,
+                            total = size.height,
+                            value = lastPoint.toFloat(),
+                        ).toFloat(),
+            )
         Value(calculatedValue = points.last(), offset = offset)
     } else {
         if (rounded && points.count() > 1) {
@@ -800,7 +858,7 @@ internal fun getPopupValue(
                     maxValue = maxValue,
                     minValue = minValue,
                     total = size.height,
-                    value = value.toFloat()
+                    value = value.toFloat(),
                 )
             }
             val x1 = (roundedIndex * (size.width / (points.size - 1)))
@@ -813,35 +871,45 @@ internal fun getPopupValue(
 
             val t = (fraction - areaFraction) * (points.size - 1)
 
-            val outputY = ((1 - t).pow(3) * (y1) +
-                    3 * t * (1 - t).pow(2) * (y1) +
-                    3 * (1 - t) * t.pow(2) * (y2) +
-                    t.pow(3) * y2).toFloat()
-            val outputX = ((1 - t).pow(3) * (x1) +
-                    3 * t * (1 - t).pow(2) * (cx) +
-                    3 * (1 - t) * t.pow(2) * (cx) +
-                    t.pow(3) * x2).toFloat()
-            val calculatedValue = calculateValue(
-                minValue = minValue,
-                maxValue = maxValue,
-                total = size.height,
-                offset = size.height - outputY
-            )
+            val outputY =
+                (
+                    (1 - t).pow(3) * (y1) +
+                        3 * t * (1 - t).pow(2) * (y1) +
+                        3 * (1 - t) * t.pow(2) * (y2) +
+                        t.pow(3) * y2
+                ).toFloat()
+            val outputX =
+                (
+                    (1 - t).pow(3) * (x1) +
+                        3 * t * (1 - t).pow(2) * (cx) +
+                        3 * (1 - t) * t.pow(2) * (cx) +
+                        t.pow(3) * x2
+                ).toFloat()
+            val calculatedValue =
+                calculateValue(
+                    minValue = minValue,
+                    maxValue = maxValue,
+                    total = size.height,
+                    offset = size.height - outputY,
+                )
 
             Value(calculatedValue = calculatedValue, offset = Offset(x = outputX, y = outputY))
         } else {
             val p1 = points[roundedIndex]
             val p2 = points.getOrNull(roundedIndex + 1) ?: p1
             val calculatedValue = ((p2 - p1) * (index - roundedIndex) + p1)
-            val offset = Offset(
-                x = if (points.count() > 1) (fraction * size.width).toFloat() else 0f,
-                y = size.height - calculateOffset(
-                    minValue = minValue,
-                    maxValue = maxValue,
-                    total = size.height,
-                    value = calculatedValue.toFloat()
-                ).toFloat()
-            )
+            val offset =
+                Offset(
+                    x = if (points.count() > 1) (fraction * size.width).toFloat() else 0f,
+                    y =
+                        size.height -
+                            calculateOffset(
+                                minValue = minValue,
+                                maxValue = maxValue,
+                                total = size.height,
+                                value = calculatedValue.toFloat(),
+                            ).toFloat(),
+                )
             Value(calculatedValue = calculatedValue, offset = offset)
         }
     }
@@ -855,14 +923,12 @@ fun DrawScope.drawGridLines(
     yAxisProperties: GridProperties.AxisProperties,
     size: Size? = null,
     xPadding: Float = 0f,
-    yPadding: Float = 0f
+    yPadding: Float = 0f,
 ) {
-
     val _size = size ?: this.size
 
     val xAxisPathEffect = xAxisProperties.style.pathEffect
     val yAxisPathEffect = yAxisProperties.style.pathEffect
-
 
     if (xAxisProperties.enabled && gridEnabled) {
         for (i in 0 until xAxisProperties.lineCount) {
@@ -872,7 +938,7 @@ fun DrawScope.drawGridLines(
                 start = Offset(0f + xPadding, y + yPadding),
                 end = Offset(_size.width + xPadding, y + yPadding),
                 strokeWidth = xAxisProperties.thickness.toPx(),
-                pathEffect = xAxisPathEffect
+                pathEffect = xAxisPathEffect,
             )
         }
     }
@@ -884,7 +950,7 @@ fun DrawScope.drawGridLines(
                 start = Offset(x + xPadding, 0f + yPadding),
                 end = Offset(x + xPadding, _size.height + yPadding),
                 strokeWidth = xAxisProperties.thickness.toPx(),
-                pathEffect = yAxisPathEffect
+                pathEffect = yAxisPathEffect,
             )
         }
     }
@@ -895,7 +961,7 @@ fun DrawScope.drawGridLines(
             start = Offset(0f + xPadding, y + yPadding),
             end = Offset(_size.width + xPadding, y + yPadding),
             strokeWidth = dividersProperties.xAxisProperties.thickness.toPx(),
-            pathEffect = dividersProperties.xAxisProperties.style.pathEffect
+            pathEffect = dividersProperties.xAxisProperties.style.pathEffect,
         )
     }
     if (dividersProperties.yAxisProperties.enabled && dividersProperties.enabled) {
@@ -905,7 +971,7 @@ fun DrawScope.drawGridLines(
             start = Offset(x + xPadding, 0f + yPadding),
             end = Offset(x + xPadding, _size.height + yPadding),
             strokeWidth = dividersProperties.yAxisProperties.thickness.toPx(),
-            pathEffect = dividersProperties.yAxisProperties.style.pathEffect
+            pathEffect = dividersProperties.yAxisProperties.style.pathEffect,
         )
     }
 }
@@ -930,19 +996,24 @@ fun DrawScope.drawDots(
     val lastPosition = pathMeasure.getPosition(pathMeasure.length)
     dataPoints.forEachIndexed { valueIndex, value ->
         if (valueIndex in startIndex..endIndex) {
-            val dotOffset = Offset(
-                x = _size.width.spaceBetween(
-                    itemCount = dataPoints.count(),
-                    index = valueIndex
-                ),
-                y = (_size.height - calculateOffset(
-                    maxValue = maxValue.toDouble(),
-                    minValue = minValue.toDouble(),
-                    total = _size.height,
-                    value = value.second
-                )).toFloat()
-
-            )
+            val dotOffset =
+                Offset(
+                    x =
+                        _size.width.spaceBetween(
+                            itemCount = dataPoints.count(),
+                            index = valueIndex,
+                        ),
+                    y =
+                        (
+                            _size.height -
+                                calculateOffset(
+                                    maxValue = maxValue.toDouble(),
+                                    minValue = minValue.toDouble(),
+                                    total = _size.height,
+                                    value = value.second,
+                                )
+                        ).toFloat(),
+                )
             if (lastPosition != Offset.Unspecified && lastPosition.x >= dotOffset.x - 20 || !properties.animationEnabled) {
                 if (!value.first.isRunning && properties.animationEnabled && value.first.value != 1f) {
                     scope.launch {
@@ -984,7 +1055,7 @@ fun HorizontalLabels(
     chartWidth: Float,
     density: Density,
     textMeasurer: TextMeasurer,
-    xPadding: Float
+    xPadding: Float,
 ) {
     if (labelProperties.enabled && labels.isNotEmpty()) {
         Spacer(modifier = Modifier.height(labelProperties.padding))
@@ -1001,7 +1072,7 @@ fun HorizontalLabels(
                 textMeasurer.measure(
                     it,
                     style = labelProperties.textStyle,
-                    maxLines = 1
+                    maxLines = 1,
                 )
             }
         val labelWidths = labelMeasures.map { it.size.width }
@@ -1015,23 +1086,32 @@ fun HorizontalLabels(
             shouldRotate = true
         }
         Row(
-            modifier = widthModifier
-                .padding(
-                    start = (xPadding / density.density).dp,
-                ), horizontalArrangement = Arrangement.SpaceBetween
+            modifier =
+                widthModifier
+                    .padding(
+                        start = (xPadding / density.density).dp,
+                    ),
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             labels.forEachIndexed { index, label ->
-                val modifier = if (shouldRotate) textModifier.graphicsLayer {
-                    rotationZ = labelProperties.rotation.degree
-                    transformOrigin =
-                        TransformOrigin(
-                            (labelMeasures[index].size.width / minLabelWidth.toFloat()),
-                            .5f
-                        )
-                    translationX =
-                        (-(labelMeasures[index].size.width - minLabelWidth.toFloat())) - (labelProperties.rotation.padding?.toPx()
-                            ?: (minLabelWidth / 2f))
-                } else textModifier
+                val modifier =
+                    if (shouldRotate) {
+                        textModifier.graphicsLayer {
+                            rotationZ = labelProperties.rotation.degree
+                            transformOrigin =
+                                TransformOrigin(
+                                    (labelMeasures[index].size.width / minLabelWidth.toFloat()),
+                                    .5f,
+                                )
+                            translationX =
+                                (-(labelMeasures[index].size.width - minLabelWidth.toFloat())) - (
+                                    labelProperties.rotation.padding?.toPx()
+                                        ?: (minLabelWidth / 2f)
+                                )
+                        }
+                    } else {
+                        textModifier
+                    }
                 if (labelProperties.builder != null) {
                     labelProperties.builder.invoke(modifier, label, shouldRotate, index)
                 } else {
@@ -1043,7 +1123,6 @@ fun HorizontalLabels(
                         softWrap = !shouldRotate,
                     )
                 }
-
             }
         }
     }
@@ -1052,35 +1131,42 @@ fun HorizontalLabels(
 @Composable
 fun LabelHelper(
     data: List<Pair<String, Brush>>,
-    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp)
+    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp),
 ) {
     val numberOfGridCells = min(data.size, 3)
     LazyVerticalGrid(columns = GridCells.Fixed(numberOfGridCells), modifier = Modifier) {
         items(data) { (label, color) ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .clip(CircleShape)
-                        .background(color)
+                    modifier =
+                        Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(color),
                 )
                 BasicText(
                     text = label,
                     style = textStyle,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
     }
 }
 
-fun calculateValue(minValue: Double, maxValue: Double, total: Float, offset: Float): Double {
+fun calculateValue(
+    minValue: Double,
+    maxValue: Double,
+    total: Float,
+    offset: Float,
+): Double {
     val percentage = offset / total
     val range = maxValue - minValue
     val value = minValue + percentage * range
@@ -1091,7 +1177,7 @@ fun calculateOffset(
     maxValue: Double,
     minValue: Double,
     total: Float,
-    value: Float
+    value: Float,
 ): Double {
     val range = maxValue - minValue
     val percentage = (value - minValue) / range
@@ -1106,23 +1192,24 @@ internal fun DrawScope.getLinePath(
     rounded: Boolean = true,
     size: Size? = null,
     startIndex: Int,
-    endIndex: Int
+    endIndex: Int,
 ): PathData {
-
     val _size = size ?: this.size
     val path = Path()
-    if (dataPoints.isEmpty()) return PathData(
-        path = path,
-        xPositions = emptyList(),
-        0,
-        Int.MAX_VALUE
-    )
+    if (dataPoints.isEmpty()) {
+        return PathData(
+            path = path,
+            xPositions = emptyList(),
+            0,
+            Int.MAX_VALUE,
+        )
+    }
     val calculateHeight = { value: Float ->
         calculateOffset(
             maxValue = maxValue.toDouble(),
             minValue = minValue.toDouble(),
             total = _size.height,
-            value = value
+            value = value,
         )
     }
 
@@ -1158,14 +1245,13 @@ internal fun DrawScope.getLinePath(
         path = path,
         xPositions = xPositions,
         startIndex,
-        endIndex
+        endIndex,
     )
 }
 
 sealed class DrawStyle() {
     data class Stroke(val width: Dp = 2.dp, val strokeStyle: StrokeStyle = StrokeStyle.Normal) :
         DrawStyle()
-
 
     data object Fill : DrawStyle()
 
@@ -1174,7 +1260,7 @@ sealed class DrawStyle() {
             is Stroke -> {
                 return Stroke(
                     width = this.width.value * density,
-                    pathEffect = this.strokeStyle.pathEffect
+                    pathEffect = this.strokeStyle.pathEffect,
                 )
             }
 
@@ -1187,7 +1273,7 @@ sealed class DrawStyle() {
 
 data class ViewRange(
     val startIndex: Int = 0,
-    val endIndex: Int = Int.MAX_VALUE
+    val endIndex: Int = Int.MAX_VALUE,
 )
 
 data class Line(
@@ -1205,7 +1291,7 @@ data class Line(
     val curvedEdges: Boolean? = null,
     val strokeProgress: Animatable<Float, AnimationVector1D> = Animatable(0f),
     val gradientProgress: Animatable<Float, AnimationVector1D> = Animatable(0f),
-    val viewRange: ViewRange = ViewRange()
+    val viewRange: ViewRange = ViewRange(),
 )
 
 internal fun DrawScope.drawLineGradient(
@@ -1215,7 +1301,7 @@ internal fun DrawScope.drawLineGradient(
     progress: Float,
     size: Size? = null,
     startOffset: Float,
-    endOffset: Float
+    endOffset: Float,
 ) {
     val _size = size ?: this.size
     drawIntoCanvas {
@@ -1225,15 +1311,16 @@ internal fun DrawScope.drawLineGradient(
         p.lineTo(startOffset, _size.height)
         p.close()
         val paint = Paint()
-        paint.shader = LinearGradientShader(
-            Offset(0f, 0f),
-            Offset(0f, _size.height),
-            listOf(
-                color1.copy(alpha = color1.alpha * progress),
-                color2,
-            ),
-            tileMode = TileMode.Mirror
-        )
+        paint.shader =
+            LinearGradientShader(
+                Offset(0f, 0f),
+                Offset(0f, _size.height),
+                listOf(
+                    color1.copy(alpha = color1.alpha * progress),
+                    color2,
+                ),
+                tileMode = TileMode.Mirror,
+            )
         it.drawPath(p, paint)
     }
 }
@@ -1244,34 +1331,38 @@ private fun DrawScope.drawPopup(
     textMeasurer: TextMeasurer,
     scope: CoroutineScope,
     progress: Float,
-    offsetAnimator: Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>? = null
+    offsetAnimator: Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>? = null,
 ) {
     val offset = popup.position
     val popupProperties = popup.properties
-    val measureResult = textMeasurer.measure(
-        popupProperties.contentBuilder(popup.index),
-        style = popupProperties.textStyle.copy(
-            color = popupProperties.textStyle.color.copy(
-                alpha = 1f * progress
-            )
+    val measureResult =
+        textMeasurer.measure(
+            popupProperties.contentBuilder(popup.index),
+            style =
+                popupProperties.textStyle.copy(
+                    color =
+                        popupProperties.textStyle.color.copy(
+                            alpha = 1f * progress,
+                        ),
+                ),
         )
-    )
     var rectSize = measureResult.size.toSize()
-    rectSize = rectSize.copy(
-        width = (rectSize.width + (popupProperties.contentHorizontalPadding.toPx() * 2)),
-        height = (rectSize.height + (popupProperties.contentVerticalPadding.toPx() * 2))
-    )
+    rectSize =
+        rectSize.copy(
+            width = (rectSize.width + (popupProperties.contentHorizontalPadding.toPx() * 2)),
+            height = (rectSize.height + (popupProperties.contentVerticalPadding.toPx() * 2)),
+        )
 
     val conflictDetected =
         ((nextPopup != null) && offset.y in nextPopup.position.y - rectSize.height..nextPopup.position.y + rectSize.height) ||
-                (offset.x + rectSize.width) > size.width
+            (offset.x + rectSize.width) > size.width
 
-
-    val rectOffset = if (conflictDetected) {
-        offset.copy(x = offset.x - rectSize.width)
-    } else {
-        offset
-    }
+    val rectOffset =
+        if (conflictDetected) {
+            offset.copy(x = offset.x - rectSize.width)
+        } else {
+            offset
+        }
     offsetAnimator?.also { (x, y) ->
         if (x.value == 0f || y.value == 0f || popupProperties.mode is PopupProperties.Mode.PointMode) {
             scope.launch {
@@ -1286,57 +1377,65 @@ private fun DrawScope.drawPopup(
                 y.animateTo(rectOffset.y)
             }
         }
-
     }
     if (offsetAnimator != null) {
-        val animatedOffset = if (popup.properties.mode is PopupProperties.Mode.PointMode) {
-            rectOffset
-        } else {
-            Offset(
-                x = offsetAnimator.first.value,
-                y = offsetAnimator.second.value
+        val animatedOffset =
+            if (popup.properties.mode is PopupProperties.Mode.PointMode) {
+                rectOffset
+            } else {
+                Offset(
+                    x = offsetAnimator.first.value,
+                    y = offsetAnimator.second.value,
+                )
+            }
+        val rect =
+            Rect(
+                offset = animatedOffset,
+                size = rectSize,
             )
-        }
-        val rect = Rect(
-            offset = animatedOffset,
-            size = rectSize
-        )
         drawPath(
-            path = Path().apply {
-                addRoundRect(
-                    RoundRect(
-                        rect = rect.copy(
-                            top = rect.top,
-                            left = rect.left,
-                        ),
-                        topLeft = CornerRadius(
-                            if (conflictDetected) popupProperties.cornerRadius.toPx() else 0f,
-                            if (conflictDetected) popupProperties.cornerRadius.toPx() else 0f
-                        ),
-                        topRight = CornerRadius(
-                            if (!conflictDetected) popupProperties.cornerRadius.toPx() else 0f,
-                            if (!conflictDetected) popupProperties.cornerRadius.toPx() else 0f
-                        ),
-                        bottomRight = CornerRadius(
-                            popupProperties.cornerRadius.toPx(),
-                            popupProperties.cornerRadius.toPx()
-                        ),
-                        bottomLeft = CornerRadius(
-                            popupProperties.cornerRadius.toPx(),
-                            popupProperties.cornerRadius.toPx()
+            path =
+                Path().apply {
+                    addRoundRect(
+                        RoundRect(
+                            rect =
+                                rect.copy(
+                                    top = rect.top,
+                                    left = rect.left,
+                                ),
+                            topLeft =
+                                CornerRadius(
+                                    if (conflictDetected) popupProperties.cornerRadius.toPx() else 0f,
+                                    if (conflictDetected) popupProperties.cornerRadius.toPx() else 0f,
+                                ),
+                            topRight =
+                                CornerRadius(
+                                    if (!conflictDetected) popupProperties.cornerRadius.toPx() else 0f,
+                                    if (!conflictDetected) popupProperties.cornerRadius.toPx() else 0f,
+                                ),
+                            bottomRight =
+                                CornerRadius(
+                                    popupProperties.cornerRadius.toPx(),
+                                    popupProperties.cornerRadius.toPx(),
+                                ),
+                            bottomLeft =
+                                CornerRadius(
+                                    popupProperties.cornerRadius.toPx(),
+                                    popupProperties.cornerRadius.toPx(),
+                                ),
                         ),
                     )
-                )
-            },
+                },
             color = popupProperties.containerColor,
-            alpha = 1f * progress
+            alpha = 1f * progress,
         )
         drawText(
             textLayoutResult = measureResult,
-            topLeft = animatedOffset.copy(
-                x = animatedOffset.x + popupProperties.contentHorizontalPadding.toPx(),
-                y = animatedOffset.y + popupProperties.contentVerticalPadding.toPx()
-            )
+            topLeft =
+                animatedOffset.copy(
+                    x = animatedOffset.x + popupProperties.contentHorizontalPadding.toPx(),
+                    y = animatedOffset.y + popupProperties.contentVerticalPadding.toPx(),
+                ),
         )
     }
 }
@@ -1348,14 +1447,15 @@ private fun Indicators(
     indicatorProperties: HorizontalIndicatorProperties,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxHeight(),
-        verticalArrangement = Arrangement.SpaceBetween
+        modifier =
+            modifier
+                .fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
         indicators.forEach {
             BasicText(
                 text = indicatorProperties.contentBuilder(it),
-                style = indicatorProperties.textStyle
+                style = indicatorProperties.textStyle,
             )
         }
     }
@@ -1364,12 +1464,12 @@ private fun Indicators(
 private data class Popup(
     val properties: PopupProperties,
     val position: Offset,
-    val index: Int
+    val index: Int,
 )
 
 internal data class PathData(
     val path: Path,
     val xPositions: List<Double>,
     val startIndex: Int,
-    val endIndex: Int
+    val endIndex: Int,
 )

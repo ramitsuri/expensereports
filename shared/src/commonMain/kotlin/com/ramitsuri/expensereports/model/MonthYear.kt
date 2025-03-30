@@ -14,7 +14,6 @@ import kotlinx.serialization.Serializable
 data class MonthYear(
     @SerialName("month")
     val month: Month,
-
     @SerialName("year")
     val year: Int,
 ) : Comparable<MonthYear> {
@@ -39,7 +38,7 @@ data class MonthYear(
         year = localDateTime.year,
     )
 
-    fun string() = "${year}-${month.number.toString().padStart(2, '0')}"
+    fun string() = "$year-${month.number.toString().padStart(2, '0')}"
 
     override operator fun compareTo(other: MonthYear): Int {
         return if (year < other.year) {
@@ -65,9 +64,10 @@ data class MonthYear(
             return clock.nowLocal(timeZone).let { MonthYear(year = it.year, month = it.month) }
         }
 
-        fun fromString(string: String) = string.split("-").let {
-            MonthYear(year = it[0].toInt(), month = Month(it[1].toInt()))
-        }
+        fun fromString(string: String) =
+            string.split("-").let {
+                MonthYear(year = it[0].toInt(), month = Month(it[1].toInt()))
+            }
     }
 }
 

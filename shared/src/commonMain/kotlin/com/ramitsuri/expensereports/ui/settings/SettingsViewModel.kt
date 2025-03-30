@@ -11,21 +11,22 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(
     private val settings: Settings,
 ) : ViewModel() {
-    val viewState = combine(
-        settings.getBaseUrlFlow(),
-        settings.getLastFetchTimeFlow(),
-        settings.getLastFullFetchTimeFlow(),
-    ) { baseUrl, lastFetchTime, lastFullFetchTime ->
-        SettingsViewState(
-            url = baseUrl,
-            lastFetchTime = lastFetchTime,
-            lastFullFetchTime = lastFullFetchTime,
+    val viewState =
+        combine(
+            settings.getBaseUrlFlow(),
+            settings.getLastFetchTimeFlow(),
+            settings.getLastFullFetchTimeFlow(),
+        ) { baseUrl, lastFetchTime, lastFullFetchTime ->
+            SettingsViewState(
+                url = baseUrl,
+                lastFetchTime = lastFetchTime,
+                lastFullFetchTime = lastFullFetchTime,
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = SettingsViewState(),
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = SettingsViewState(),
-    )
 
     fun setBaseUrl(url: String) {
         viewModelScope.launch {

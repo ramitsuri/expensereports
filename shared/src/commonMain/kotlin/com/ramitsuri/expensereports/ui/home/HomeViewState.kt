@@ -7,7 +7,7 @@ data class HomeViewState(
     val expandableCardGroups: List<ExpandableCardGroup> = listOf(),
     val netWorths: List<NetWorth> = listOf(),
     val selectedNetWorthPeriod: Period,
-    val periods: List<Period> = listOf()
+    val periods: List<Period> = listOf(),
 ) {
     data class ExpandableCardGroup(
         val name: String,
@@ -28,8 +28,11 @@ data class HomeViewState(
 
     sealed interface Period {
         data object ThisYear : Period
+
         data object OneYear : Period
+
         data object LastThreeYears : Period
+
         data object AllTime : Period
     }
 }

@@ -25,7 +25,7 @@ internal class ApiImpl(
 ) : Api {
     override suspend fun getTransactions(
         baseUrl: String,
-        since: MonthYear
+        since: MonthYear,
     ): Result<List<Transaction>> =
         coroutineScope {
             getMonthYears(since)
@@ -40,20 +40,22 @@ internal class ApiImpl(
                         return@coroutineScope Result.success(
                             result
                                 .map { it.getOrThrow() }
-                                .flatten()
+                                .flatten(),
                         )
                     }
-                    val (successes, errors) = result.partition {
-                        it.getOrNull() != null
-                    }
-                    val errorsOtherThanNotFound = errors.filterNot {
-                        it.exceptionOrNull() is NotFoundException
-                    }
+                    val (successes, errors) =
+                        result.partition {
+                            it.getOrNull() != null
+                        }
+                    val errorsOtherThanNotFound =
+                        errors.filterNot {
+                            it.exceptionOrNull() is NotFoundException
+                        }
                     if (errorsOtherThanNotFound.isEmpty()) {
                         return@coroutineScope Result.success(
                             successes
                                 .map { it.getOrThrow() }
-                                .flatten()
+                                .flatten(),
                         )
                     }
                     Result.failure(errorsOtherThanNotFound.firstNotNullOf { it.exceptionOrNull() })
@@ -62,7 +64,7 @@ internal class ApiImpl(
 
     override suspend fun getCurrentBalances(
         baseUrl: String,
-        since: MonthYear
+        since: MonthYear,
     ): Result<List<CurrentBalance>> {
         return apiRequest(ioDispatcher) {
             httpClient.get("$baseUrl/current_balances/current_balances.json")
@@ -71,7 +73,7 @@ internal class ApiImpl(
 
     override suspend fun getReports(
         baseUrl: String,
-        since: MonthYear
+        since: MonthYear,
     ): Result<List<Report>> =
         coroutineScope {
             getMonthYears(since)
@@ -93,12 +95,14 @@ internal class ApiImpl(
                     if (result.all { it.isSuccess }) {
                         return@coroutineScope Result.success(result.map { it.getOrThrow() })
                     }
-                    val (successes, errors) = result.partition {
-                        it.getOrNull() != null
-                    }
-                    val errorsOtherThanNotFound = errors.filterNot {
-                        it.exceptionOrNull() is NotFoundException
-                    }
+                    val (successes, errors) =
+                        result.partition {
+                            it.getOrNull() != null
+                        }
+                    val errorsOtherThanNotFound =
+                        errors.filterNot {
+                            it.exceptionOrNull() is NotFoundException
+                        }
                     if (errorsOtherThanNotFound.isEmpty()) {
                         return@coroutineScope Result.success(successes.map { it.getOrThrow() })
                     }
@@ -108,27 +112,26 @@ internal class ApiImpl(
 
     private suspend fun getTransactionsForMonthYear(
         baseUrl: String,
-        monthYear: MonthYear
+        monthYear: MonthYear,
     ) = apiRequest<List<Transaction>>(ioDispatcher) {
         httpClient.get("$baseUrl/transactions/${monthYear.asTxRoute()}")
     }
 
     // Fetch for next month included because there might be some data
-    private fun getMonthYears(since: MonthYear) =
-        (since..(MonthYear.now(clock, timeZone).next())).toList()
+    private fun getMonthYears(since: MonthYear) = (since..(MonthYear.now(clock, timeZone).next())).toList()
 
-    private fun MonthYear.asTxRoute() =
-        string().split("-").joinToString(separator = "/", postfix = ".json")
+    private fun MonthYear.asTxRoute() = string().split("-").joinToString(separator = "/", postfix = ".json")
 
-    private fun getReportsRoutes(forYear: Int) = listOf(
-        "After_Deduction_Expenses.json",
-        "Assets.json",
-        "Expenses.json",
-        "Income.json",
-        "Income_Without_Gains.json",
-        "Liabilities.json",
-        "NetWorth.json",
-        "Savings.json",
-        "Savings_Rate.json",
-    ).map { "$forYear/$it" }
+    private fun getReportsRoutes(forYear: Int) =
+        listOf(
+            "After_Deduction_Expenses.json",
+            "Assets.json",
+            "Expenses.json",
+            "Income.json",
+            "Income_Without_Gains.json",
+            "Liabilities.json",
+            "NetWorth.json",
+            "Savings.json",
+            "Savings_Rate.json",
+        ).map { "$forYear/$it" }
 }

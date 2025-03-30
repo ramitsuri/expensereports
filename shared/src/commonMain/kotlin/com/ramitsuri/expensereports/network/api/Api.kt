@@ -8,16 +8,16 @@ import com.ramitsuri.expensereports.model.Transaction
 internal interface Api {
     suspend fun getTransactions(
         baseUrl: String,
-        since: MonthYear
+        since: MonthYear,
     ): Result<List<Transaction>>
 
     suspend fun getCurrentBalances(
         baseUrl: String,
-        since: MonthYear
+        since: MonthYear,
     ): Result<List<CurrentBalance>>
 
     suspend fun getReports(
         baseUrl: String,
-        since: MonthYear
+        since: MonthYear,
     ): Result<List<Report>>
 }
