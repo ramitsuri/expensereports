@@ -45,6 +45,7 @@ internal abstract class AppDatabase : RoomDatabase() {
                 .setDriver(BundledSQLiteDriver())
                 .addTypeConverter(typeConverter)
                 .setQueryCoroutineContext(dispatcher)
+                .fallbackToDestructiveMigration(true)
                 .addMigrations(
 
                 )
