@@ -182,6 +182,9 @@ ktlint {
     verbose.set(true)
     outputToConsole.set(true)
     filter {
+        // Excluded because copied from somewhere else
+        exclude("kotlin/com/ramitsuri/expensereports/ui/components/LineChart.kt")
+
         exclude("**/generated/**")
         exclude("**/build/**")
         exclude { element -> element.file.toString().contains("generated/") }

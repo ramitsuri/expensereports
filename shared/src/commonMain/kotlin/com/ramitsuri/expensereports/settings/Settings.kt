@@ -60,7 +60,7 @@ class Settings internal constructor(
         return getLastFullFetchTimeFlow().first() ?: distantPast
     }
 
-     fun getLastFullFetchTimeFlow(): Flow<Instant?> {
+    fun getLastFullFetchTimeFlow(): Flow<Instant?> {
         return keyValueStore
             .getStringFlow(Key.LAST_FULL_FETCH_TIME, null)
             .map {
@@ -76,16 +76,16 @@ class Settings internal constructor(
         keyValueStore.putString(Key.LAST_FULL_FETCH_TIME, time.toString())
     }
 
-     suspend fun getLastFetchTime(): Instant {
+    suspend fun getLastFetchTime(): Instant {
         return getLastFetchTimeFlow().first() ?: distantPast
     }
 
-     fun getLastFetchTimeFlow(): Flow<Instant?> {
+    fun getLastFetchTimeFlow(): Flow<Instant?> {
         return keyValueStore
             .getStringFlow(Key.LAST_FETCH_TIME, null)
             .map {
                 if (it == null) {
-                   null
+                    null
                 } else {
                     Instant.parse(it)
                 }

@@ -9,7 +9,6 @@ import java.math.BigDecimal
 data class TransactionSplit(
     @SerialName("account_name")
     val accountName: String,
-
     @Serializable(with = BigDecimalSerializer::class)
     @SerialName("amount")
     val amount: BigDecimal,

@@ -19,7 +19,6 @@ import androidx.core.view.WindowCompat
 import com.ramitsuri.expensereports.ui.navigation.NavGraph
 
 class MainActivity : ComponentActivity() {
-
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +46,7 @@ class MainActivity : ComponentActivity() {
             NavGraph(
                 dynamicDarkColorScheme = dynamicDarkColorScheme(this),
                 dynamicLightColorScheme = dynamicLightColorScheme(this),
-                windowSize = calculateWindowSizeClass(this@MainActivity)
+                windowSize = calculateWindowSizeClass(this@MainActivity),
             )
         }
     }

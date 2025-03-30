@@ -55,14 +55,15 @@ import org.jetbrains.compose.resources.stringResource
 fun SettingsScreen(
     viewState: SettingsViewState,
     onUrlSet: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     var showUrlDialog by remember { mutableStateOf(false) }
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .displayCutoutPadding(),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .displayCutoutPadding(),
     ) {
         val scrollBehavior =
             TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -129,7 +130,7 @@ private fun Instant?.friendlyFetchDate(): String {
 @Composable
 private fun Toolbar(
     scrollBehavior: TopAppBarScrollBehavior,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         colors =

@@ -37,7 +37,6 @@ import androidx.compose.material.icons.outlined.BeachAccess
 import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Elderly
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.Payment
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material3.Card
@@ -112,10 +111,11 @@ fun HomeScreen(
     onSettingsClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .displayCutoutPadding(),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .displayCutoutPadding(),
     ) {
         val scrollBehavior =
             TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -123,22 +123,24 @@ fun HomeScreen(
             )
         Toolbar(
             scrollBehavior = scrollBehavior,
-            onSettingsClick = onSettingsClick
+            onSettingsClick = onSettingsClick,
         )
         LazyVerticalGrid(
-            modifier = Modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .padding(16.dp),
-            columns = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
-                Fixed(1)
-            } else {
-                Fixed(2)
-            },
+            modifier =
+                Modifier
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .padding(16.dp),
+            columns =
+                if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
+                    Fixed(1)
+                } else {
+                    Fixed(2)
+                },
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item(
-                span = { GridItemSpan(maxLineSpan) }
+                span = { GridItemSpan(maxLineSpan) },
             ) {
                 NetWorths(
                     netWorths = viewState.netWorths,
@@ -152,7 +154,7 @@ fun HomeScreen(
                     cardName = expandableCardGroups.name,
                     cardAmount = expandableCardGroups.value,
                     isCardAmountPositive = expandableCardGroups.isValuePositive,
-                    children = expandableCardGroups.children
+                    children = expandableCardGroups.children,
                 )
             }
         }
@@ -163,7 +165,7 @@ fun HomeScreen(
 @Composable
 private fun Toolbar(
     scrollBehavior: TopAppBarScrollBehavior,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         colors =
@@ -202,35 +204,39 @@ private fun NetWorths(
         delay(1500)
         periodSelectorVisible = true
     }
-    val data = remember(netWorths) {
-        Line(
-            label = "",
-            values = netWorths.map { it.netWorth.toDouble() },
-            color = SolidColor(Color(0xFF23af92)),
-            firstGradientFillColor = Color(0xFF2BC0A1).copy(alpha = .5f),
-            secondGradientFillColor = Color.Transparent,
-            strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
-            gradientAnimationDelay = 1000,
-            drawStyle = DrawStyle.Stroke(width = 2.dp),
-            curvedEdges = true,
-        )
-    }
+    val data =
+        remember(netWorths) {
+            Line(
+                label = "",
+                values = netWorths.map { it.netWorth.toDouble() },
+                color = SolidColor(Color(0xFF23af92)),
+                firstGradientFillColor = Color(0xFF2BC0A1).copy(alpha = .5f),
+                secondGradientFillColor = Color.Transparent,
+                strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
+                gradientAnimationDelay = 1000,
+                drawStyle = DrawStyle.Stroke(width = 2.dp),
+                curvedEdges = true,
+            )
+        }
     Card(
-        modifier = Modifier
-            .height(320.dp)
-            .fillMaxWidth(),
+        modifier =
+            Modifier
+                .height(320.dp)
+                .fillMaxWidth(),
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 8.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
         ) {
             Text(
                 text = stringResource(Res.string.net_worth),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(horizontal = 8.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(horizontal = 8.dp),
             )
             LineChart(
                 data = listOf(data),
@@ -239,19 +245,21 @@ private fun NetWorths(
                 labelHelperProperties = LabelHelperProperties(enabled = false),
                 gridProperties = GridProperties(enabled = false),
                 indicatorProperties = HorizontalIndicatorProperties(enabled = false),
-                popupProperties = PopupProperties(
-                    textStyle = TextStyle.Default.copy(
-                        color = Color.White,
-                        fontSize = 12.sp
+                popupProperties =
+                    PopupProperties(
+                        textStyle =
+                            TextStyle.Default.copy(
+                                color = Color.White,
+                                fontSize = 12.sp,
+                            ),
+                        contentBuilder = { index ->
+                            popupLabels[index]
+                        },
                     ),
-                    contentBuilder = { index ->
-                        popupLabels[index]
-                    }
-                ),
             )
             androidx.compose.animation.AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                visible = periodSelectorVisible
+                visible = periodSelectorVisible,
             ) {
                 PeriodSelector(
                     selectedPeriod = selectedPeriod,
@@ -279,18 +287,20 @@ private fun ExpandableCard(
     )
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable {
-                        isExpanded = !isExpanded
-                        rotateCount++
-                    }
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable {
+                            isExpanded = !isExpanded
+                            rotateCount++
+                        }
+                        .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
@@ -303,7 +313,7 @@ private fun ExpandableCard(
                 Text(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Normal,
-                    text = cardName
+                    text = cardName,
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
@@ -316,35 +326,38 @@ private fun ExpandableCard(
                 Icon(
                     imageVector = Icons.Outlined.KeyboardArrowDown,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                        .rotate(iconRotate),
+                    modifier =
+                        Modifier.size(16.dp)
+                            .rotate(iconRotate),
                 )
             }
             AnimatedVisibility(isExpanded) {
                 Column(modifier = Modifier.padding(vertical = 16.dp)) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                            .height(IntrinsicSize.Max),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .height(IntrinsicSize.Max),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Spacer(modifier = Modifier.width(8.dp))
                         children.forEach {
                             Column(
-                                modifier = Modifier
-                                    .width(160.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.colorScheme.background)
-                                    .padding(16.dp),
+                                modifier =
+                                    Modifier
+                                        .width(160.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .fillMaxHeight()
+                                        .background(MaterialTheme.colorScheme.background)
+                                        .padding(16.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text(
                                     text = it.title,
                                     modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(text = it.value, fontWeight = FontWeight.Bold)
@@ -381,10 +394,11 @@ private fun PeriodSelector(
     SingleChoiceSegmentedButtonRow {
         periods.forEachIndexed { index, period ->
             SegmentedButton(
-                shape = SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = periods.size
-                ),
+                shape =
+                    SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = periods.size,
+                    ),
                 onClick = { onPeriodSelected(period) },
                 selected = period == selectedPeriod,
                 label = {
@@ -400,19 +414,20 @@ private fun PeriodSelector(
 }
 
 @Composable
-private fun HomeViewState.Period.formatted() = when (this) {
-    is HomeViewState.Period.ThisYear -> stringResource(Res.string.period_this_year)
-    is HomeViewState.Period.OneYear -> stringResource(Res.string.period_one_year)
-    is HomeViewState.Period.LastThreeYears -> stringResource(Res.string.period_last_three_years)
-    is HomeViewState.Period.AllTime -> stringResource(Res.string.period_all)
-}
+private fun HomeViewState.Period.formatted() =
+    when (this) {
+        is HomeViewState.Period.ThisYear -> stringResource(Res.string.period_this_year)
+        is HomeViewState.Period.OneYear -> stringResource(Res.string.period_one_year)
+        is HomeViewState.Period.LastThreeYears -> stringResource(Res.string.period_last_three_years)
+        is HomeViewState.Period.AllTime -> stringResource(Res.string.period_all)
+    }
 
 @Composable
 private fun HomeViewState.NetWorth.formatted(): String {
     return stringResource(
         Res.string.value1_value2_formatted,
         monthYear.formatted(),
-        netWorth.formatRounded()
+        netWorth.formatRounded(),
     )
 }
 

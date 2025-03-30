@@ -13,12 +13,10 @@ data class CurrentBalance(
     @SerialName("name")
     @ColumnInfo(name = "name")
     val name: String,
-
     @Serializable(with = BigDecimalSerializer::class)
     @SerialName("balance")
     @ColumnInfo(name = "balance")
     val balance: BigDecimal,
-
     @SerialName("group_name")
     @ColumnInfo(name = "group_name")
     val groupName: String,

@@ -2,18 +2,31 @@ package com.ramitsuri.expensereports.log
 
 import co.touchlab.kermit.Logger
 
-fun logD(tag: String, message: () -> String) {
+fun logD(
+    tag: String,
+    message: () -> String,
+) {
     Logger.d(tag, message = message)
 }
 
-fun logI(tag: String, message: () -> String) {
+fun logI(
+    tag: String,
+    message: () -> String,
+) {
     Logger.i(tag, message = message)
 }
 
-fun logW(tag: String, message: () -> String) {
+fun logW(
+    tag: String,
+    message: () -> String,
+) {
     Logger.w(tag, message = message)
 }
 
-fun logE(tag: String, throwable: Throwable? = null, message: () -> String) {
+fun logE(
+    tag: String,
+    throwable: Throwable? = null,
+    message: () -> String,
+) {
     Logger.e(tag, throwable = throwable, message = message)
 }

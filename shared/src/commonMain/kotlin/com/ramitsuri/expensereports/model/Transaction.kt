@@ -14,15 +14,12 @@ data class Transaction(
     @PrimaryKey
     @ColumnInfo(name = "id")
     val id: String,
-
     @SerialName("splits")
     @ColumnInfo(name = "splits")
     val splits: List<TransactionSplit>,
-
     @SerialName("date")
     @ColumnInfo(name = "date")
     val date: LocalDate,
-
     @SerialName("description")
     @ColumnInfo(name = "description")
     val description: String,

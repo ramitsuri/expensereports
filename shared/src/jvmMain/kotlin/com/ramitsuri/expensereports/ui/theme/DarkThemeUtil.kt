@@ -18,9 +18,10 @@ actual fun isDarkMode(): Boolean {
     }
 
     DisposableEffect(Unit) {
-        val darkThemeListener = Consumer<Boolean> {
-            darkTheme = it
-        }
+        val darkThemeListener =
+            Consumer<Boolean> {
+                darkTheme = it
+            }
 
         val detector =
             OsThemeDetector.getDetector().apply {

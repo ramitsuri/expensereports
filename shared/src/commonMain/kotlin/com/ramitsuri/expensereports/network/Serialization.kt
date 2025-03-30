@@ -15,7 +15,10 @@ class BigDecimalSerializer : KSerializer<BigDecimal> {
         return BigDecimal(decoder.decodeString())
     }
 
-    override fun serialize(encoder: Encoder, value: BigDecimal) {
+    override fun serialize(
+        encoder: Encoder,
+        value: BigDecimal,
+    ) {
         encoder.encodeString(value.toString())
     }
 }
@@ -23,7 +26,10 @@ class BigDecimalSerializer : KSerializer<BigDecimal> {
 class MonthYearSerializer : KSerializer<MonthYear> {
     override val descriptor = PrimitiveSerialDescriptor("MonthYear", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: MonthYear) {
+    override fun serialize(
+        encoder: Encoder,
+        value: MonthYear,
+    ) {
         encoder.encodeString(value.string())
     }
 

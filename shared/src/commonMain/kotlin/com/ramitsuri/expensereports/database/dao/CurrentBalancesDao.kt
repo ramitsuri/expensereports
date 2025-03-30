@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface CurrentBalancesDao {
-     @Query("SELECT * FROM db_current_balance")
-     fun get(): Flow<List<CurrentBalance>>
+    @Query("SELECT * FROM db_current_balance")
+    fun get(): Flow<List<CurrentBalance>>
 
-     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     suspend fun insert(currentBalances: List<CurrentBalance>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(currentBalances: List<CurrentBalance>)
 
-     @Query("DELETE FROM db_current_balance")
-     suspend fun deleteAll()
+    @Query("DELETE FROM db_current_balance")
+    suspend fun deleteAll()
 }

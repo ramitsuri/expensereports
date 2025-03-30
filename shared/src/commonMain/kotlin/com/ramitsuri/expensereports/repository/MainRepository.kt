@@ -48,24 +48,24 @@ class MainRepository internal constructor(
 
     fun getTransactions(
         start: LocalDate,
-        end: LocalDate
+        end: LocalDate,
     ) = transactionsDao.get(
         start = start,
-        end = end
+        end = end,
     )
 
     fun getCurrentBalances() = currentBalancesDao.get()
 
     fun getReport(
         reportName: String,
-        monthYears: List<MonthYear>
+        monthYears: List<MonthYear>,
     ) = reportsDao.get(reportName, monthYears)
 
     private suspend fun refreshTransactions(fetchFromStart: Boolean): Boolean {
         val baseUrl = settings.getBaseUrl()
         api.getTransactions(
             baseUrl = baseUrl,
-            since = settings.getLastTxFetchTime().toSince(fetchFromStart)
+            since = settings.getLastTxFetchTime().toSince(fetchFromStart),
         ).onSuccess {
             if (fetchFromStart) {
                 transactionsDao.deleteAll()
@@ -81,7 +81,7 @@ class MainRepository internal constructor(
         val baseUrl = settings.getBaseUrl()
         api.getCurrentBalances(
             baseUrl = baseUrl,
-            since = settings.getLastCurrentBalancesFetchTime().toSince(fetchFromStart)
+            since = settings.getLastCurrentBalancesFetchTime().toSince(fetchFromStart),
         ).onSuccess {
             if (fetchFromStart) {
                 currentBalancesDao.deleteAll()
@@ -97,7 +97,7 @@ class MainRepository internal constructor(
         val baseUrl = settings.getBaseUrl()
         api.getReports(
             baseUrl = baseUrl,
-            since = settings.getLastReportsFetchTime().toSince(fetchFromStart)
+            since = settings.getLastReportsFetchTime().toSince(fetchFromStart),
         ).onSuccess {
             if (fetchFromStart) {
                 reportsDao.deleteAll()

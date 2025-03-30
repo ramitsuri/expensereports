@@ -12,10 +12,11 @@ import kotlin.io.path.deleteRecursively
 
 open class BaseTest : KoinTest {
     @get:Rule
-    val koinTestRule = KoinTestRule.create {
-        printLogger()
-        modules(testModule, coreModule)
-    }
+    val koinTestRule =
+        KoinTestRule.create {
+            printLogger()
+            modules(testModule, coreModule)
+        }
 
     @OptIn(ExperimentalPathApi::class)
     @After

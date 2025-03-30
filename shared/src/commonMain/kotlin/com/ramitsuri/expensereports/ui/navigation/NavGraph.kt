@@ -42,10 +42,11 @@ fun NavGraph(
             NavHost(
                 navController = navController,
                 startDestination = Destination.Home,
-                modifier = Modifier.padding(
-                    top = innerPadding.calculateTopPadding(),
-                    bottom = innerPadding.calculateBottomPadding(),
-                ),
+                modifier =
+                    Modifier.padding(
+                        top = innerPadding.calculateTopPadding(),
+                        bottom = innerPadding.calculateBottomPadding(),
+                    ),
             ) {
                 composable<Destination.Home> {
                     val viewModel = koinViewModel<HomeViewModel>()

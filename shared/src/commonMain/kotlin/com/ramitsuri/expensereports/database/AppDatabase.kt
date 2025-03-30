@@ -28,13 +28,13 @@ import kotlinx.serialization.json.Json
 )
 @TypeConverters(DatabaseConverters::class)
 internal abstract class AppDatabase : RoomDatabase() {
-
     abstract fun transactionsDao(): TransactionsDao
+
     abstract fun reportsDao(): ReportsDao
+
     abstract fun currentBalancesDao(): CurrentBalancesDao
 
     companion object {
-
         fun getDb(
             builder: Builder<AppDatabase>,
             dispatcher: CoroutineDispatcher,
@@ -46,9 +46,7 @@ internal abstract class AppDatabase : RoomDatabase() {
                 .addTypeConverter(typeConverter)
                 .setQueryCoroutineContext(dispatcher)
                 .fallbackToDestructiveMigration(true)
-                .addMigrations(
-
-                )
+                .addMigrations()
                 .build()
         }
     }

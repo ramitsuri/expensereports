@@ -23,7 +23,10 @@ class MainApplication : Application(), LifecycleEventObserver, KoinComponent {
         enqueueWorkers()
     }
 
-    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+    override fun onStateChanged(
+        source: LifecycleOwner,
+        event: Lifecycle.Event,
+    ) {
         if (event == Lifecycle.Event.ON_START) {
             isInForeground = true
         }

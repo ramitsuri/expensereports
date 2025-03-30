@@ -37,7 +37,7 @@ fun friendlyDate(
         }
 
         minutes < 60 -> {
-            return stringResource(Res.string.minutes_ago_format, minutes.toInt(),)
+            return stringResource(Res.string.minutes_ago_format, minutes.toInt())
         }
 
         hours < 2 -> {
