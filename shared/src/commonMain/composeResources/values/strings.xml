@@ -40,6 +40,8 @@
     <string name="hours_ago_format">%1$s hours ago</string>
     <string name="one_day_ago">1 day ago</string>
     <string name="days_ago_format">%1$s days ago</string>
+    <string name="just_now">Just now</string>
+    <string name="minutes_ago_format">%1$d minutes ago</string>
 
     <string name="period_this_year">YTD</string>
     <string name="period_one_year">1Y</string>

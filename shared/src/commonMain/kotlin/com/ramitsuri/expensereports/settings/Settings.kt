@@ -13,7 +13,7 @@ class Settings internal constructor(
             .getString(Key.LAST_TX_FETCH_TIME, null)
             .let {
                 if (it == null) {
-                    Instant.DISTANT_PAST
+                    distantPast
                 } else {
                     Instant.parse(it)
                 }
@@ -33,7 +33,7 @@ class Settings internal constructor(
             .getString(Key.LAST_REPORTS_FETCH_TIME, null)
             .let {
                 if (it == null) {
-                    Instant.DISTANT_PAST
+                    distantPast
                 } else {
                     Instant.parse(it)
                 }
@@ -45,7 +45,7 @@ class Settings internal constructor(
             .getString(Key.LAST_CURRENT_BALANCES_FETCH_TIME, null)
             .let {
                 if (it == null) {
-                    Instant.DISTANT_PAST
+                    distantPast
                 } else {
                     Instant.parse(it)
                 }
@@ -57,7 +57,7 @@ class Settings internal constructor(
     }
 
     suspend fun getLastFullFetchTime(): Instant {
-        return getLastFullFetchTimeFlow().first() ?: Instant.DISTANT_PAST
+        return getLastFullFetchTimeFlow().first() ?: distantPast
     }
 
      fun getLastFullFetchTimeFlow(): Flow<Instant?> {
@@ -77,7 +77,7 @@ class Settings internal constructor(
     }
 
      suspend fun getLastFetchTime(): Instant {
-        return getLastFetchTimeFlow().first() ?: Instant.DISTANT_PAST
+        return getLastFetchTimeFlow().first() ?: distantPast
     }
 
      fun getLastFetchTimeFlow(): Flow<Instant?> {
@@ -109,4 +109,6 @@ class Settings internal constructor(
     suspend fun setBaseUrl(baseUrl: String) {
         keyValueStore.putString(Key.BASE_URL, baseUrl)
     }
+
+    private val distantPast = Instant.parse("2000-01-01T12:00:00Z")
 }

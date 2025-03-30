@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.days_ago_format
 import expensereports.shared.generated.resources.hours_ago_format
+import expensereports.shared.generated.resources.just_now
+import expensereports.shared.generated.resources.minutes_ago_format
 import expensereports.shared.generated.resources.month_names_long
 import expensereports.shared.generated.resources.month_names_short
 import expensereports.shared.generated.resources.one_day_ago
@@ -26,9 +28,18 @@ fun friendlyDate(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String {
     val durationSincePublished = now - publishedDateTime
+    val minutes = durationSincePublished.inWholeMinutes
     val hours = durationSincePublished.inWholeHours
     val days = durationSincePublished.inWholeDays
     when {
+        minutes <= 1L -> {
+            return stringResource(Res.string.just_now)
+        }
+
+        minutes < 60 -> {
+            return stringResource(Res.string.minutes_ago_format, minutes.toInt(),)
+        }
+
         hours < 2 -> {
             return stringResource(Res.string.one_hour_ago)
         }
