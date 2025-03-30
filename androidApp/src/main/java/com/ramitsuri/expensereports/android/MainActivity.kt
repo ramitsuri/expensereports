@@ -11,6 +11,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.DisposableEffect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -18,6 +20,7 @@ import com.ramitsuri.expensereports.ui.navigation.NavGraph
 
 class MainActivity : ComponentActivity() {
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -44,6 +47,7 @@ class MainActivity : ComponentActivity() {
             NavGraph(
                 dynamicDarkColorScheme = dynamicDarkColorScheme(this),
                 dynamicLightColorScheme = dynamicLightColorScheme(this),
+                windowSize = calculateWindowSizeClass(this@MainActivity)
             )
         }
     }

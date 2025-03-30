@@ -33,7 +33,7 @@ class HomeViewModel(
     private val selectedNetWorthPeriod: MutableStateFlow<HomeViewState.Period> =
         MutableStateFlow(HomeViewState.Period.AllTime)
     private val selectedSavingsRatePeriod: MutableStateFlow<HomeViewState.Period> =
-        MutableStateFlow(HomeViewState.Period.ThisYear)
+        MutableStateFlow(HomeViewState.Period.AllTime)
 
     init {
         viewModelScope.launch {
@@ -60,11 +60,10 @@ class HomeViewModel(
             ),
         ) { currentBalances, netWorthReport, savingsRatesReport ->
             HomeViewState(
-                currentBalanceGroups = getCurrentBalanceGroups(currentBalances),
+                expandableCardGroups = listOfNotNull(getSavingsRates(savingsRatesReport))
+                    .plus(getCurrentBalanceGroups(currentBalances)),
                 netWorths = getNetWorths(netWorthReport),
                 selectedNetWorthPeriod = selectedNetWorthPeriod,
-                selectedSavingsRatePeriod = selectedSavingsRatePeriod,
-                savingsRates = getSavingsRates(savingsRatesReport),
                 periods = listOf(
                     HomeViewState.Period.ThisYear,
                     HomeViewState.Period.OneYear,
@@ -78,7 +77,6 @@ class HomeViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = HomeViewState(
             selectedNetWorthPeriod = selectedNetWorthPeriod.value,
-            selectedSavingsRatePeriod = selectedSavingsRatePeriod.value,
         ),
     )
 
@@ -86,25 +84,101 @@ class HomeViewModel(
         selectedNetWorthPeriod.value = period
     }
 
-    private fun getSavingsRates(report: Report?): List<HomeViewState.SavingsRate> {
+    private fun getSavingsRates(report: Report?): HomeViewState.ExpandableCardGroup? {
         if (report == null) {
-            return listOf()
+            return null
         }
-        val incomes = report.accounts[0].monthTotals
-        val taxes = report.accounts[1].monthTotals
-        val expenses = report.accounts[2].monthTotals
-        val savingsRate = incomes.map { (monthYear, income) ->
-            val tax = taxes[monthYear] ?: BigDecimal.ZERO
-            val expense = expenses[monthYear] ?: BigDecimal.ZERO
-            val afterTaxIncome = income - tax
-            val savings = afterTaxIncome - expense
-            val savingsRate = savings.div(afterTaxIncome)
-            HomeViewState.SavingsRate(
-                monthYear = monthYear,
-                savingsRate = savingsRate.formatPercent()
+        val incomes = report.accounts.first { it.order == 0 }.monthTotals
+        val taxes = report.accounts.first { it.order == 1 }.monthTotals
+        val expenses = report.accounts.first { it.order == 2 }.monthTotals
+
+        val currentMonthYear = MonthYear.now(clock, timeZone)
+
+        val thisYear = currentMonthYear.year
+        val savingsRateThisYear = getSavingsRate(
+            income = incomes
+                .filterKeys { (_, year) -> year == thisYear }
+                .sum(),
+            tax = taxes
+                .filterKeys { (_, year) -> year == thisYear }
+                .sum(),
+            expense = expenses
+                .filterKeys { (_, year) -> year == thisYear }
+                .sum(),
+        )
+        val thisMonth = MonthYear.now(clock, timeZone).month
+        val savingsRateThisMonth = getSavingsRate(
+            income = incomes
+                .filterKeys { (month, _) -> month == thisMonth }
+                .sum(),
+            tax = taxes
+                .filterKeys { (month, _) -> month == thisMonth }
+                .sum(),
+            expense = expenses
+                .filterKeys { (month, _) -> month == thisMonth }
+                .sum(),
+        )
+        val lastThreeYears = currentMonthYear.minus(DateTimePeriod(years = 3))
+        val savingsRateLastThreeYears = getSavingsRate(
+            income = incomes
+                .filterKeys { monthYear -> monthYear >= lastThreeYears }
+                .sum(),
+            tax = taxes
+                .filterKeys { monthYear -> monthYear >= lastThreeYears }
+                .sum(),
+            expense = expenses
+                .filterKeys { monthYear -> monthYear >= lastThreeYears }
+                .sum(),
+        )
+        val allTime = MonthYear(Month.JANUARY, 2021)
+        val savingsRateAllTime = getSavingsRate(
+            income = incomes
+                .filterKeys { monthYear -> monthYear >= allTime }
+                .sum(),
+            tax = taxes
+                .filterKeys { monthYear -> monthYear >= allTime }
+                .sum(),
+            expense = expenses
+                .filterKeys { monthYear -> monthYear >= allTime }
+                .sum(),
+        )
+
+        return HomeViewState.ExpandableCardGroup(
+            name = "Savings this year",
+            value = savingsRateThisYear.formatPercent(),
+            children = listOf(
+                HomeViewState.ExpandableCardGroup.Child(
+                    title = "This month",
+                    value = savingsRateThisMonth.formatPercent(),
+                ),
+                HomeViewState.ExpandableCardGroup.Child(
+                    title = "Last 3 years",
+                    value = savingsRateLastThreeYears.formatPercent(),
+                ),
+                HomeViewState.ExpandableCardGroup.Child(
+                    title = "All time",
+                    value = savingsRateAllTime.formatPercent(),
+                ),
             )
+        )
+    }
+
+    private fun Map<MonthYear, BigDecimal>.sum(): BigDecimal {
+        var sum = BigDecimal.ZERO
+        forEach { (_, value) ->
+            sum += value
         }
-        return savingsRate
+        return sum
+    }
+
+    private fun getSavingsRate(
+        income: BigDecimal,
+        tax: BigDecimal,
+        expense: BigDecimal,
+    ): BigDecimal {
+        val afterTaxIncome = income - tax
+        val savings = afterTaxIncome - expense
+        return savings.div(afterTaxIncome)
     }
 
     private fun getNetWorths(report: Report?): List<HomeViewState.NetWorth> {
@@ -126,17 +200,16 @@ class HomeViewModel(
     private fun getCurrentBalanceGroups(currentBalances: List<CurrentBalance>) = currentBalances
         .groupBy { it.groupName }
         .map { (groupName, currentBalances) ->
-            if (groupName == null) {
-                HomeViewState.CurrentBalanceGroup(
-                    currentBalances = currentBalances,
-                )
-            } else {
-                HomeViewState.CurrentBalanceGroup(
-                    groupName = groupName,
-                    groupTotal = currentBalances.sumOf { it.balance }.format(),
-                    currentBalances = currentBalances,
-                )
-            }
+            HomeViewState.ExpandableCardGroup(
+                name = groupName ?: "",
+                value = currentBalances.sumOf { it.balance }.format(),
+                children = currentBalances.map {
+                    HomeViewState.ExpandableCardGroup.Child(
+                        title = it.name,
+                        value = it.balance.format(),
+                    )
+                },
+            )
         }
 
     private fun HomeViewState.Period.toMonthYears(): List<MonthYear> {

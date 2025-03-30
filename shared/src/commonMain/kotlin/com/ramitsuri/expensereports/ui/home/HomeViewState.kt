@@ -1,31 +1,28 @@
 package com.ramitsuri.expensereports.ui.home
 
-import com.ramitsuri.expensereports.model.CurrentBalance
 import com.ramitsuri.expensereports.model.MonthYear
 import java.math.BigDecimal
 
 data class HomeViewState(
-    val currentBalanceGroups: List<CurrentBalanceGroup> = listOf(),
+    val expandableCardGroups: List<ExpandableCardGroup> = listOf(),
     val netWorths: List<NetWorth> = listOf(),
     val selectedNetWorthPeriod: Period,
-    val selectedSavingsRatePeriod: Period,
-    val savingsRates: List<SavingsRate> = listOf(),
     val periods: List<Period> = listOf()
 ) {
-    data class CurrentBalanceGroup(
-        val groupName: String? = null,
-        val groupTotal: String? = null,
-        val currentBalances: List<CurrentBalance>,
-    )
+    data class ExpandableCardGroup(
+        val name: String,
+        val value: String,
+        val children: List<Child>,
+    ) {
+        data class Child(
+            val title: String,
+            val value: String,
+        )
+    }
 
     data class NetWorth(
         val monthYear: MonthYear,
         val netWorth: BigDecimal,
-    )
-
-    data class SavingsRate(
-        val monthYear: MonthYear,
-        val savingsRate: String,
     )
 
     sealed interface Period {

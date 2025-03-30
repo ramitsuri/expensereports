@@ -1,5 +1,7 @@
 package com.ramitsuri.expensereports
 
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 fun main() =
     application {
         initSdk()
@@ -38,7 +41,9 @@ fun main() =
             state = windowState,
         ) {
             AppTheme {
-                NavGraph()
+                NavGraph(
+                    windowSize = calculateWindowSizeClass(),
+                )
             }
             LaunchedEffect(windowState) {
                 snapshotFlow { windowState.size }

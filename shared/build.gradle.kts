@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.datastore)
 
             implementation(libs.kermit)
+            implementation(libs.window)
         }
         androidMain.dependencies {
             implementation(libs.androidx.ktx)

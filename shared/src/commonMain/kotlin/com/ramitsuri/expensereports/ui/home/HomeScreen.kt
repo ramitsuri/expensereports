@@ -1,36 +1,65 @@
 package com.ramitsuri.expensereports.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInOutCubic
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells.Fixed
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BeachAccess
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.ui.components.AnimationMode
 import com.ramitsuri.expensereports.ui.components.DividerProperties
 import com.ramitsuri.expensereports.ui.components.DrawStyle
@@ -43,12 +72,13 @@ import com.ramitsuri.expensereports.ui.components.PopupProperties
 import com.ramitsuri.expensereports.utils.formatRounded
 import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.month_names_short
+import expensereports.shared.generated.resources.month_year_formatted
 import expensereports.shared.generated.resources.net_worth
-import expensereports.shared.generated.resources.net_worth_in_month
 import expensereports.shared.generated.resources.period_all
 import expensereports.shared.generated.resources.period_last_three_years
 import expensereports.shared.generated.resources.period_one_year
 import expensereports.shared.generated.resources.period_this_year
+import expensereports.shared.generated.resources.value1_value2_formatted
 import kotlinx.coroutines.delay
 import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringArrayResource
@@ -57,22 +87,40 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun HomeScreen(
     viewState: HomeViewState,
+    windowSize: WindowSizeClass,
     onNetWorthPeriodSelected: (HomeViewState.Period) -> Unit,
 ) {
-    Column(
+    LazyVerticalGrid(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
-            .verticalScroll(rememberScrollState())
             .statusBarsPadding()
             .displayCutoutPadding(),
+        columns = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
+            Fixed(1)
+        } else {
+            Fixed(2)
+        },
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        NetWorths(
-            netWorths = viewState.netWorths,
-            selectedPeriod = viewState.selectedNetWorthPeriod,
-            periods = viewState.periods,
-            onPeriodSelected = onNetWorthPeriodSelected,
-        )
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
+            NetWorths(
+                netWorths = viewState.netWorths,
+                selectedPeriod = viewState.selectedNetWorthPeriod,
+                periods = viewState.periods,
+                onPeriodSelected = onNetWorthPeriodSelected,
+            )
+        }
+        items(viewState.expandableCardGroups) { expandableCardGroups ->
+            ExpandableCard(
+                cardName = expandableCardGroups.name,
+                cardAmount = expandableCardGroups.value,
+                children = expandableCardGroups.children
+            )
+        }
     }
 }
 
@@ -114,7 +162,7 @@ private fun NetWorths(
         ) {
             Text(
                 text = stringResource(Res.string.net_worth),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(horizontal = 8.dp),
@@ -145,6 +193,98 @@ private fun NetWorths(
                     periods = periods,
                     onPeriodSelected = onPeriodSelected,
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExpandableCard(
+    cardName: String,
+    cardAmount: String,
+    children: List<HomeViewState.ExpandableCardGroup.Child>,
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+    var rotateCount by remember(Unit) { mutableIntStateOf(0) }
+    val iconRotate by animateFloatAsState(
+        targetValue = if (isExpanded) (0f + (rotateCount * 180f)) else (180f + ((rotateCount - 1) * 180f)),
+        animationSpec = tween(300, easing = LinearOutSlowInEasing),
+        label = "buttonRotate",
+    )
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable {
+                        isExpanded = !isExpanded
+                        rotateCount++
+                    }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.BeachAccess,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Normal,
+                    text = cardName
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    text = cardAmount
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.Outlined.KeyboardArrowDown,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                        .rotate(iconRotate),
+                )
+            }
+            AnimatedVisibility(isExpanded) {
+                Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .height(IntrinsicSize.Max),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        children.forEach {
+                            Column(
+                                modifier = Modifier
+                                    .width(160.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .fillMaxHeight()
+                                    .background(MaterialTheme.colorScheme.background)
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text(
+                                    text = it.title,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(text = it.value, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                }
             }
         }
     }
@@ -187,11 +327,15 @@ private fun HomeViewState.Period.formatted() = when (this) {
 
 @Composable
 private fun HomeViewState.NetWorth.formatted(): String {
-    val month = stringArrayResource(Res.array.month_names_short)[monthYear.month.number - 1]
     return stringResource(
-        Res.string.net_worth_in_month,
-        month,
-        monthYear.year.toString(),
+        Res.string.value1_value2_formatted,
+        monthYear.formatted(),
         netWorth.formatRounded()
     )
+}
+
+@Composable
+private fun MonthYear.formatted(): String {
+    val month = stringArrayResource(Res.array.month_names_short)[month.number - 1]
+    return stringResource(Res.string.month_year_formatted, month, year.toString())
 }

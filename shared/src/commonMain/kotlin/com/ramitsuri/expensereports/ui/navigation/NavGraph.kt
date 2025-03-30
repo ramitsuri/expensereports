@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -22,6 +23,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
+    windowSize: WindowSizeClass,
     navController: NavHostController = rememberNavController(),
     dynamicDarkColorScheme: ColorScheme? = null,
     dynamicLightColorScheme: ColorScheme? = null,
@@ -50,6 +52,7 @@ fun NavGraph(
                     HomeScreen(
                         viewState = viewState,
                         onNetWorthPeriodSelected = viewModel::onNetWorthPeriodSelected,
+                        windowSize = windowSize,
                     )
                 }
 

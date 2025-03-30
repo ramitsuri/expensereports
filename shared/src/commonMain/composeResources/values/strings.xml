@@ -5,6 +5,7 @@
     <string name="cancel">Cancel</string>
     <string name="error">Error</string>
     <string name="net_worth">Net Worth</string>
+    <string name="savings_rate">Savings Rate</string>
     <string-array name="month_names_short">
         <item>Jan</item>
         <item>Feb</item>
@@ -19,7 +20,8 @@
         <item>Nov</item>
         <item>Dec</item>
     </string-array>
-    <string name="net_worth_in_month">%1$s %2$s\n%3$s</string>"
+    <string name="value1_value2_formatted">%1$s\n%2$s</string>"
+    <string name="month_year_formatted">%1$s %2$s</string>"
 
     <string name="period_this_year">YTD</string>
     <string name="period_one_year">1Y</string>
