@@ -146,6 +146,7 @@ class HomeViewModel(
         return HomeViewState.ExpandableCardGroup(
             name = "Savings this year",
             value = savingsRateThisYear.formatPercent(),
+            isValuePositive = savingsRateThisYear >= BigDecimal("0.5"),
             children = listOf(
                 HomeViewState.ExpandableCardGroup.Child(
                     title = "This month",
@@ -203,6 +204,7 @@ class HomeViewModel(
             HomeViewState.ExpandableCardGroup(
                 name = groupName,
                 value = currentBalances.sumOf { it.balance }.format(),
+                isValuePositive = getIsValuePositive(groupName),
                 children = currentBalances.map {
                     HomeViewState.ExpandableCardGroup.Child(
                         title = it.name,
@@ -232,5 +234,17 @@ class HomeViewModel(
             }
         }
         return (start..now).toList()
+    }
+
+    private fun getIsValuePositive(name: String): Boolean {
+        return when (name) {
+            "Travel" -> false
+            "Cash" -> true
+            "Retirement" -> true
+            "Credit Cards" -> false
+            "Salary" -> true
+            "Taxes" -> false
+            else -> false
+        }
     }
 }

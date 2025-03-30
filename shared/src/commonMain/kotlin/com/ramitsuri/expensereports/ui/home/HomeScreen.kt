@@ -85,6 +85,8 @@ import com.ramitsuri.expensereports.ui.components.LabelHelperProperties
 import com.ramitsuri.expensereports.ui.components.Line
 import com.ramitsuri.expensereports.ui.components.LineChart
 import com.ramitsuri.expensereports.ui.components.PopupProperties
+import com.ramitsuri.expensereports.ui.theme.greenColor
+import com.ramitsuri.expensereports.ui.theme.redColor
 import com.ramitsuri.expensereports.utils.formatRounded
 import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.month_names_short
@@ -149,6 +151,7 @@ fun HomeScreen(
                 ExpandableCard(
                     cardName = expandableCardGroups.name,
                     cardAmount = expandableCardGroups.value,
+                    isCardAmountPositive = expandableCardGroups.isValuePositive,
                     children = expandableCardGroups.children
                 )
             }
@@ -264,6 +267,7 @@ private fun NetWorths(
 private fun ExpandableCard(
     cardName: String,
     cardAmount: String,
+    isCardAmountPositive: Boolean,
     children: List<HomeViewState.ExpandableCardGroup.Child>,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -292,7 +296,8 @@ private fun ExpandableCard(
                 Icon(
                     imageVector = getExpandableCardImage(cardName),
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp),
+                    tint = if (isCardAmountPositive) greenColor else redColor,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -304,7 +309,8 @@ private fun ExpandableCard(
                 Text(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    text = cardAmount
+                    text = cardAmount,
+                    color = if (isCardAmountPositive) greenColor else redColor,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(

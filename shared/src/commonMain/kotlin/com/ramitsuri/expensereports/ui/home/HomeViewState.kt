@@ -12,6 +12,7 @@ data class HomeViewState(
     data class ExpandableCardGroup(
         val name: String,
         val value: String,
+        val isValuePositive: Boolean,
         val children: List<Child>,
     ) {
         data class Child(
