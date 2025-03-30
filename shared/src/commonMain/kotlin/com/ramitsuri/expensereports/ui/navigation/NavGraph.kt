@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ramitsuri.expensereports.ui.home.HomeScreen
 import com.ramitsuri.expensereports.ui.home.HomeViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsScreen
+import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
 import com.ramitsuri.expensereports.ui.theme.AppTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -53,11 +54,18 @@ fun NavGraph(
                         viewState = viewState,
                         onNetWorthPeriodSelected = viewModel::onNetWorthPeriodSelected,
                         windowSize = windowSize,
+                        onSettingsClick = { navController.navigate(Destination.Settings) },
                     )
                 }
 
                 composable<Destination.Settings> {
-                    SettingsScreen()
+                    val viewModel = koinViewModel<SettingsViewModel>()
+                    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+                    SettingsScreen(
+                        viewState = viewState,
+                        onBack = { navController.navigateUp() },
+                        onUrlSet = viewModel::setBaseUrl,
+                    )
                 }
             }
         }

@@ -1,5 +1,7 @@
 package com.ramitsuri.expensereports.settings
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 
 class Settings internal constructor(
@@ -70,7 +72,13 @@ class Settings internal constructor(
     }
 
     suspend fun getBaseUrl(): String {
-        return keyValueStore.getString(Key.BASE_URL, "http://192.168.1.166/json-v2") ?: ""
+        return keyValueStore.getString(Key.BASE_URL, "") ?: ""
+    }
+
+    fun getBaseUrlFlow(): Flow<String> {
+        return keyValueStore
+            .getStringFlow(Key.BASE_URL, "")
+            .map { it ?: "" }
     }
 
     suspend fun setBaseUrl(baseUrl: String) {

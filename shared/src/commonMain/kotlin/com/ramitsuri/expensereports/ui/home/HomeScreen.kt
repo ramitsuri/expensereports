@@ -30,15 +30,22 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.BeachAccess
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -54,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -84,44 +92,89 @@ import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewState: HomeViewState,
     windowSize: WindowSizeClass,
     onNetWorthPeriodSelected: (HomeViewState.Period) -> Unit,
+    onSettingsClick: () -> Unit,
 ) {
-    LazyVerticalGrid(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
             .statusBarsPadding()
             .displayCutoutPadding(),
-        columns = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
-            Fixed(1)
-        } else {
-            Fixed(2)
-        },
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item(
-            span = { GridItemSpan(maxLineSpan) }
+        val scrollBehavior =
+            TopAppBarDefaults.enterAlwaysScrollBehavior(
+                rememberTopAppBarState(),
+            )
+        Toolbar(
+            scrollBehavior = scrollBehavior,
+            onSettingsClick = onSettingsClick
+        )
+        LazyVerticalGrid(
+            modifier = Modifier
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .padding(24.dp),
+            columns = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
+                Fixed(1)
+            } else {
+                Fixed(2)
+            },
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            NetWorths(
-                netWorths = viewState.netWorths,
-                selectedPeriod = viewState.selectedNetWorthPeriod,
-                periods = viewState.periods,
-                onPeriodSelected = onNetWorthPeriodSelected,
-            )
-        }
-        items(viewState.expandableCardGroups) { expandableCardGroups ->
-            ExpandableCard(
-                cardName = expandableCardGroups.name,
-                cardAmount = expandableCardGroups.value,
-                children = expandableCardGroups.children
-            )
+            item(
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+                NetWorths(
+                    netWorths = viewState.netWorths,
+                    selectedPeriod = viewState.selectedNetWorthPeriod,
+                    periods = viewState.periods,
+                    onPeriodSelected = onNetWorthPeriodSelected,
+                )
+            }
+            items(viewState.expandableCardGroups) { expandableCardGroups ->
+                ExpandableCard(
+                    cardName = expandableCardGroups.name,
+                    cardAmount = expandableCardGroups.value,
+                    children = expandableCardGroups.children
+                )
+            }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Toolbar(
+    scrollBehavior: TopAppBarScrollBehavior,
+    onSettingsClick: () -> Unit
+) {
+    CenterAlignedTopAppBar(
+        colors =
+            TopAppBarDefaults
+                .centerAlignedTopAppBarColors()
+                .copy(scrolledContainerColor = MaterialTheme.colorScheme.background),
+        title = { },
+        actions = {
+            IconButton(
+                onClick = onSettingsClick,
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .padding(4.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = "",
+                )
+            }
+        },
+        scrollBehavior = scrollBehavior,
+    )
 }
 
 @Composable

@@ -13,6 +13,7 @@ import com.ramitsuri.expensereports.settings.DataStoreKeyValueStore
 import com.ramitsuri.expensereports.settings.Settings
 import com.ramitsuri.expensereports.shared.BuildKonfig
 import com.ramitsuri.expensereports.ui.home.HomeViewModel
+import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -139,6 +140,12 @@ internal val coreModule = module {
     viewModel<HomeViewModel> {
         HomeViewModel(
             mainRepository = get<MainRepository>(),
+        )
+    }
+
+    viewModel<SettingsViewModel> {
+        SettingsViewModel(
+            settings = get<Settings>(),
         )
     }
 }
