@@ -6,4 +6,5 @@ enum class Key(val value: String) {
     LAST_REPORTS_FETCH_TIME("last_reports_fetch_time"),
     BASE_URL("base_url"),
     LAST_FULL_FETCH_TIME("last_full_fetch_time"),
+    LAST_FETCH_TIME("last_fetch_time"),
 }

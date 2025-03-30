@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.ramitsuri.expensereports.settings.Settings
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -14,10 +13,13 @@ class SettingsViewModel(
 ) : ViewModel() {
     val viewState = combine(
         settings.getBaseUrlFlow(),
-        flowOf(""), // Empty flow so that can use combine
-    ) { baseUrl, _ ->
+        settings.getLastFetchTimeFlow(),
+        settings.getLastFullFetchTimeFlow(),
+    ) { baseUrl, lastFetchTime, lastFullFetchTime ->
         SettingsViewState(
             url = baseUrl,
+            lastFetchTime = lastFetchTime,
+            lastFullFetchTime = lastFullFetchTime,
         )
     }.stateIn(
         scope = viewModelScope,

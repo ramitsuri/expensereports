@@ -20,8 +20,26 @@
         <item>Nov</item>
         <item>Dec</item>
     </string-array>
+    <string-array name="month_names_long">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
     <string name="value1_value2_formatted">%1$s\n%2$s</string>"
     <string name="month_year_formatted">%1$s %2$s</string>"
+    <string name="one_hour_ago">1 hour ago</string>
+    <string name="hours_ago_format">%1$s hours ago</string>
+    <string name="one_day_ago">1 day ago</string>
+    <string name="days_ago_format">%1$s days ago</string>
 
     <string name="period_this_year">YTD</string>
     <string name="period_one_year">1Y</string>
@@ -29,4 +47,7 @@
     <string name="period_all">All</string>
 
     <string name="settings_url">URL</string>
+    <string name="settings_last_fetch_time">Last fetched</string>
+    <string name="settings_last_full_fetch_time">Last fetched everything</string>
+    <string name="settings_fetch_never">Never</string>
 </resources>

@@ -39,10 +39,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.ramitsuri.expensereports.utils.friendlyDate
 import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.cancel
 import expensereports.shared.generated.resources.ok
+import expensereports.shared.generated.resources.settings_fetch_never
+import expensereports.shared.generated.resources.settings_last_fetch_time
+import expensereports.shared.generated.resources.settings_last_full_fetch_time
 import expensereports.shared.generated.resources.settings_url
+import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,13 +76,26 @@ fun SettingsScreen(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .padding(16.dp),
         ) {
             item {
                 SettingsItem(
                     title = stringResource(Res.string.settings_url),
                     subtitle = viewState.url,
                     onClick = { showUrlDialog = true },
+                    showProgress = false,
+                )
+                SettingsItem(
+                    title = stringResource(Res.string.settings_last_fetch_time),
+                    subtitle = viewState.lastFetchTime.friendlyFetchDate(),
+                    onClick = { },
+                    showProgress = false,
+                )
+                SettingsItem(
+                    title = stringResource(Res.string.settings_last_full_fetch_time),
+                    subtitle = viewState.lastFullFetchTime.friendlyFetchDate(),
+                    onClick = { },
                     showProgress = false,
                 )
             }
@@ -95,6 +113,15 @@ fun SettingsScreen(
                 showUrlDialog = false
             },
         )
+    }
+}
+
+@Composable
+private fun Instant?.friendlyFetchDate(): String {
+    return if (this == null) {
+        stringResource(Res.string.settings_fetch_never)
+    } else {
+        friendlyDate(this)
     }
 }
 

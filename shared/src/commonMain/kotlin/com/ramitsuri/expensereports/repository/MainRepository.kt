@@ -3,6 +3,7 @@ package com.ramitsuri.expensereports.repository
 import com.ramitsuri.expensereports.database.dao.CurrentBalancesDao
 import com.ramitsuri.expensereports.database.dao.ReportsDao
 import com.ramitsuri.expensereports.database.dao.TransactionsDao
+import com.ramitsuri.expensereports.log.logI
 import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.network.api.Api
 import com.ramitsuri.expensereports.settings.Settings
@@ -13,6 +14,7 @@ import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 
 class MainRepository internal constructor(
     private val api: Api,
@@ -24,7 +26,13 @@ class MainRepository internal constructor(
     private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ) {
     suspend fun refresh() {
-        val fetchFromStart = clock.now().minus(settings.getLastFullFetchTime()) >= 21.days
+        val now = clock.now()
+        val lastFetch = settings.getLastFetchTime()
+        if (now.minus(lastFetch) < 6.hours) {
+            logI(TAG) { "Skipping refresh, less than 6 hours since last fetch" }
+            return
+        }
+        val fetchFromStart = now.minus(settings.getLastFullFetchTime()) >= 21.days
         listOf(
             refreshTransactions(fetchFromStart),
             refreshCurrentBalances(fetchFromStart),
@@ -32,6 +40,8 @@ class MainRepository internal constructor(
         ).let { results ->
             if (fetchFromStart && results.all { successful -> successful }) {
                 settings.setLastFullFetchTime(clock.now())
+            } else if (results.all { successful -> successful }) {
+                settings.setLastFetchTime(clock.now())
             }
         }
     }
@@ -96,4 +106,8 @@ class MainRepository internal constructor(
         } else {
             toLocalDateTime(timeZone).let { MonthYear(it.month, it.year) }
         }
+
+    companion object {
+        private const val TAG = "MainRepository"
+    }
 }

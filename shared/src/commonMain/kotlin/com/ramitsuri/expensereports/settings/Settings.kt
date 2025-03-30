@@ -1,6 +1,7 @@
 package com.ramitsuri.expensereports.settings
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 
@@ -56,11 +57,15 @@ class Settings internal constructor(
     }
 
     suspend fun getLastFullFetchTime(): Instant {
+        return getLastFullFetchTimeFlow().first() ?: Instant.DISTANT_PAST
+    }
+
+     fun getLastFullFetchTimeFlow(): Flow<Instant?> {
         return keyValueStore
-            .getString(Key.LAST_FULL_FETCH_TIME, null)
-            .let {
+            .getStringFlow(Key.LAST_FULL_FETCH_TIME, null)
+            .map {
                 if (it == null) {
-                    Instant.DISTANT_PAST
+                    null
                 } else {
                     Instant.parse(it)
                 }
@@ -71,8 +76,28 @@ class Settings internal constructor(
         keyValueStore.putString(Key.LAST_FULL_FETCH_TIME, time.toString())
     }
 
+     suspend fun getLastFetchTime(): Instant {
+        return getLastFetchTimeFlow().first() ?: Instant.DISTANT_PAST
+    }
+
+     fun getLastFetchTimeFlow(): Flow<Instant?> {
+        return keyValueStore
+            .getStringFlow(Key.LAST_FETCH_TIME, null)
+            .map {
+                if (it == null) {
+                   null
+                } else {
+                    Instant.parse(it)
+                }
+            }
+    }
+
+    suspend fun setLastFetchTime(time: Instant) {
+        keyValueStore.putString(Key.LAST_FETCH_TIME, time.toString())
+    }
+
     suspend fun getBaseUrl(): String {
-        return keyValueStore.getString(Key.BASE_URL, "") ?: ""
+        return getBaseUrlFlow().first()
     }
 
     fun getBaseUrlFlow(): Flow<String> {

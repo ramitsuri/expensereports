@@ -117,7 +117,7 @@ fun HomeScreen(
         LazyVerticalGrid(
             modifier = Modifier
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .padding(24.dp),
+                .padding(16.dp),
             columns = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
                 Fixed(1)
             } else {
