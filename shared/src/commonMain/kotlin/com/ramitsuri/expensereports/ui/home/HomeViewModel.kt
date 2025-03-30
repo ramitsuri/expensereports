@@ -201,7 +201,7 @@ class HomeViewModel(
         .groupBy { it.groupName }
         .map { (groupName, currentBalances) ->
             HomeViewState.ExpandableCardGroup(
-                name = groupName ?: "",
+                name = groupName,
                 value = currentBalances.sumOf { it.balance }.format(),
                 children = currentBalances.map {
                     HomeViewState.ExpandableCardGroup.Child(
