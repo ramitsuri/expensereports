@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:516955222413:android:8a1f9bb2e18729a7cf0dc4",
+        "android_client_info": {
+          "package_name": "com.ramitsuri.expensereports.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIU9jlE3p2VQ1p4N-nvArDjo9c7oPXaps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:516955222413:android:1d0d9b9fd80ad926cf0dc4",
         "android_client_info": {
           "package_name": "com.ramitsuri.expensereports.android.debug"
