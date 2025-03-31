@@ -56,6 +56,7 @@ fun NavGraph(
                         onNetWorthPeriodSelected = viewModel::onNetWorthPeriodSelected,
                         windowSize = windowSize,
                         onSettingsClick = { navController.navigate(Destination.Settings) },
+                        onRefresh = viewModel::onRefresh,
                     )
                 }
 

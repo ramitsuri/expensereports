@@ -38,6 +38,10 @@ fun initSdk(application: Application) {
                 val fileName = get<String>(qualifier = KoinQualifier.DATASTORE_FILE_NAME)
                 application.filesDir.resolve(fileName).absolutePath.toPath()
             }
+
+            factory<Boolean>(qualifier = KoinQualifier.IS_DESKTOP) {
+                false
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -26,13 +27,13 @@ import java.math.BigDecimal
 
 class HomeViewModel(
     private val mainRepository: MainRepository,
+    private val isDesktop: Boolean,
     private val clock: Clock = Clock.System,
     private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ) : ViewModel() {
     private val selectedNetWorthPeriod: MutableStateFlow<HomeViewState.Period> =
         MutableStateFlow(HomeViewState.Period.AllTime)
-    private val selectedSavingsRatePeriod: MutableStateFlow<HomeViewState.Period> =
-        MutableStateFlow(HomeViewState.Period.AllTime)
+    private val isRefreshing = MutableStateFlow(false)
 
     init {
         viewModelScope.launch {
@@ -43,11 +44,12 @@ class HomeViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val viewState =
         combine(
-            selectedSavingsRatePeriod,
+            // Empty so can use combine since probably going to need it in the future
+            flowOf(""),
             selectedNetWorthPeriod,
-        ) { selectedSavingsRatePeriod, selectedNetWorthPeriod ->
-            selectedSavingsRatePeriod to selectedNetWorthPeriod
-        }.flatMapLatest { (selectedSavingsRatePeriod, selectedNetWorthPeriod) ->
+        ) { _, selectedNetWorthPeriod ->
+            selectedNetWorthPeriod
+        }.flatMapLatest { selectedNetWorthPeriod ->
             combine(
                 mainRepository.getCurrentBalances(),
                 mainRepository.getReport(
@@ -56,9 +58,10 @@ class HomeViewModel(
                 ),
                 mainRepository.getReport(
                     reportName = ReportNames.SavingsRate.name,
-                    monthYears = selectedSavingsRatePeriod.toMonthYears(),
+                    monthYears = HomeViewState.Period.AllTime.toMonthYears(),
                 ),
-            ) { currentBalances, netWorthReport, savingsRatesReport ->
+                isRefreshing,
+            ) { currentBalances, netWorthReport, savingsRatesReport, isRefreshing ->
                 HomeViewState(
                     expandableCardGroups =
                         listOfNotNull(getSavingsRates(savingsRatesReport))
@@ -71,6 +74,11 @@ class HomeViewModel(
                             HomeViewState.Period.OneYear,
                             HomeViewState.Period.LastThreeYears,
                             HomeViewState.Period.AllTime,
+                        ),
+                    refreshState =
+                        HomeViewState.Refresh(
+                            isRefreshing = isRefreshing,
+                            isPullToRefreshAvailable = !isDesktop,
                         ),
                 )
             }
@@ -85,6 +93,14 @@ class HomeViewModel(
 
     fun onNetWorthPeriodSelected(period: HomeViewState.Period) {
         selectedNetWorthPeriod.value = period
+    }
+
+    fun onRefresh() {
+        viewModelScope.launch {
+            isRefreshing.value = true
+            mainRepository.refresh(forced = true)
+            isRefreshing.value = false
+        }
     }
 
     private fun getSavingsRates(report: Report?): HomeViewState.ExpandableCardGroup? {

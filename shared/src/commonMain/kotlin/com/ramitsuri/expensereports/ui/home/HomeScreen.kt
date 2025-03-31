@@ -30,7 +30,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.BeachAccess
@@ -38,9 +37,12 @@ import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Elderly
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Savings
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +53,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -108,6 +111,7 @@ fun HomeScreen(
     windowSize: WindowSizeClass,
     onNetWorthPeriodSelected: (HomeViewState.Period) -> Unit,
     onSettingsClick: () -> Unit,
+    onRefresh: () -> Unit,
 ) {
     Column(
         modifier =
@@ -122,39 +126,46 @@ fun HomeScreen(
             )
         Toolbar(
             scrollBehavior = scrollBehavior,
+            refreshState = viewState.refreshState,
             onSettingsClick = onSettingsClick,
+            onRefresh = onRefresh,
         )
-        LazyVerticalGrid(
-            modifier =
-                Modifier
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
-                    .padding(16.dp),
-            columns =
-                if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
-                    Fixed(1)
-                } else {
-                    Fixed(2)
-                },
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        PullToRefreshBox(
+            isRefreshing = viewState.refreshState.isPullToRefreshAvailable && viewState.refreshState.isRefreshing,
+            onRefresh = onRefresh,
         ) {
-            item(
-                span = { GridItemSpan(maxLineSpan) },
+            LazyVerticalGrid(
+                modifier =
+                    Modifier
+                        .nestedScroll(scrollBehavior.nestedScrollConnection)
+                        .padding(16.dp),
+                columns =
+                    if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
+                        Fixed(1)
+                    } else {
+                        Fixed(2)
+                    },
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                NetWorths(
-                    netWorths = viewState.netWorths,
-                    selectedPeriod = viewState.selectedNetWorthPeriod,
-                    periods = viewState.periods,
-                    onPeriodSelected = onNetWorthPeriodSelected,
-                )
-            }
-            items(viewState.expandableCardGroups) { expandableCardGroups ->
-                ExpandableCard(
-                    cardName = expandableCardGroups.name,
-                    cardAmount = expandableCardGroups.value,
-                    isCardAmountPositive = expandableCardGroups.isValuePositive,
-                    children = expandableCardGroups.children,
-                )
+                item(
+                    span = { GridItemSpan(maxLineSpan) },
+                ) {
+                    NetWorths(
+                        netWorths = viewState.netWorths,
+                        selectedPeriod = viewState.selectedNetWorthPeriod,
+                        periods = viewState.periods,
+                        onPeriodSelected = onNetWorthPeriodSelected,
+                    )
+                }
+                items(viewState.expandableCardGroups) { expandableCardGroups ->
+                    ExpandableCard(
+                        cardName = expandableCardGroups.name,
+                        cardAmount = expandableCardGroups.value,
+                        isCardAmountPositive = expandableCardGroups.isValuePositive,
+                        children = expandableCardGroups.children,
+                    )
+                }
             }
         }
     }
@@ -164,7 +175,9 @@ fun HomeScreen(
 @Composable
 private fun Toolbar(
     scrollBehavior: TopAppBarScrollBehavior,
+    refreshState: HomeViewState.Refresh,
     onSettingsClick: () -> Unit,
+    onRefresh: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         colors =
@@ -173,6 +186,28 @@ private fun Toolbar(
                 .copy(scrolledContainerColor = MaterialTheme.colorScheme.background),
         title = { },
         actions = {
+            if (!refreshState.isPullToRefreshAvailable) {
+                IconButton(
+                    onClick = {
+                        if (!refreshState.isRefreshing) {
+                            onRefresh()
+                        }
+                    },
+                    modifier =
+                        Modifier
+                            .size(48.dp)
+                            .padding(4.dp),
+                ) {
+                    if (refreshState.isRefreshing) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                    } else {
+                        Icon(
+                            imageVector = Icons.Outlined.Refresh,
+                            contentDescription = "",
+                        )
+                    }
+                }
+            }
             IconButton(
                 onClick = onSettingsClick,
                 modifier =
@@ -181,7 +216,7 @@ private fun Toolbar(
                         .padding(4.dp),
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Settings,
+                    imageVector = Icons.Outlined.Settings,
                     contentDescription = "",
                 )
             }
