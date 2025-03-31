@@ -9,6 +9,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.math.BigDecimal
 
 @Serializable(with = MonthYearSerializer::class)
 data class MonthYear(
@@ -79,4 +80,12 @@ fun ClosedRange<MonthYear>.toList(): List<MonthYear> {
         current = current.next()
     }
     return list.toList()
+}
+
+fun Map<MonthYear, BigDecimal>.sum(): BigDecimal {
+    var sum = BigDecimal.ZERO
+    forEach { (_, value) ->
+        sum += value
+    }
+    return sum
 }

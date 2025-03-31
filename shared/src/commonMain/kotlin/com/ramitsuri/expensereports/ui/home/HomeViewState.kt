@@ -1,6 +1,7 @@
 package com.ramitsuri.expensereports.ui.home
 
 import com.ramitsuri.expensereports.model.MonthYear
+import com.ramitsuri.expensereports.model.Period
 import java.math.BigDecimal
 
 data class HomeViewState(
@@ -31,14 +32,4 @@ data class HomeViewState(
         val isRefreshing: Boolean = false,
         val isPullToRefreshAvailable: Boolean = true,
     )
-
-    sealed interface Period {
-        data object ThisYear : Period
-
-        data object OneYear : Period
-
-        data object LastThreeYears : Period
-
-        data object AllTime : Period
-    }
 }

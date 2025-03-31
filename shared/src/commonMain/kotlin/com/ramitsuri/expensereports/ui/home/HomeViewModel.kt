@@ -4,9 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramitsuri.expensereports.model.CurrentBalance
 import com.ramitsuri.expensereports.model.MonthYear
+import com.ramitsuri.expensereports.model.Period
 import com.ramitsuri.expensereports.model.Report
 import com.ramitsuri.expensereports.model.ReportNames
-import com.ramitsuri.expensereports.model.toList
+import com.ramitsuri.expensereports.model.sum
 import com.ramitsuri.expensereports.repository.MainRepository
 import com.ramitsuri.expensereports.utils.format
 import com.ramitsuri.expensereports.utils.formatPercent
@@ -31,8 +32,8 @@ class HomeViewModel(
     private val clock: Clock = Clock.System,
     private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ) : ViewModel() {
-    private val selectedNetWorthPeriod: MutableStateFlow<HomeViewState.Period> =
-        MutableStateFlow(HomeViewState.Period.AllTime)
+    private val selectedNetWorthPeriod: MutableStateFlow<Period> =
+        MutableStateFlow(Period.AllTime)
     private val isRefreshing = MutableStateFlow(false)
 
     init {
@@ -50,19 +51,20 @@ class HomeViewModel(
         ) { _, selectedNetWorthPeriod ->
             selectedNetWorthPeriod
         }.flatMapLatest { selectedNetWorthPeriod ->
+            val now = MonthYear.now(clock, timeZone)
             combine(
                 mainRepository.getCurrentBalances(),
                 mainRepository.getReport(
                     reportName = ReportNames.NetWorth.name,
-                    monthYears = selectedNetWorthPeriod.toMonthYears(),
+                    monthYears = selectedNetWorthPeriod.toMonthYears(now),
                 ),
                 mainRepository.getReport(
                     reportName = ReportNames.SavingsRate.name,
-                    monthYears = HomeViewState.Period.AllTime.toMonthYears(),
+                    monthYears = Period.AllTime.toMonthYears(now),
                 ),
                 mainRepository.getReport(
                     reportName = ReportNames.AfterDeductionsExpenses.name,
-                    monthYears = HomeViewState.Period.OneYear.toMonthYears(),
+                    monthYears = Period.OneYear.toMonthYears(now),
                 ),
                 isRefreshing,
             ) { currentBalances, netWorthReport, savingsRatesReport, expensesReport, isRefreshing ->
@@ -75,10 +77,10 @@ class HomeViewModel(
                     selectedNetWorthPeriod = selectedNetWorthPeriod,
                     periods =
                         listOf(
-                            HomeViewState.Period.ThisYear,
-                            HomeViewState.Period.OneYear,
-                            HomeViewState.Period.LastThreeYears,
-                            HomeViewState.Period.AllTime,
+                            Period.ThisYear,
+                            Period.OneYear,
+                            Period.LastThreeYears,
+                            Period.AllTime,
                         ),
                     refreshState =
                         HomeViewState.Refresh(
@@ -96,7 +98,7 @@ class HomeViewModel(
                 ),
         )
 
-    fun onNetWorthPeriodSelected(period: HomeViewState.Period) {
+    fun onNetWorthPeriodSelected(period: Period) {
         selectedNetWorthPeriod.value = period
     }
 
@@ -268,14 +270,6 @@ class HomeViewModel(
         )
     }
 
-    private fun Map<MonthYear, BigDecimal>.sum(): BigDecimal {
-        var sum = BigDecimal.ZERO
-        forEach { (_, value) ->
-            sum += value
-        }
-        return sum
-    }
-
     private fun getSavingsRate(
         income: BigDecimal,
         tax: BigDecimal,
@@ -319,29 +313,6 @@ class HomeViewModel(
                         },
                 )
             }
-
-    private fun HomeViewState.Period.toMonthYears(): List<MonthYear> {
-        val now = MonthYear.now(clock, timeZone)
-        val start =
-            when (this) {
-                is HomeViewState.Period.AllTime -> {
-                    MonthYear(Month.JANUARY, 2021)
-                }
-
-                is HomeViewState.Period.LastThreeYears -> {
-                    now.minus(DateTimePeriod(years = 3))
-                }
-
-                is HomeViewState.Period.OneYear -> {
-                    now.minus(DateTimePeriod(years = 1))
-                }
-
-                is HomeViewState.Period.ThisYear -> {
-                    now.copy(month = Month.JANUARY)
-                }
-            }
-        return (start..now).toList()
-    }
 
     private fun getIsValuePositive(name: String): Boolean {
         return when (name) {
