@@ -260,11 +260,32 @@ private fun NetWorths(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 visible = periodSelectorVisible,
             ) {
-                PeriodSelector(
-                    selectedPeriod = selectedPeriod,
-                    periods = periods,
-                    onPeriodSelected = onPeriodSelected,
-                )
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    netWorths.firstOrNull()?.let {
+                        Text(
+                            text = it.monthYear.formatted(),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    PeriodSelector(
+                        selectedPeriod = selectedPeriod,
+                        periods = periods,
+                        onPeriodSelected = onPeriodSelected,
+                    )
+                    netWorths.lastOrNull()?.let {
+                        Text(
+                            text = it.monthYear.formatted(),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
             }
         }
     }
