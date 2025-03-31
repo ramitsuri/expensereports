@@ -60,11 +60,16 @@ class HomeViewModel(
                     reportName = ReportNames.SavingsRate.name,
                     monthYears = HomeViewState.Period.AllTime.toMonthYears(),
                 ),
+                mainRepository.getReport(
+                    reportName = ReportNames.AfterDeductionsExpenses.name,
+                    monthYears = HomeViewState.Period.OneYear.toMonthYears(),
+                ),
                 isRefreshing,
-            ) { currentBalances, netWorthReport, savingsRatesReport, isRefreshing ->
+            ) { currentBalances, netWorthReport, savingsRatesReport, expensesReport, isRefreshing ->
                 HomeViewState(
                     expandableCardGroups =
-                        listOfNotNull(getSavingsRates(savingsRatesReport))
+                        getSavingsRates(savingsRatesReport)
+                            .plus(getExpenses(expensesReport))
                             .plus(getCurrentBalanceGroups(currentBalances)),
                     netWorths = getNetWorths(netWorthReport),
                     selectedNetWorthPeriod = selectedNetWorthPeriod,
@@ -103,9 +108,50 @@ class HomeViewModel(
         }
     }
 
-    private fun getSavingsRates(report: Report?): HomeViewState.ExpandableCardGroup? {
+    private fun getExpenses(report: Report?): List<HomeViewState.ExpandableCardGroup> {
         if (report == null) {
-            return null
+            return emptyList()
+        }
+        val expensesRow = report.accounts.firstOrNull { it.order == 0 }?.monthTotals ?: return emptyList()
+
+        val currentMonthYear = MonthYear.now(clock, timeZone)
+        val expensesThisMonth =
+            expensesRow
+                .filterKeys { monthYear -> monthYear == currentMonthYear }
+                .sum()
+
+        val previousMonthYear = currentMonthYear.previous()
+        val expensesLastMonth =
+            expensesRow
+                .filterKeys { monthYear -> monthYear == previousMonthYear }
+                .sum()
+        val expensesThisYear =
+            expensesRow
+                .filterKeys { (_, year) -> year == currentMonthYear.year }
+                .sum()
+        return listOf(
+            HomeViewState.ExpandableCardGroup(
+                name = "Expenses this month",
+                value = expensesThisMonth.format(),
+                isValuePositive = false,
+                children =
+                    listOf(
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "This year",
+                            value = expensesThisYear.format(),
+                        ),
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "Last month",
+                            value = expensesLastMonth.format(),
+                        ),
+                    ),
+            ),
+        )
+    }
+
+    private fun getSavingsRates(report: Report?): List<HomeViewState.ExpandableCardGroup> {
+        if (report == null) {
+            return emptyList()
         }
         val incomes = report.accounts.first { it.order == 0 }.monthTotals
         val taxes = report.accounts.first { it.order == 1 }.monthTotals
@@ -194,29 +240,31 @@ class HomeViewModel(
                         .sum(),
             )
 
-        return HomeViewState.ExpandableCardGroup(
-            name = "Savings this year",
-            value = savingsRateThisYear.formatPercent(),
-            isValuePositive = savingsRateThisYear >= BigDecimal("0.5"),
-            children =
-                listOf(
-                    HomeViewState.ExpandableCardGroup.Child(
-                        title = "This month",
-                        value = savingsRateThisMonth.formatPercent(),
+        return listOf(
+            HomeViewState.ExpandableCardGroup(
+                name = "Savings this year",
+                value = savingsRateThisYear.formatPercent(),
+                isValuePositive = savingsRateThisYear >= BigDecimal("0.5"),
+                children =
+                    listOf(
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "This month",
+                            value = savingsRateThisMonth.formatPercent(),
+                        ),
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "Last month",
+                            value = savingsRateLastMonth.formatPercent(),
+                        ),
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "Last 3 years",
+                            value = savingsRateLastThreeYears.formatPercent(),
+                        ),
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "All time",
+                            value = savingsRateAllTime.formatPercent(),
+                        ),
                     ),
-                    HomeViewState.ExpandableCardGroup.Child(
-                        title = "Last month",
-                        value = savingsRateLastMonth.formatPercent(),
-                    ),
-                    HomeViewState.ExpandableCardGroup.Child(
-                        title = "Last 3 years",
-                        value = savingsRateLastThreeYears.formatPercent(),
-                    ),
-                    HomeViewState.ExpandableCardGroup.Child(
-                        title = "All time",
-                        value = savingsRateAllTime.formatPercent(),
-                    ),
-                ),
+            ),
         )
     }
 
