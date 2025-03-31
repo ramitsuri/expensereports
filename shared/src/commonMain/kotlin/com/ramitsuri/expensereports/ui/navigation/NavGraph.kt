@@ -14,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.ramitsuri.expensereports.ui.home.HomeScreen
 import com.ramitsuri.expensereports.ui.home.HomeViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsScreen
@@ -48,7 +49,11 @@ fun NavGraph(
                         bottom = innerPadding.calculateBottomPadding(),
                     ),
             ) {
-                composable<Destination.Home> {
+                composable<Destination.Home>(
+                    deepLinks = listOf(
+                        navDeepLink<Destination.Home>(basePath = Destination.Home.deepLinkUri)
+                    )
+                ) {
                     val viewModel = koinViewModel<HomeViewModel>()
                     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
                     HomeScreen(

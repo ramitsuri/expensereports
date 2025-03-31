@@ -5,6 +5,10 @@ import androidx.room.RoomDatabase
 import com.ramitsuri.expensereports.database.AppDatabase
 import com.ramitsuri.expensereports.di.KoinQualifier
 import com.ramitsuri.expensereports.di.initKoin
+import com.ramitsuri.expensereports.log.logI
+import com.ramitsuri.expensereports.notification.NotificationHandler
+import com.ramitsuri.expensereports.notification.NotificationInfo
+import com.ramitsuri.expensereports.notification.NotificationType
 import com.ramitsuri.expensereports.shared.BuildKonfig
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.java.Java
@@ -38,6 +42,22 @@ fun initSdk() {
 
             factory<Boolean>(qualifier = KoinQualifier.IS_DESKTOP) {
                 true
+            }
+
+            single<NotificationHandler> {
+               object : NotificationHandler {
+                   override fun registerTypes(types: List<NotificationType>) {
+                       logI("DesktopNotificationHandler") {
+                           "Registering notifications $types"
+                       }
+                   }
+
+                   override fun showNotification(notificationInfo: NotificationInfo) {
+                       logI("DesktopNotificationHandler") {
+                           "Showing notification $notificationInfo"
+                       }
+                   }
+               }
             }
         }
     }
