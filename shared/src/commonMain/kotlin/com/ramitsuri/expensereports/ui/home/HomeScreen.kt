@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -92,13 +91,13 @@ import com.ramitsuri.expensereports.ui.theme.redColor
 import com.ramitsuri.expensereports.utils.formatRounded
 import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.month_names_short
-import expensereports.shared.generated.resources.month_year_formatted
 import expensereports.shared.generated.resources.net_worth
 import expensereports.shared.generated.resources.period_all
 import expensereports.shared.generated.resources.period_last_three_years
 import expensereports.shared.generated.resources.period_one_year
 import expensereports.shared.generated.resources.period_this_year
 import expensereports.shared.generated.resources.value1_value2_formatted
+import expensereports.shared.generated.resources.value1_value2_new_line_formatted
 import kotlinx.coroutines.delay
 import kotlinx.datetime.number
 import org.jetbrains.compose.resources.stringArrayResource
@@ -138,7 +137,7 @@ fun HomeScreen(
                 modifier =
                     Modifier
                         .nestedScroll(scrollBehavior.nestedScrollConnection)
-                        .padding(16.dp),
+                        .padding(horizontal = 16.dp),
                 columns =
                     if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
                         Fixed(1)
@@ -165,6 +164,9 @@ fun HomeScreen(
                         isCardAmountPositive = expandableCardGroups.isValuePositive,
                         children = expandableCardGroups.children,
                     )
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -258,7 +260,7 @@ private fun NetWorths(
                 .height(320.dp)
                 .fillMaxWidth(),
     ) {
-        Box(
+        Column(
             modifier =
                 Modifier
                     .fillMaxSize()
@@ -269,10 +271,10 @@ private fun NetWorths(
                 style = MaterialTheme.typography.titleMedium,
                 modifier =
                     Modifier
-                        .align(Alignment.TopStart)
                         .padding(horizontal = 8.dp),
             )
             LineChart(
+                modifier = Modifier.weight(1f),
                 data = listOf(data),
                 dividerProperties = DividerProperties(enabled = false),
                 animationMode = AnimationMode.Together(delayBuilder = { it * 500L }),
@@ -291,35 +293,44 @@ private fun NetWorths(
                         },
                     ),
             )
-            androidx.compose.animation.AnimatedVisibility(
-                modifier = Modifier.align(Alignment.BottomCenter),
+            AnimatedVisibility(
                 visible = periodSelectorVisible,
             ) {
-                Row(
+                Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    netWorths.firstOrNull()?.let {
-                        Text(
-                            text = it.monthYear.formatted(),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        netWorths.firstOrNull()?.let {
+                            Text(
+                                text = it.monthYear.formatted(withNewLine = true),
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                        netWorths.lastOrNull()?.let {
+                            Text(
+                                text = it.monthYear.formatted(withNewLine = true),
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                     PeriodSelector(
                         selectedPeriod = selectedPeriod,
                         periods = periods,
                         onPeriodSelected = onPeriodSelected,
                     )
-                    netWorths.lastOrNull()?.let {
-                        Text(
-                            text = it.monthYear.formatted(),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
                 }
             }
         }
@@ -480,14 +491,18 @@ private fun HomeViewState.Period.formatted() =
 @Composable
 private fun HomeViewState.NetWorth.formatted(): String {
     return stringResource(
-        Res.string.value1_value2_formatted,
+        Res.string.value1_value2_new_line_formatted,
         monthYear.formatted(),
         netWorth.formatRounded(),
     )
 }
 
 @Composable
-private fun MonthYear.formatted(): String {
+private fun MonthYear.formatted(withNewLine: Boolean = false): String {
     val month = stringArrayResource(Res.array.month_names_short)[month.number - 1]
-    return stringResource(Res.string.month_year_formatted, month, year.toString())
+    return if (withNewLine) {
+        stringResource(Res.string.value1_value2_new_line_formatted, month, year.toString())
+    } else {
+        stringResource(Res.string.value1_value2_formatted, month, year.toString())
+    }
 }
