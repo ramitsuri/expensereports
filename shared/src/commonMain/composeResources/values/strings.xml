@@ -47,6 +47,8 @@
     <string name="period_one_year">1Y</string>
     <string name="period_last_three_years">3Y</string>
     <string name="period_all">All</string>
+    <string name="period_this_month">This month</string>
+    <string name="period_previous_month">Last month</string>
 
     <string name="settings_url">URL</string>
     <string name="settings_last_fetch_time">Last fetched</string>

@@ -14,6 +14,7 @@ import com.ramitsuri.expensereports.settings.Settings
 import com.ramitsuri.expensereports.shared.BuildKonfig
 import com.ramitsuri.expensereports.ui.home.HomeViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
+import com.ramitsuri.expensereports.usecase.ExpensesUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -137,9 +138,16 @@ internal val coreModule =
             BuildKonfig.IS_DEBUG
         }
 
+        factory<ExpensesUseCase> {
+            ExpensesUseCase(
+                mainRepository = get<MainRepository>(),
+            )
+        }
+
         viewModel<HomeViewModel> {
             HomeViewModel(
                 mainRepository = get<MainRepository>(),
+                expensesUseCase = get<ExpensesUseCase>(),
                 isDesktop = get<Boolean>(qualifier = KoinQualifier.IS_DESKTOP),
             )
         }

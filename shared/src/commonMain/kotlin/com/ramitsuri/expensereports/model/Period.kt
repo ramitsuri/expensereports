@@ -5,6 +5,10 @@ import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.Month
 
 sealed interface Period {
+    data object ThisMonth : Period
+
+    data object PreviousMonth : Period
+
     data object ThisYear : Period
 
     data object OneYear : Period
@@ -30,6 +34,14 @@ sealed interface Period {
 
                 is ThisYear -> {
                     now.copy(month = Month.JANUARY)
+                }
+
+                is PreviousMonth -> {
+                    return listOf(now.previous())
+                }
+
+                is ThisMonth -> {
+                    return listOf(now)
                 }
             }
         return (start..now).toList()
