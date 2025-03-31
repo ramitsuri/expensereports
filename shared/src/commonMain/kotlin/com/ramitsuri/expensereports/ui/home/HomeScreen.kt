@@ -95,7 +95,6 @@ import expensereports.shared.generated.resources.period_all
 import expensereports.shared.generated.resources.period_last_three_years
 import expensereports.shared.generated.resources.period_one_year
 import expensereports.shared.generated.resources.period_this_year
-import expensereports.shared.generated.resources.savings_rate
 import expensereports.shared.generated.resources.value1_value2_formatted
 import kotlinx.coroutines.delay
 import kotlinx.datetime.number
@@ -374,7 +373,7 @@ private fun ExpandableCard(
 @Composable
 private fun getExpandableCardImage(name: String): ImageVector {
     return when (name) {
-        stringResource(Res.string.savings_rate) -> Icons.Outlined.Savings
+        "Savings this year" -> Icons.Outlined.Savings
         "Travel" -> Icons.Outlined.BeachAccess
         "Cash" -> Icons.Outlined.AttachMoney
         "Retirement" -> Icons.Outlined.Elderly
