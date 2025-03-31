@@ -78,6 +78,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramitsuri.expensereports.model.MonthYear
+import com.ramitsuri.expensereports.model.Period
 import com.ramitsuri.expensereports.ui.components.AnimationMode
 import com.ramitsuri.expensereports.ui.components.DividerProperties
 import com.ramitsuri.expensereports.ui.components.DrawStyle
@@ -109,7 +110,7 @@ import org.jetbrains.compose.resources.stringResource
 fun HomeScreen(
     viewState: HomeViewState,
     windowSize: WindowSizeClass,
-    onNetWorthPeriodSelected: (HomeViewState.Period) -> Unit,
+    onNetWorthPeriodSelected: (Period) -> Unit,
     onSettingsClick: () -> Unit,
     onRefresh: () -> Unit,
 ) {
@@ -231,9 +232,9 @@ private fun Toolbar(
 @Composable
 private fun NetWorths(
     netWorths: List<HomeViewState.NetWorth>,
-    selectedPeriod: HomeViewState.Period,
-    periods: List<HomeViewState.Period>,
-    onPeriodSelected: (HomeViewState.Period) -> Unit,
+    selectedPeriod: Period,
+    periods: List<Period>,
+    onPeriodSelected: (Period) -> Unit,
 ) {
     val popupLabels = netWorths.map { it.formatted() }
     var periodSelectorVisible by remember(selectedPeriod) { mutableStateOf(false) }
@@ -455,9 +456,9 @@ private fun getExpandableCardImage(name: String): ImageVector {
 
 @Composable
 private fun PeriodSelector(
-    selectedPeriod: HomeViewState.Period,
-    periods: List<HomeViewState.Period>,
-    onPeriodSelected: (HomeViewState.Period) -> Unit,
+    selectedPeriod: Period,
+    periods: List<Period>,
+    onPeriodSelected: (Period) -> Unit,
 ) {
     SingleChoiceSegmentedButtonRow {
         periods.forEachIndexed { index, period ->
@@ -482,12 +483,12 @@ private fun PeriodSelector(
 }
 
 @Composable
-private fun HomeViewState.Period.formatted() =
+private fun Period.formatted() =
     when (this) {
-        is HomeViewState.Period.ThisYear -> stringResource(Res.string.period_this_year)
-        is HomeViewState.Period.OneYear -> stringResource(Res.string.period_one_year)
-        is HomeViewState.Period.LastThreeYears -> stringResource(Res.string.period_last_three_years)
-        is HomeViewState.Period.AllTime -> stringResource(Res.string.period_all)
+        is Period.ThisYear -> stringResource(Res.string.period_this_year)
+        is Period.OneYear -> stringResource(Res.string.period_one_year)
+        is Period.LastThreeYears -> stringResource(Res.string.period_last_three_years)
+        is Period.AllTime -> stringResource(Res.string.period_all)
     }
 
 @Composable
