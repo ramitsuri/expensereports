@@ -113,20 +113,36 @@ class HomeViewModel(
                         .filterKeys { (_, year) -> year == thisYear }
                         .sum(),
             )
-        val thisMonth = MonthYear.now(clock, timeZone).month
+        val thisMonthYear = MonthYear.now(clock, timeZone)
         val savingsRateThisMonth =
             getSavingsRate(
                 income =
                     incomes
-                        .filterKeys { (month, _) -> month == thisMonth }
+                        .filterKeys { monthYear -> monthYear == thisMonthYear }
                         .sum(),
                 tax =
                     taxes
-                        .filterKeys { (month, _) -> month == thisMonth }
+                        .filterKeys { monthYear -> monthYear == thisMonthYear }
                         .sum(),
                 expense =
                     expenses
-                        .filterKeys { (month, _) -> month == thisMonth }
+                        .filterKeys { monthYear -> monthYear == thisMonthYear }
+                        .sum(),
+            )
+        val lastMonthYear = currentMonthYear.previous()
+        val savingsRateLastMonth =
+            getSavingsRate(
+                income =
+                    incomes
+                        .filterKeys { monthYear -> monthYear == lastMonthYear }
+                        .sum(),
+                tax =
+                    taxes
+                        .filterKeys { monthYear -> monthYear == lastMonthYear }
+                        .sum(),
+                expense =
+                    expenses
+                        .filterKeys { monthYear -> monthYear == lastMonthYear }
                         .sum(),
             )
         val lastThreeYears = currentMonthYear.minus(DateTimePeriod(years = 3))
@@ -171,6 +187,10 @@ class HomeViewModel(
                     HomeViewState.ExpandableCardGroup.Child(
                         title = "This month",
                         value = savingsRateThisMonth.formatPercent(),
+                    ),
+                    HomeViewState.ExpandableCardGroup.Child(
+                        title = "Last month",
+                        value = savingsRateLastMonth.formatPercent(),
                     ),
                     HomeViewState.ExpandableCardGroup.Child(
                         title = "Last 3 years",
