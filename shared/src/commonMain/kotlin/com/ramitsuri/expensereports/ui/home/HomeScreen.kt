@@ -97,6 +97,8 @@ import expensereports.shared.generated.resources.net_worth
 import expensereports.shared.generated.resources.period_all
 import expensereports.shared.generated.resources.period_last_three_years
 import expensereports.shared.generated.resources.period_one_year
+import expensereports.shared.generated.resources.period_previous_month
+import expensereports.shared.generated.resources.period_this_month
 import expensereports.shared.generated.resources.period_this_year
 import expensereports.shared.generated.resources.value1_value2_formatted
 import expensereports.shared.generated.resources.value1_value2_new_line_formatted
@@ -489,6 +491,8 @@ private fun Period.formatted() =
         is Period.OneYear -> stringResource(Res.string.period_one_year)
         is Period.LastThreeYears -> stringResource(Res.string.period_last_three_years)
         is Period.AllTime -> stringResource(Res.string.period_all)
+        is Period.ThisMonth -> stringResource(Res.string.period_this_month)
+        is Period.PreviousMonth -> stringResource(Res.string.period_previous_month)
     }
 
 @Composable

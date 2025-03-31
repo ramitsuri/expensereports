@@ -9,8 +9,10 @@ import com.ramitsuri.expensereports.model.Report
 import com.ramitsuri.expensereports.model.ReportNames
 import com.ramitsuri.expensereports.model.sum
 import com.ramitsuri.expensereports.repository.MainRepository
+import com.ramitsuri.expensereports.usecase.ExpensesUseCase
 import com.ramitsuri.expensereports.utils.format
 import com.ramitsuri.expensereports.utils.formatPercent
+import com.ramitsuri.expensereports.utils.getOrThrow
 import com.ramitsuri.expensereports.utils.minus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,7 @@ import java.math.BigDecimal
 
 class HomeViewModel(
     private val mainRepository: MainRepository,
+    private val expensesUseCase: ExpensesUseCase,
     private val isDesktop: Boolean,
     private val clock: Clock = Clock.System,
     private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
@@ -62,16 +65,13 @@ class HomeViewModel(
                     reportName = ReportNames.SavingsRate.name,
                     monthYears = Period.AllTime.toMonthYears(now),
                 ),
-                mainRepository.getReport(
-                    reportName = ReportNames.AfterDeductionsExpenses.name,
-                    monthYears = Period.OneYear.toMonthYears(now),
-                ),
+                expensesUseCase(listOf(Period.ThisMonth, Period.ThisYear, Period.PreviousMonth)),
                 isRefreshing,
-            ) { currentBalances, netWorthReport, savingsRatesReport, expensesReport, isRefreshing ->
+            ) { currentBalances, netWorthReport, savingsRatesReport, expenses, isRefreshing ->
                 HomeViewState(
                     expandableCardGroups =
                         getSavingsRates(savingsRatesReport)
-                            .plus(getExpenses(expensesReport))
+                            .plus(getExpenses(expenses))
                             .plus(getCurrentBalanceGroups(currentBalances)),
                     netWorths = getNetWorths(netWorthReport),
                     selectedNetWorthPeriod = selectedNetWorthPeriod,
@@ -110,41 +110,21 @@ class HomeViewModel(
         }
     }
 
-    private fun getExpenses(report: Report?): List<HomeViewState.ExpandableCardGroup> {
-        if (report == null) {
-            return emptyList()
-        }
-        val expensesRow = report.accounts.firstOrNull { it.order == 0 }?.monthTotals ?: return emptyList()
-
-        val currentMonthYear = MonthYear.now(clock, timeZone)
-        val expensesThisMonth =
-            expensesRow
-                .filterKeys { monthYear -> monthYear == currentMonthYear }
-                .sum()
-
-        val previousMonthYear = currentMonthYear.previous()
-        val expensesLastMonth =
-            expensesRow
-                .filterKeys { monthYear -> monthYear == previousMonthYear }
-                .sum()
-        val expensesThisYear =
-            expensesRow
-                .filterKeys { (_, year) -> year == currentMonthYear.year }
-                .sum()
+    private fun getExpenses(expenses: Map<Period, BigDecimal>): List<HomeViewState.ExpandableCardGroup> {
         return listOf(
             HomeViewState.ExpandableCardGroup(
                 name = "Expenses this month",
-                value = expensesThisMonth.format(),
+                value = expenses.getOrThrow(Period.ThisMonth).format(),
                 isValuePositive = false,
                 children =
                     listOf(
                         HomeViewState.ExpandableCardGroup.Child(
                             title = "This year",
-                            value = expensesThisYear.format(),
+                            value = expenses.getOrThrow(Period.ThisYear).format(),
                         ),
                         HomeViewState.ExpandableCardGroup.Child(
                             title = "Last month",
-                            value = expensesLastMonth.format(),
+                            value = expenses.getOrThrow(Period.PreviousMonth).format(),
                         ),
                     ),
             ),
