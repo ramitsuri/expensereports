@@ -34,8 +34,8 @@
         <item>November</item>
         <item>December</item>
     </string-array>
-    <string name="value1_value2_formatted">%1$s\n%2$s</string>"
-    <string name="month_year_formatted">%1$s %2$s</string>"
+    <string name="value1_value2_new_line_formatted">%1$s\n%2$s</string>
+    <string name="value1_value2_formatted">%1$s %2$s</string>
     <string name="one_hour_ago">1 hour ago</string>
     <string name="hours_ago_format">%1$s hours ago</string>
     <string name="one_day_ago">1 day ago</string>
