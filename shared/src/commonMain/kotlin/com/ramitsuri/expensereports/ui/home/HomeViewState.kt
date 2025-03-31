@@ -8,6 +8,7 @@ data class HomeViewState(
     val netWorths: List<NetWorth> = listOf(),
     val selectedNetWorthPeriod: Period,
     val periods: List<Period> = listOf(),
+    val refreshState: Refresh = Refresh(),
 ) {
     data class ExpandableCardGroup(
         val name: String,
@@ -24,6 +25,11 @@ data class HomeViewState(
     data class NetWorth(
         val monthYear: MonthYear,
         val netWorth: BigDecimal,
+    )
+
+    data class Refresh(
+        val isRefreshing: Boolean = false,
+        val isPullToRefreshAvailable: Boolean = true,
     )
 
     sealed interface Period {

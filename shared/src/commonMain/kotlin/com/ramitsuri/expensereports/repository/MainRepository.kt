@@ -33,6 +33,7 @@ class MainRepository internal constructor(
             return
         }
         val fetchFromStart = (now.minus(settings.getLastFullFetchTime()) >= 21.days) || forced
+        logI(TAG) { "Refreshing data, fetchFromStart: $fetchFromStart" }
         listOf(
             refreshTransactions(fetchFromStart),
             refreshCurrentBalances(fetchFromStart),

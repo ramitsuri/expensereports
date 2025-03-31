@@ -140,6 +140,7 @@ internal val coreModule =
         viewModel<HomeViewModel> {
             HomeViewModel(
                 mainRepository = get<MainRepository>(),
+                isDesktop = get<Boolean>(qualifier = KoinQualifier.IS_DESKTOP),
             )
         }
 
@@ -155,4 +156,5 @@ object KoinQualifier {
     val IS_DEBUG = named("is_debug")
     val DATASTORE_FILE_NAME = named("datastore_file_name")
     val DATABASE_NAME = named("database_name")
+    val IS_DESKTOP = named("is_desktop")
 }
