@@ -39,6 +39,7 @@ import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -440,6 +441,7 @@ private fun ExpandableCard(
 @Composable
 private fun getExpandableCardImage(name: String): ImageVector {
     return when (name) {
+        "Expenses this month" -> Icons.Outlined.ShoppingCart
         "Savings this year" -> Icons.Outlined.Savings
         "Travel" -> Icons.Outlined.BeachAccess
         "Cash" -> Icons.Outlined.AttachMoney
