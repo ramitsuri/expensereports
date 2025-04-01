@@ -45,19 +45,19 @@ fun initSdk() {
             }
 
             single<NotificationHandler> {
-               object : NotificationHandler {
-                   override fun registerTypes(types: List<NotificationType>) {
-                       logI("DesktopNotificationHandler") {
-                           "Registering notifications $types"
-                       }
-                   }
+                object : NotificationHandler {
+                    override fun registerTypes(types: List<NotificationType>) {
+                        logI("DesktopNotificationHandler") {
+                            "Registering notifications $types"
+                        }
+                    }
 
-                   override fun showNotification(notificationInfo: NotificationInfo) {
-                       logI("DesktopNotificationHandler") {
-                           "Showing notification $notificationInfo"
-                       }
-                   }
-               }
+                    override fun showNotification(notificationInfo: NotificationInfo) {
+                        logI("DesktopNotificationHandler") {
+                            "Showing notification $notificationInfo"
+                        }
+                    }
+                }
             }
         }
     }

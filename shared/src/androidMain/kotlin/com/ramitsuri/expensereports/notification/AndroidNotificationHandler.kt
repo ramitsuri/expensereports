@@ -22,9 +22,8 @@ import com.ramitsuri.expensereports.log.logW
 import com.ramitsuri.expensereports.ui.navigation.Destination
 
 internal class AndroidNotificationHandler(
-    context: Context
+    context: Context,
 ) : NotificationHandler {
-
     private val appContext = context.applicationContext
     private val notificationManager = NotificationManagerCompat.from(appContext)
 
@@ -85,9 +84,12 @@ internal class AndroidNotificationHandler(
             .toChannels()
             .map { channel ->
                 NotificationChannel(
-                    /* id = */ channel.id,
-                    /* name = */ appContext.getString(channel.title),
-                    /* importance = */ channel.importance,
+                    // id =
+                    channel.id,
+                    // name =
+                    appContext.getString(channel.title),
+                    // importance =
+                    channel.importance,
                 ).apply {
                     if (importance >= IMPORTANCE_DEFAULT) {
                         // Sound
@@ -109,7 +111,6 @@ internal class AndroidNotificationHandler(
             .forEach { channel ->
                 notificationManager.createNotificationChannel(channel)
             }
-
     }
 
     private fun List<NotificationType>.toChannels(): List<Channel> {

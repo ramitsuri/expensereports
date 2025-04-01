@@ -50,9 +50,10 @@ fun NavGraph(
                     ),
             ) {
                 composable<Destination.Home>(
-                    deepLinks = listOf(
-                        navDeepLink<Destination.Home>(basePath = Destination.Home.deepLinkUri)
-                    )
+                    deepLinks =
+                        listOf(
+                            navDeepLink<Destination.Home>(basePath = Destination.Home.deepLinkUri),
+                        ),
                 ) {
                     val viewModel = koinViewModel<HomeViewModel>()
                     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
