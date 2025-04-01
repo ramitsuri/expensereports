@@ -10,6 +10,8 @@ import com.ramitsuri.expensereports.model.ReportNames
 import com.ramitsuri.expensereports.model.sum
 import com.ramitsuri.expensereports.repository.MainRepository
 import com.ramitsuri.expensereports.usecase.ExpensesUseCase
+import com.ramitsuri.expensereports.usecase.IncomeUseCase
+import com.ramitsuri.expensereports.utils.combine
 import com.ramitsuri.expensereports.utils.format
 import com.ramitsuri.expensereports.utils.formatPercent
 import com.ramitsuri.expensereports.utils.getOrThrow
@@ -31,6 +33,7 @@ import java.math.BigDecimal
 class HomeViewModel(
     private val mainRepository: MainRepository,
     private val expensesUseCase: ExpensesUseCase,
+    private val incomeUseCase: IncomeUseCase,
     private val isDesktop: Boolean,
     private val clock: Clock = Clock.System,
     private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
@@ -66,12 +69,21 @@ class HomeViewModel(
                     monthYears = Period.AllTime.toMonthYears(now),
                 ),
                 expensesUseCase(listOf(Period.ThisMonth, Period.ThisYear, Period.PreviousMonth)),
+                incomeUseCase(listOf(Period.ThisMonth, Period.ThisYear, Period.PreviousMonth)),
                 isRefreshing,
-            ) { currentBalances, netWorthReport, savingsRatesReport, expenses, isRefreshing ->
+            ) {
+                    currentBalances,
+                    netWorthReport,
+                    savingsRatesReport,
+                    expenses,
+                    incomes,
+                    isRefreshing,
+                ->
                 HomeViewState(
                     expandableCardGroups =
                         getSavingsRates(savingsRatesReport)
                             .plus(getExpenses(expenses))
+                            .plus(getIncomes(incomes))
                             .plus(getCurrentBalanceGroups(currentBalances)),
                     netWorths = getNetWorths(netWorthReport),
                     selectedNetWorthPeriod = selectedNetWorthPeriod,
@@ -125,6 +137,27 @@ class HomeViewModel(
                         HomeViewState.ExpandableCardGroup.Child(
                             title = "Last month",
                             value = expenses.getOrThrow(Period.PreviousMonth).format(),
+                        ),
+                    ),
+            ),
+        )
+    }
+
+    private fun getIncomes(incomes: Map<Period, BigDecimal>): List<HomeViewState.ExpandableCardGroup> {
+        return listOf(
+            HomeViewState.ExpandableCardGroup(
+                name = "Salary this year",
+                value = incomes.getOrThrow(Period.ThisYear).format(),
+                isValuePositive = true,
+                children =
+                    listOf(
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "This month",
+                            value = incomes.getOrThrow(Period.ThisMonth).format(),
+                        ),
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "Last month",
+                            value = incomes.getOrThrow(Period.PreviousMonth).format(),
                         ),
                     ),
             ),
@@ -300,7 +333,6 @@ class HomeViewModel(
             "Cash" -> true
             "Retirement" -> true
             "Credit Cards" -> false
-            "Salary" -> true
             "Taxes" -> false
             else -> false
         }

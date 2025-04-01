@@ -12,23 +12,23 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import java.math.BigDecimal
 
-class ExpensesUseCase(
+class IncomeUseCase(
     private val mainRepository: MainRepository,
     private val clock: Clock = Clock.System,
     private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ) {
     operator fun invoke(forPeriods: List<Period>): Flow<Map<Period, BigDecimal>> {
         return mainRepository.getReport(
-            reportName = ReportNames.AfterDeductionsExpenses.name,
+            reportName = ReportNames.IncomeWithoutGains.name,
             monthYears = Period.AllTime.toMonthYears(MonthYear.now(clock, timeZone)),
         ).map { report ->
             if (report == null) {
-                logI(TAG) { "AfterDeductionsExpenses report is null" }
+                logI(TAG) { "IncomeWithoutGains report is null" }
                 return@map emptyMap()
             }
-            val expenses = report.accounts.firstOrNull()?.monthTotals
-            if (expenses == null) {
-                logI(TAG) { "expenses account is null" }
+            val incomes = report.accounts.firstOrNull()?.monthTotals
+            if (incomes == null) {
+                logI(TAG) { "income account is null" }
                 return@map emptyMap()
             }
             forPeriods.map { period ->
@@ -36,19 +36,21 @@ class ExpensesUseCase(
                 val totals =
                     when (period) {
                         Period.ThisMonth -> {
-                            expenses
+                            incomes
                                 .filterKeys { monthYear ->
                                     monthYear == currentMonthYear
                                 }
                         }
 
                         Period.ThisYear -> {
-                            expenses
-                                .filterKeys { (_, year) -> year == currentMonthYear.year }
+                            incomes
+                                .filterKeys { (_, year) ->
+                                    year == currentMonthYear.year
+                                }
                         }
 
                         Period.PreviousMonth -> {
-                            expenses
+                            incomes
                                 .filterKeys { monthYear ->
                                     monthYear == currentMonthYear.previous()
                                 }
@@ -64,6 +66,6 @@ class ExpensesUseCase(
     }
 
     companion object {
-        private const val TAG = "ExpensesUseCases"
+        private const val TAG = "IncomeUseCases"
     }
 }
