@@ -4,7 +4,7 @@ import com.ramitsuri.expensereports.log.logI
 import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.model.Period
 import com.ramitsuri.expensereports.model.ReportNames
-import com.ramitsuri.expensereports.model.sum
+import com.ramitsuri.expensereports.model.sumPeriod
 import com.ramitsuri.expensereports.repository.MainRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -12,6 +12,10 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import java.math.BigDecimal
 
+/**
+ * Income here is salary plus income from other means like rewards, which is not the case for income
+ * in savings rate use case.
+ */
 class IncomeUseCase(
     private val mainRepository: MainRepository,
     private val clock: Clock = Clock.System,
@@ -32,35 +36,9 @@ class IncomeUseCase(
                 return@map emptyMap()
             }
             forPeriods.map { period ->
-                val currentMonthYear = MonthYear.now(clock, timeZone)
-                val totals =
-                    when (period) {
-                        Period.ThisMonth -> {
-                            incomes
-                                .filterKeys { monthYear ->
-                                    monthYear == currentMonthYear
-                                }
-                        }
-
-                        Period.ThisYear -> {
-                            incomes
-                                .filterKeys { (_, year) ->
-                                    year == currentMonthYear.year
-                                }
-                        }
-
-                        Period.PreviousMonth -> {
-                            incomes
-                                .filterKeys { monthYear ->
-                                    monthYear == currentMonthYear.previous()
-                                }
-                        }
-
-                        else -> {
-                            error("Not implemented")
-                        }
-                    }
-                period to totals.sum()
+                val now = MonthYear.now(clock, timeZone)
+                val totals = incomes.sumPeriod(period, now)
+                period to totals
             }.associate { it }
         }
     }

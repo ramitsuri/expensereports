@@ -16,6 +16,7 @@ import com.ramitsuri.expensereports.ui.home.HomeViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
 import com.ramitsuri.expensereports.usecase.ExpensesUseCase
 import com.ramitsuri.expensereports.usecase.IncomeUseCase
+import com.ramitsuri.expensereports.usecase.SavingsRateUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -151,9 +152,16 @@ internal val coreModule =
             )
         }
 
+        factory<SavingsRateUseCase> {
+            SavingsRateUseCase(
+                mainRepository = get<MainRepository>(),
+            )
+        }
+
         viewModel<HomeViewModel> {
             HomeViewModel(
                 mainRepository = get<MainRepository>(),
+                savingsRateUseCase = get<SavingsRateUseCase>(),
                 expensesUseCase = get<ExpensesUseCase>(),
                 incomeUseCase = get<IncomeUseCase>(),
                 isDesktop = get<Boolean>(qualifier = KoinQualifier.IS_DESKTOP),
