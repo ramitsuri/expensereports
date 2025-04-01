@@ -4,7 +4,7 @@ import com.ramitsuri.expensereports.log.logI
 import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.model.Period
 import com.ramitsuri.expensereports.model.ReportNames
-import com.ramitsuri.expensereports.model.sum
+import com.ramitsuri.expensereports.model.sumPeriod
 import com.ramitsuri.expensereports.repository.MainRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -32,38 +32,14 @@ class ExpensesUseCase(
                 return@map emptyMap()
             }
             forPeriods.map { period ->
-                val currentMonthYear = MonthYear.now(clock, timeZone)
-                val totals =
-                    when (period) {
-                        Period.ThisMonth -> {
-                            expenses
-                                .filterKeys { monthYear ->
-                                    monthYear == currentMonthYear
-                                }
-                        }
-
-                        Period.ThisYear -> {
-                            expenses
-                                .filterKeys { (_, year) -> year == currentMonthYear.year }
-                        }
-
-                        Period.PreviousMonth -> {
-                            expenses
-                                .filterKeys { monthYear ->
-                                    monthYear == currentMonthYear.previous()
-                                }
-                        }
-
-                        else -> {
-                            error("Not implemented")
-                        }
-                    }
-                period to totals.sum()
+                val now = MonthYear.now(clock, timeZone)
+                val totals = expenses.sumPeriod(period, now)
+                period to totals
             }.associate { it }
         }
     }
 
     companion object {
-        private const val TAG = "ExpensesUseCases"
+        private const val TAG = "ExpensesUseCase"
     }
 }
