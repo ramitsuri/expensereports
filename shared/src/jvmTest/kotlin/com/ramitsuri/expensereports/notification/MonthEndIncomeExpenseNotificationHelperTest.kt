@@ -106,7 +106,7 @@ class MonthEndIncomeExpenseNotificationHelperTest : BaseTest() {
             assertEquals(
                 NotificationInfo(
                     type = NotificationType.MonthEndIncomeExpenses,
-                    title = "Incomes & Expenses last month",
+                    title = "New Numbers Are In!",
                     body =
                         "You earned $25 and spent $10 last month. " +
                             "You saved 50% of the earned amount (rest were taxes).",
@@ -131,7 +131,7 @@ class MonthEndIncomeExpenseNotificationHelperTest : BaseTest() {
             assertEquals(
                 NotificationInfo(
                     type = NotificationType.MonthEndIncomeExpenses,
-                    title = "Incomes & Expenses last month",
+                    title = "New Numbers Are In!",
                     body =
                         "You earned $24 and spent $12 last month. " +
                             "You saved 40% of the earned amount (rest were taxes).",
