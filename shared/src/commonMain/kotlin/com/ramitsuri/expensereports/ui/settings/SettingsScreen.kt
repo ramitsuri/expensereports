@@ -102,19 +102,17 @@ fun SettingsScreen(
             }
         }
     }
-    if (showUrlDialog) {
-        BaseUrlDialog(
-            show = showUrlDialog,
-            url = "",
-            onUrlSet = {
-                showUrlDialog = false
-                onUrlSet(it)
-            },
-            onDismiss = {
-                showUrlDialog = false
-            },
-        )
-    }
+    BaseUrlDialog(
+        show = showUrlDialog,
+        url = viewState.url,
+        onUrlSet = {
+            showUrlDialog = false
+            onUrlSet(it)
+        },
+        onDismiss = {
+            showUrlDialog = false
+        },
+    )
 }
 
 @Composable
@@ -200,7 +198,7 @@ private fun BaseUrlDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var urlText by remember { mutableStateOf(url) }
+    var urlText by remember(url) { mutableStateOf(url) }
 
     if (show) {
         Dialog(onDismissRequest = { }) {
