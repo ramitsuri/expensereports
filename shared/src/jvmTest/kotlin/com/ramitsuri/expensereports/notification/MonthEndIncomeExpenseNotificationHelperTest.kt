@@ -109,7 +109,7 @@ class MonthEndIncomeExpenseNotificationHelperTest : BaseTest() {
                     title = "Incomes & Expenses last month",
                     body =
                         "You earned $25 and spent $10 last month. " +
-                            "You saved 50% of the earned amount.",
+                            "You saved 50% of the earned amount (rest were taxes).",
                 ),
                 notificationHandler.shownNotification,
             )
@@ -134,7 +134,7 @@ class MonthEndIncomeExpenseNotificationHelperTest : BaseTest() {
                     title = "Incomes & Expenses last month",
                     body =
                         "You earned $24 and spent $12 last month. " +
-                            "You saved 40% of the earned amount.",
+                            "You saved 40% of the earned amount (rest were taxes).",
                 ),
                 notificationHandler.shownNotification,
             )
