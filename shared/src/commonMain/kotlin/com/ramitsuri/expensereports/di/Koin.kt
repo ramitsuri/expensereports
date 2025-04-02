@@ -8,6 +8,8 @@ import com.ramitsuri.expensereports.database.dao.TransactionsDao
 import com.ramitsuri.expensereports.log.logI
 import com.ramitsuri.expensereports.network.api.Api
 import com.ramitsuri.expensereports.network.api.impl.ApiImpl
+import com.ramitsuri.expensereports.notification.MonthEndIncomeExpenseNotificationHelper
+import com.ramitsuri.expensereports.notification.NotificationHandler
 import com.ramitsuri.expensereports.repository.MainRepository
 import com.ramitsuri.expensereports.settings.DataStoreKeyValueStore
 import com.ramitsuri.expensereports.settings.Settings
@@ -155,6 +157,14 @@ internal val coreModule =
         factory<SavingsRateUseCase> {
             SavingsRateUseCase(
                 mainRepository = get<MainRepository>(),
+            )
+        }
+
+        factory<MonthEndIncomeExpenseNotificationHelper> {
+            MonthEndIncomeExpenseNotificationHelper(
+                savingsRateUseCase = get<SavingsRateUseCase>(),
+                notificationHandler = get<NotificationHandler>(),
+                settings = get<Settings>(),
             )
         }
 

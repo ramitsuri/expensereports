@@ -8,6 +8,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.material.color.DynamicColors
 import com.ramitsuri.expensereports.android.work.DataDownloadWorker
 import com.ramitsuri.expensereports.initSdk
+import com.ramitsuri.expensereports.notification.ShowNotificationWorker
 import org.koin.core.component.KoinComponent
 
 class MainApplication : Application(), LifecycleEventObserver, KoinComponent {
@@ -36,9 +37,7 @@ class MainApplication : Application(), LifecycleEventObserver, KoinComponent {
     }
 
     private fun enqueueWorkers() {
-        if (BuildConfig.DEBUG) {
-            return
-        }
         DataDownloadWorker.enqueuePeriodic(this)
+        ShowNotificationWorker.enqueue(this)
     }
 }

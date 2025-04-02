@@ -44,7 +44,7 @@ fun BigDecimal.formatPercent(locale: Locale = Locale.US) =
         }
         .plus("%")
 
-fun BigDecimal.div(divisor: BigDecimal): BigDecimal =
+fun BigDecimal.divideForCalculation(divisor: BigDecimal): BigDecimal =
     this.divide(
         divisor,
         10,
