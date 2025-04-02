@@ -8,12 +8,19 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Duration
 
 fun LocalDateTime.minus(period: DateTimePeriod): LocalDateTime {
     val timeZone = TimeZone.UTC
     return toInstant(timeZone)
         .minus(period, timeZone)
         .toLocalDateTime(timeZone)
+}
+
+fun LocalDateTime.minus(other: LocalDateTime): Duration {
+    val timeZone = TimeZone.UTC
+    return toInstant(timeZone)
+        .minus(other.toInstant(timeZone))
 }
 
 fun Clock.nowLocal(timeZone: TimeZone = TimeZone.currentSystemDefault()): LocalDateTime =

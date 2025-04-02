@@ -54,4 +54,7 @@
     <string name="settings_last_fetch_time">Last fetched</string>
     <string name="settings_last_full_fetch_time">Last fetched everything</string>
     <string name="settings_fetch_never">Never</string>
+
+    <string name="income_expense_notification_title">Incomes &amp; Expenses last month</string>
+    <string name="income_expense_notification_body">You earned %1$s and spent %2$s last month. You saved %3$s of the earned amount.</string>
 </resources>

@@ -110,5 +110,22 @@ class Settings internal constructor(
         keyValueStore.putString(Key.BASE_URL, baseUrl)
     }
 
+    suspend fun getLastMonthEndIncomeExpensesNotification(): Instant? {
+        return keyValueStore
+            .getString(Key.LAST_MONTH_END_INCOME_EXPENSES_NOTIFICATION, null)
+            .let {
+                if (it == null) {
+                    null
+                } else {
+                    Instant.parse(it)
+                }
+            }
+    }
+
+    suspend fun setLastMonthEndIncomeExpensesNotification(time: Instant) {
+        keyValueStore
+            .putString(Key.LAST_MONTH_END_INCOME_EXPENSES_NOTIFICATION, time.toString())
+    }
+
     private val distantPast = Instant.parse("2000-01-01T12:00:00Z")
 }

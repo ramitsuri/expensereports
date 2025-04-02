@@ -6,6 +6,7 @@ import com.ramitsuri.expensereports.model.Period
 import com.ramitsuri.expensereports.model.ReportNames
 import com.ramitsuri.expensereports.model.sumPeriod
 import com.ramitsuri.expensereports.repository.MainRepository
+import com.ramitsuri.expensereports.utils.divideForCalculation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
@@ -57,7 +58,7 @@ class SavingsRateUseCase(
                     return BigDecimal.ZERO
                 }
                 return savings
-                    .div(afterTaxIncome)
+                    .divideForCalculation(afterTaxIncome)
             }
     }
 
