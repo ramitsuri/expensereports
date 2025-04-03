@@ -33,8 +33,8 @@ class HomeViewModel(
     private val expensesUseCase: ExpensesUseCase,
     private val incomeUseCase: IncomeUseCase,
     private val isDesktop: Boolean,
-    private val clock: Clock = Clock.System,
-    private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    private val clock: Clock,
+    private val timeZone: TimeZone,
 ) : ViewModel() {
     private val selectedNetWorthPeriod: MutableStateFlow<Period> =
         MutableStateFlow(Period.AllTime)

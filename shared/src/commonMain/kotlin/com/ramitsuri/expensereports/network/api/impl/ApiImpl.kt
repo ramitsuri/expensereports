@@ -20,8 +20,8 @@ import kotlinx.datetime.TimeZone
 internal class ApiImpl(
     private val httpClient: HttpClient,
     private val ioDispatcher: CoroutineDispatcher,
-    private val clock: Clock = Clock.System,
-    private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    private val clock: Clock,
+    private val timeZone: TimeZone,
 ) : Api {
     override suspend fun getTransactions(
         baseUrl: String,

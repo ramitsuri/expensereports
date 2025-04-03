@@ -4,13 +4,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.ramitsuri.expensereports.database.AppDatabase
 import com.ramitsuri.expensereports.di.KoinQualifier
-import com.ramitsuri.expensereports.log.logI
-import com.ramitsuri.expensereports.notification.NotificationHandler
-import com.ramitsuri.expensereports.notification.NotificationInfo
-import com.ramitsuri.expensereports.notification.NotificationType
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.java.Java
+import kotlinx.datetime.TimeZone
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import org.koin.dsl.module
@@ -38,19 +35,15 @@ val testModule =
             true
         }
 
-        single<NotificationHandler> {
-            object : NotificationHandler {
-                override fun registerTypes(types: List<NotificationType>) {
-                    logI("TestNotificationHandler") {
-                        "Registering notifications $types"
-                    }
-                }
+        factory<TestNotificationHandler> {
+            TestNotificationHandler()
+        }
 
-                override fun showNotification(notificationInfo: NotificationInfo) {
-                    logI("TestNotificationHandler") {
-                        "Showing notification $notificationInfo"
-                    }
-                }
-            }
+        factory<TestClock> {
+            TestClock()
+        }
+
+        factory<TimeZone> {
+            TimeZone.of("America/New_York")
         }
     }

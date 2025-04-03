@@ -4,20 +4,21 @@ import com.ramitsuri.expensereports.database.dao.ReportsDao
 import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.model.Report
 import com.ramitsuri.expensereports.model.ReportNames
+import com.ramitsuri.expensereports.repository.MainRepository
 import com.ramitsuri.expensereports.settings.Settings
 import com.ramitsuri.expensereports.testutils.BaseTest
+import com.ramitsuri.expensereports.testutils.TestClock
+import com.ramitsuri.expensereports.testutils.TestNotificationHandler
 import com.ramitsuri.expensereports.usecase.SavingsRateUseCase
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import org.junit.Test
 import org.koin.core.component.get
 import org.koin.core.component.inject
+import org.koin.test.mock.declare
 import java.math.BigDecimal
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -27,10 +28,9 @@ class MonthEndIncomeExpenseNotificationHelperTest : BaseTest() {
     private val settings by inject<Settings>()
     private val reportDao by inject<ReportsDao>()
     private val lastMonth = MonthYear(Month.JANUARY, 2025)
-    private val timeZone = TimeZone.of("America/Los_Angeles")
-    private lateinit var savingsRateUseCase: SavingsRateUseCase
-    private lateinit var clock: TestClock
-    private lateinit var notificationHandler: TestNotificationHandler
+    private val clock by inject<TestClock>()
+    private val notificationHandler by inject<TestNotificationHandler>()
+    private lateinit var timeZone: TimeZone
     private lateinit var helper: MonthEndIncomeExpenseNotificationHelper
 
     @Test
@@ -141,11 +141,24 @@ class MonthEndIncomeExpenseNotificationHelperTest : BaseTest() {
         }
 
     private fun initHelper() {
-        clock = TestClock(timeZone)
-        notificationHandler = TestNotificationHandler()
-        savingsRateUseCase =
+        declare<TimeZone> {
+            TimeZone.of("America/Los_Angeles")
+        }
+        timeZone = get<TimeZone>()
+        clock.timeZone = timeZone
+        val mainRepository =
+            MainRepository(
+                api = get(),
+                transactionsDao = get(),
+                currentBalancesDao = get(),
+                reportsDao = reportDao,
+                settings = get(),
+                clock = clock,
+                timeZone = timeZone,
+            )
+        val savingsRateUseCase =
             SavingsRateUseCase(
-                mainRepository = get(),
+                mainRepository = mainRepository,
                 clock = clock,
                 timeZone = timeZone,
             )
@@ -162,26 +175,6 @@ class MonthEndIncomeExpenseNotificationHelperTest : BaseTest() {
     private suspend fun setLastShownTime(localDateTime: String) {
         val instant = LocalDateTime.parse(localDateTime).toInstant(timeZone)
         settings.setLastMonthEndIncomeExpensesNotification(instant)
-    }
-
-    private class TestClock(val timeZone: TimeZone) : Clock {
-        var nowLocal = Instant.DISTANT_PAST.toLocalDateTime(timeZone).toString()
-
-        override fun now(): Instant {
-            return LocalDateTime.parse(nowLocal).toInstant(timeZone)
-        }
-    }
-
-    private class TestNotificationHandler : NotificationHandler {
-        var shownNotification: NotificationInfo? = null
-
-        override fun showNotification(notificationInfo: NotificationInfo) {
-            shownNotification = notificationInfo
-        }
-
-        override fun registerTypes(types: List<NotificationType>) {
-            println("Registered types")
-        }
     }
 
     private suspend fun insertSavingsRateReportForLastMonth(

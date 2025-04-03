@@ -28,6 +28,8 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
 import okio.Path
 import org.koin.core.KoinApplication
@@ -105,6 +107,8 @@ internal val coreModule =
             ApiImpl(
                 httpClient = get<HttpClient>(),
                 ioDispatcher = get<CoroutineDispatcher>(qualifier = KoinQualifier.IO_DISPATCHER),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
             )
         }
 
@@ -115,6 +119,8 @@ internal val coreModule =
                 currentBalancesDao = get<CurrentBalancesDao>(),
                 api = get<Api>(),
                 settings = get<Settings>(),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
             )
         }
 
@@ -145,18 +151,24 @@ internal val coreModule =
         factory<ExpensesUseCase> {
             ExpensesUseCase(
                 mainRepository = get<MainRepository>(),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
             )
         }
 
         factory<IncomeUseCase> {
             IncomeUseCase(
                 mainRepository = get<MainRepository>(),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
             )
         }
 
         factory<SavingsRateUseCase> {
             SavingsRateUseCase(
                 mainRepository = get<MainRepository>(),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
             )
         }
 
@@ -165,7 +177,17 @@ internal val coreModule =
                 savingsRateUseCase = get<SavingsRateUseCase>(),
                 notificationHandler = get<NotificationHandler>(),
                 settings = get<Settings>(),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
             )
+        }
+
+        factory<Clock> {
+            Clock.System
+        }
+
+        factory<TimeZone> {
+            TimeZone.currentSystemDefault()
         }
 
         viewModel<HomeViewModel> {
@@ -175,6 +197,8 @@ internal val coreModule =
                 expensesUseCase = get<ExpensesUseCase>(),
                 incomeUseCase = get<IncomeUseCase>(),
                 isDesktop = get<Boolean>(qualifier = KoinQualifier.IS_DESKTOP),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
             )
         }
 
