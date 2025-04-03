@@ -21,8 +21,8 @@ class MonthEndIncomeExpenseNotificationHelper(
     private val savingsRateUseCase: SavingsRateUseCase,
     private val notificationHandler: NotificationHandler,
     private val settings: Settings,
-    private val clock: Clock = Clock.System,
-    private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    private val clock: Clock,
+    private val timeZone: TimeZone,
 ) {
     suspend fun show() {
         if (shownThisMonthAlready()) {

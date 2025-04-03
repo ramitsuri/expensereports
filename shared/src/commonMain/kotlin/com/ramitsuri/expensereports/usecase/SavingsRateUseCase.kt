@@ -19,8 +19,8 @@ import java.math.BigDecimal
  */
 class SavingsRateUseCase(
     private val mainRepository: MainRepository,
-    private val clock: Clock = Clock.System,
-    private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    private val clock: Clock,
+    private val timeZone: TimeZone,
 ) {
     operator fun invoke(forPeriods: List<Period>): Flow<Map<Period, SavingsRate>> {
         return mainRepository.getReport(
