@@ -131,13 +131,13 @@ class HomeViewModel(
         }
         return listOf(
             HomeViewState.ExpandableCardGroup(
-                name = "Expenses this month",
+                name = "Expenses MTD",
                 value = expenses.getOrThrow(Period.ThisMonth).format(),
                 isValuePositive = false,
                 children =
                     listOf(
                         HomeViewState.ExpandableCardGroup.Child(
-                            title = "This year",
+                            title = "YTD",
                             value = expenses.getOrThrow(Period.ThisYear).format(),
                         ),
                         HomeViewState.ExpandableCardGroup.Child(
@@ -155,18 +155,18 @@ class HomeViewModel(
         }
         return listOf(
             HomeViewState.ExpandableCardGroup(
-                name = "Salary this year",
-                value = incomes.getOrThrow(Period.ThisYear).format(),
+                name = "Salary MTD",
+                value = incomes.getOrThrow(Period.ThisMonth).format(),
                 isValuePositive = true,
                 children =
                     listOf(
                         HomeViewState.ExpandableCardGroup.Child(
-                            title = "This month",
-                            value = incomes.getOrThrow(Period.ThisMonth).format(),
-                        ),
-                        HomeViewState.ExpandableCardGroup.Child(
                             title = "Last month",
                             value = incomes.getOrThrow(Period.PreviousMonth).format(),
+                        ),
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "YTD",
+                            value = incomes.getOrThrow(Period.ThisYear).format(),
                         ),
                     ),
             ),
@@ -190,13 +190,13 @@ class HomeViewModel(
 
         return listOf(
             HomeViewState.ExpandableCardGroup(
-                name = "Savings this year",
+                name = "Savings YTD",
                 value = savingsRateThisYear.formatPercent(),
                 isValuePositive = savingsRateThisYear >= BigDecimal("0.5"),
                 children =
                     listOf(
                         HomeViewState.ExpandableCardGroup.Child(
-                            title = "This month",
+                            title = "MTD",
                             value = savingsRateThisMonth.formatPercent(),
                         ),
                         HomeViewState.ExpandableCardGroup.Child(

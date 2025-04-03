@@ -444,15 +444,15 @@ private fun ExpandableCard(
 @Composable
 private fun getExpandableCardImage(name: String): ImageVector {
     return when (name) {
-        "Expenses this month" -> Icons.Outlined.ShoppingCart
-        "Savings this year" -> Icons.Outlined.Savings
+        "Expenses MTD" -> Icons.Outlined.ShoppingCart
+        "Savings YTD" -> Icons.Outlined.Savings
         "Travel" -> Icons.Outlined.BeachAccess
         "Cash" -> Icons.Outlined.AttachMoney
         "Retirement" -> Icons.Outlined.Elderly
         "Credit Cards" -> Icons.Outlined.CreditCard
 
         "Salary",
-        "Salary this year",
+        "Salary MTD",
         -> Icons.Outlined.Payments
 
         "Taxes" -> Icons.Outlined.AccountBalance
