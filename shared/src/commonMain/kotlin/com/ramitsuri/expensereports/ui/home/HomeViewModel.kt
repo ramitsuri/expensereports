@@ -87,6 +87,7 @@ class HomeViewModel(
                         getSavingsRates(savingsRates)
                             .plus(getExpenses(expenses))
                             .plus(getIncomes(incomes))
+                            .plus(getTaxes(savingsRates))
                             .plus(getCurrentBalanceGroups(currentBalances)),
                     netWorths = getNetWorths(netWorthReport),
                     selectedNetWorthPeriod = selectedNetWorthPeriod,
@@ -173,11 +174,34 @@ class HomeViewModel(
         )
     }
 
+    private fun getTaxes(
+        savingsRates: Map<Period, SavingsRateUseCase.SavingsRate>,
+    ): List<HomeViewState.ExpandableCardGroup> {
+        if (savingsRates.isEmpty()) {
+            return listOf()
+        }
+        return listOf(
+            HomeViewState.ExpandableCardGroup(
+                name = "Taxes YTD",
+                value = savingsRates.getValue(Period.ThisYear).taxes.format(),
+                isValuePositive = false,
+                children =
+                    listOf(
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "MTD",
+                            value = savingsRates.getValue(Period.ThisMonth).taxes.format(),
+                        ),
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "Last month",
+                            value = savingsRates.getValue(Period.PreviousMonth).taxes.format(),
+                        ),
+                    ),
+            ),
+        )
+    }
+
     private fun getSavingsRates(
-        savingsRates: Map<
-            Period,
-            SavingsRateUseCase.SavingsRate,
-            >,
+        savingsRates: Map<Period, SavingsRateUseCase.SavingsRate>,
     ): List<HomeViewState.ExpandableCardGroup> {
         if (savingsRates.isEmpty()) {
             return listOf()
