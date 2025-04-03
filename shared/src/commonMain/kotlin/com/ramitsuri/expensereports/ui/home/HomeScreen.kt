@@ -455,7 +455,7 @@ private fun getExpandableCardImage(name: String): ImageVector {
         "Salary MTD",
         -> Icons.Outlined.Payments
 
-        "Taxes" -> Icons.Outlined.AccountBalance
+        "Taxes YTD" -> Icons.Outlined.AccountBalance
         else -> Icons.Outlined.BeachAccess
     }
 }
