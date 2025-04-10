@@ -3,6 +3,7 @@ package com.ramitsuri.expensereports.network.api
 import com.ramitsuri.expensereports.model.CurrentBalance
 import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.model.Report
+import com.ramitsuri.expensereports.model.RunInfo
 import com.ramitsuri.expensereports.model.Transaction
 
 internal interface Api {
@@ -20,4 +21,6 @@ internal interface Api {
         baseUrl: String,
         since: MonthYear,
     ): Result<List<Report>>
+
+    suspend fun getRunInfo(baseUrl: String): Result<RunInfo>
 }

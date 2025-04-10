@@ -1,12 +1,15 @@
 package com.ramitsuri.expensereports.settings
 
+import com.ramitsuri.expensereports.model.RunInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
+import kotlinx.serialization.json.Json
 
 class Settings internal constructor(
     private val keyValueStore: KeyValueStore,
+    private val json: Json,
 ) {
     suspend fun getLastTxFetchTime(): Instant {
         return keyValueStore
@@ -125,6 +128,23 @@ class Settings internal constructor(
     suspend fun setLastMonthEndIncomeExpensesNotification(time: Instant) {
         keyValueStore
             .putString(Key.LAST_MONTH_END_INCOME_EXPENSES_NOTIFICATION, time.toString())
+    }
+
+    suspend fun setRunInfo(runInfo: RunInfo) {
+        keyValueStore
+            .putString(Key.RUN_INFO, json.encodeToString(RunInfo.serializer(), runInfo))
+    }
+
+    fun getRunInfoFlow(): Flow<RunInfo?> {
+        return keyValueStore
+            .getStringFlow(Key.RUN_INFO, null)
+            .map {
+                if (it == null) {
+                    null
+                } else {
+                    json.decodeFromString(RunInfo.serializer(), it)
+                }
+            }
     }
 
     private val distantPast = Instant.parse("2000-01-01T12:00:00Z")
