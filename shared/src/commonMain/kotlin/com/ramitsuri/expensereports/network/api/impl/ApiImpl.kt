@@ -3,6 +3,7 @@ package com.ramitsuri.expensereports.network.api.impl
 import com.ramitsuri.expensereports.model.CurrentBalance
 import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.model.Report
+import com.ramitsuri.expensereports.model.RunInfo
 import com.ramitsuri.expensereports.model.Transaction
 import com.ramitsuri.expensereports.model.toList
 import com.ramitsuri.expensereports.network.NotFoundException
@@ -109,6 +110,12 @@ internal class ApiImpl(
                     Result.failure(errorsOtherThanNotFound.firstNotNullOf { it.exceptionOrNull() })
                 }
         }
+
+    override suspend fun getRunInfo(baseUrl: String): Result<RunInfo> {
+        return apiRequest(ioDispatcher) {
+            httpClient.get("$baseUrl/info.json")
+        }
+    }
 
     private suspend fun getTransactionsForMonthYear(
         baseUrl: String,

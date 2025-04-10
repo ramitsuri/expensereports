@@ -38,6 +38,7 @@ class MainRepository internal constructor(
             refreshTransactions(fetchFromStart),
             refreshCurrentBalances(fetchFromStart),
             refreshReports(fetchFromStart),
+            refreshRunInfo(),
         ).let { results ->
             if (fetchFromStart && results.all { successful -> successful }) {
                 settings.setLastFullFetchTime(clock.now())
@@ -105,6 +106,17 @@ class MainRepository internal constructor(
             }
             reportsDao.insert(it)
             settings.setLastReportsFetchTime(clock.now())
+            return true
+        }
+        return false
+    }
+
+    private suspend fun refreshRunInfo(): Boolean {
+        val baseUrl = settings.getBaseUrl()
+        api.getRunInfo(
+            baseUrl = baseUrl,
+        ).onSuccess {
+            settings.setRunInfo(it)
             return true
         }
         return false

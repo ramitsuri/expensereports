@@ -40,14 +40,19 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ramitsuri.expensereports.utils.friendlyDate
+import com.ramitsuri.expensereports.utils.fullLocalDateTime
 import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.cancel
 import expensereports.shared.generated.resources.ok
 import expensereports.shared.generated.resources.settings_fetch_never
-import expensereports.shared.generated.resources.settings_last_fetch_time
-import expensereports.shared.generated.resources.settings_last_full_fetch_time
+import expensereports.shared.generated.resources.settings_file_last_modified_time_format
+import expensereports.shared.generated.resources.settings_last_fetch_time_format
+import expensereports.shared.generated.resources.settings_last_full_fetch_time_format
+import expensereports.shared.generated.resources.settings_last_run_time_format
+import expensereports.shared.generated.resources.settings_times_title
 import expensereports.shared.generated.resources.settings_url
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,18 +92,7 @@ fun SettingsScreen(
                     onClick = { showUrlDialog = true },
                     showProgress = false,
                 )
-                SettingsItem(
-                    title = stringResource(Res.string.settings_last_fetch_time),
-                    subtitle = viewState.lastFetchTime.friendlyFetchDate(),
-                    onClick = { },
-                    showProgress = false,
-                )
-                SettingsItem(
-                    title = stringResource(Res.string.settings_last_full_fetch_time),
-                    subtitle = viewState.lastFullFetchTime.friendlyFetchDate(),
-                    onClick = { },
-                    showProgress = false,
-                )
+                TimesItem(viewState.times)
             }
         }
     }
@@ -116,11 +110,75 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun Instant?.friendlyFetchDate(): String {
+private fun TimesItem(
+    times: SettingsViewState.Times,
+    modifier: Modifier = Modifier,
+) {
+    var friendly by remember { mutableStateOf(true) }
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable(onClick = { friendly = !friendly })
+                .defaultMinSize(minHeight = 64.dp)
+                .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(Res.string.settings_times_title),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(4.dp),
+        )
+        Text(
+            text =
+                stringResource(
+                    Res.string.settings_last_fetch_time_format,
+                    times.lastFetchTime.format(friendly = friendly),
+                ),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+        Text(
+            text =
+                stringResource(
+                    Res.string.settings_last_full_fetch_time_format,
+                    times.lastFullFetchTime.format(friendly = friendly),
+                ),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+        Text(
+            text =
+                stringResource(
+                    Res.string.settings_file_last_modified_time_format,
+                    times.fileLastModifiedTime.format(friendly = friendly),
+                ),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+        Text(
+            text =
+                stringResource(
+                    Res.string.settings_last_run_time_format,
+                    times.lastRunTime.format(friendly = friendly),
+                ),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun Instant?.format(
+    friendly: Boolean,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String {
     return if (this == null) {
         stringResource(Res.string.settings_fetch_never)
-    } else {
+    } else if (friendly) {
         friendlyDate(this)
+    } else {
+        fullLocalDateTime(this, timeZone)
     }
 }
 

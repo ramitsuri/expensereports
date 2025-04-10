@@ -74,6 +74,29 @@ fun friendlyDate(
 }
 
 @Composable
+fun fullLocalDateTime(
+    dateTime: Instant,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String {
+    val monthNames = monthNames()
+    val format =
+        LocalDateTime.Format {
+            monthName(monthNames)
+            char(' ')
+            dayOfMonth()
+            char(',')
+            hour()
+            char(':')
+            minute()
+            char(':')
+            second()
+        }
+    return dateTime
+        .toLocalDateTime(timeZone)
+        .format(format)
+}
+
+@Composable
 private fun monthNames(useShortNames: Boolean = true): MonthNames {
     return MonthNames(
         if (useShortNames) {

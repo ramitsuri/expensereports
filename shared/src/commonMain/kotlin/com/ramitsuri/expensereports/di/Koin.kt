@@ -56,6 +56,7 @@ internal val coreModule =
             val dataStore = DataStoreKeyValueStore { get<Path>() }
             Settings(
                 keyValueStore = dataStore,
+                json = get<Json>(),
             )
         }
 
