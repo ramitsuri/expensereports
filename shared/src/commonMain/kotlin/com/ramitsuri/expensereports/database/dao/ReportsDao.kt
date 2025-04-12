@@ -27,7 +27,7 @@ internal abstract class ReportsDao {
                 return@map null
             }
             val accounts =
-                getReportAccounts(reportName).map { dbReportAccount ->
+                getReportAccounts(reportName).mapNotNull { dbReportAccount ->
                     val totals =
                         getReportAccountTotals(
                             reportName = reportName,
@@ -36,11 +36,15 @@ internal abstract class ReportsDao {
                         ).associate { dbReportAccountTotal ->
                             dbReportAccountTotal.monthYear to dbReportAccountTotal.total
                         }
-                    Report.Account(
-                        name = dbReportAccount.accountName,
-                        order = dbReportAccount.order,
-                        monthTotals = totals,
-                    )
+                    if (totals.isEmpty()) {
+                        null
+                    } else {
+                        Report.Account(
+                            name = dbReportAccount.accountName,
+                            order = dbReportAccount.order,
+                            monthTotals = totals,
+                        )
+                    }
                 }
             Report(
                 name = dbReport.name,

@@ -1,6 +1,7 @@
 package com.ramitsuri.expensereports.utils
 
 import androidx.compose.runtime.Composable
+import com.ramitsuri.expensereports.model.MonthYear
 import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.days_ago_format
 import expensereports.shared.generated.resources.hours_ago_format
@@ -12,12 +13,14 @@ import expensereports.shared.generated.resources.one_day_ago
 import expensereports.shared.generated.resources.one_hour_ago
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.getStringArray
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -73,6 +76,19 @@ fun friendlyDate(
         .format(format)
 }
 
+suspend fun MonthYear.formatted(): String {
+    val monthNames = monthNamesSuspend()
+    val format =
+        LocalDate.Format {
+            monthName(monthNames)
+            char(' ')
+            yearTwoDigits(2000)
+        }
+    return toLocalDateTime()
+        .date
+        .format(format)
+}
+
 @Composable
 private fun monthNames(useShortNames: Boolean = true): MonthNames {
     return MonthNames(
@@ -80,6 +96,16 @@ private fun monthNames(useShortNames: Boolean = true): MonthNames {
             stringArrayResource(Res.array.month_names_short)
         } else {
             stringArrayResource(Res.array.month_names_long)
+        },
+    )
+}
+
+private suspend fun monthNamesSuspend(useShortNames: Boolean = true): MonthNames {
+    return MonthNames(
+        if (useShortNames) {
+            getStringArray(Res.array.month_names_short)
+        } else {
+            getStringArray(Res.array.month_names_long)
         },
     )
 }
