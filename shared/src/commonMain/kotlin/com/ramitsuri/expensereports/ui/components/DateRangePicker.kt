@@ -4,6 +4,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -14,6 +15,7 @@ import androidx.compose.material3.DateRangePicker as AndroidDateRangePicker
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateRangePicker(
+    modifier: Modifier = Modifier,
     selectedStartDate: LocalDate?,
     selectedEndDate: LocalDate?,
     onSelectedDateChange: (LocalDate, LocalDate) -> Unit,
@@ -47,6 +49,7 @@ fun DateRangePicker(
         }
     }
     AndroidDateRangePicker(
+        modifier = modifier,
         state = state,
         title = null,
         headline = null,

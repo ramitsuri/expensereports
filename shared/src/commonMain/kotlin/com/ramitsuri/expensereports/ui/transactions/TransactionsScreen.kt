@@ -299,7 +299,9 @@ private fun Filter(
     var filterExpanded by remember { mutableStateOf(false) }
     AnimatedContent(filterExpanded) { expanded ->
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp).clickable(onClick = { filterExpanded = true }),
+            modifier =
+                Modifier.fillMaxWidth().padding(16.dp)
+                    .clickable(onClick = { filterExpanded = true }),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -383,6 +385,7 @@ private fun RowScope.ExpandedFilterContent(
             },
         )
         DateRangePicker(
+            modifier = Modifier.weight(1f),
             selectedStartDate = startDate,
             selectedEndDate = endDate,
             onSelectedDateChange = { start, end ->
@@ -390,19 +393,23 @@ private fun RowScope.ExpandedFilterContent(
                 endDate = end
             },
         )
-    }
-    Column {
-        IconButton(
-            onClick = onFilterCanceled,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
         ) {
-            Icon(Icons.Outlined.Clear, contentDescription = "apply")
-        }
-        IconButton(
-            onClick = {
-                onFilterApplied(text.text, startDate, endDate)
-            },
-        ) {
-            Icon(Icons.Outlined.Check, contentDescription = "apply")
+            IconButton(
+                onClick = onFilterCanceled,
+            ) {
+                Icon(Icons.Outlined.Clear, contentDescription = "apply")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(
+                onClick = {
+                    onFilterApplied(text.text, startDate, endDate)
+                },
+            ) {
+                Icon(Icons.Outlined.Check, contentDescription = "apply")
+            }
         }
     }
 }
