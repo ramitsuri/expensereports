@@ -16,6 +16,16 @@ internal interface TransactionsDao {
         end: LocalDate,
     ): Flow<List<Transaction>>
 
+    @Query(
+        "SELECT * FROM db_transaction WHERE description LIKE '%' || :description || '%' " +
+            "AND date BETWEEN :start AND :end AND date",
+    )
+    fun get(
+        description: String,
+        start: LocalDate,
+        end: LocalDate,
+    ): Flow<List<Transaction>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transactions: List<Transaction>)
 

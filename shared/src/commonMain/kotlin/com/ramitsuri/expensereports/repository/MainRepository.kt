@@ -49,12 +49,21 @@ class MainRepository internal constructor(
     }
 
     fun getTransactions(
+        description: String?,
         start: LocalDate,
         end: LocalDate,
-    ) = transactionsDao.get(
-        start = start,
-        end = end,
-    )
+    ) = if (description.isNullOrEmpty()) {
+        transactionsDao.get(
+            start = start,
+            end = end,
+        )
+    } else {
+        transactionsDao.get(
+            description = description,
+            start = start,
+            end = end,
+        )
+    }
 
     fun getCurrentBalances() = currentBalancesDao.get()
 

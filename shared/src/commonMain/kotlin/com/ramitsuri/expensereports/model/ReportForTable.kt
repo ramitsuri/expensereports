@@ -1,7 +1,7 @@
 package com.ramitsuri.expensereports.model
 
 import com.ramitsuri.expensereports.utils.format
-import com.ramitsuri.expensereports.utils.formatted
+import com.ramitsuri.expensereports.utils.formattedSuspend
 import java.math.BigDecimal
 
 data class ReportForTable(
@@ -32,7 +32,7 @@ data class ReportForTable(
 
             val headerRow =
                 sortedMonthYears
-                    .map { it.formatted() }
+                    .map { it.formattedSuspend() }
                     .let {
                         if (reportHasTotals) {
                             it.plus("Total")
