@@ -15,6 +15,11 @@ sealed interface Destination {
         override val deepLinkUri: String = DEEPLINK_BASE.plus("settings")
     }
 
+    @Serializable
+    data object Report : Destination {
+        override val deepLinkUri: String = DEEPLINK_BASE.plus("report")
+    }
+
     companion object {
         private const val DEEPLINK_BASE: String = "expense-reports://"
     }

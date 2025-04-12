@@ -17,6 +17,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.ramitsuri.expensereports.ui.home.HomeScreen
 import com.ramitsuri.expensereports.ui.home.HomeViewModel
+import com.ramitsuri.expensereports.ui.report.ReportScreen
+import com.ramitsuri.expensereports.ui.report.ReportViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsScreen
 import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
 import com.ramitsuri.expensereports.ui.theme.AppTheme
@@ -61,8 +63,9 @@ fun NavGraph(
                         viewState = viewState,
                         onNetWorthPeriodSelected = viewModel::onNetWorthPeriodSelected,
                         windowSize = windowSize,
+                        onReportsClick = { navController.navigate(Destination.Report) },
                         onSettingsClick = { navController.navigate(Destination.Settings) },
-                        onRefresh = viewModel::onRefresh,
+                        onRefresh = { navController.navigate(Destination.Report) },
                     )
                 }
 
@@ -73,6 +76,17 @@ fun NavGraph(
                         viewState = viewState,
                         onBack = { navController.navigateUp() },
                         onUrlSet = viewModel::setBaseUrl,
+                    )
+                }
+
+                composable<Destination.Report> {
+                    val viewModel = koinViewModel<ReportViewModel>()
+                    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+                    ReportScreen(
+                        viewState = viewState,
+                        onBack = { navController.navigateUp() },
+                        onPeriodSelected = viewModel::onPeriodSelected,
+                        onReportSelected = viewModel::onReportSelected,
                     )
                 }
             }

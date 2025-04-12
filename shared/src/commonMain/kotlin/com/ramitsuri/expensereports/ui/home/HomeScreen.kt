@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.BeachAccess
 import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Elderly
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Payments
@@ -79,6 +80,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.model.Period
+import com.ramitsuri.expensereports.model.formatted
 import com.ramitsuri.expensereports.ui.components.AnimationMode
 import com.ramitsuri.expensereports.ui.components.DividerProperties
 import com.ramitsuri.expensereports.ui.components.DrawStyle
@@ -94,12 +96,6 @@ import com.ramitsuri.expensereports.utils.formatRounded
 import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.month_names_short
 import expensereports.shared.generated.resources.net_worth
-import expensereports.shared.generated.resources.period_all
-import expensereports.shared.generated.resources.period_last_three_years
-import expensereports.shared.generated.resources.period_one_year
-import expensereports.shared.generated.resources.period_previous_month
-import expensereports.shared.generated.resources.period_this_month
-import expensereports.shared.generated.resources.period_this_year
 import expensereports.shared.generated.resources.value1_value2_formatted
 import expensereports.shared.generated.resources.value1_value2_new_line_formatted
 import kotlinx.coroutines.delay
@@ -113,6 +109,7 @@ fun HomeScreen(
     viewState: HomeViewState,
     windowSize: WindowSizeClass,
     onNetWorthPeriodSelected: (Period) -> Unit,
+    onReportsClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRefresh: () -> Unit,
 ) {
@@ -130,6 +127,7 @@ fun HomeScreen(
         Toolbar(
             scrollBehavior = scrollBehavior,
             refreshState = viewState.refreshState,
+            onReportsClick = onReportsClick,
             onSettingsClick = onSettingsClick,
             onRefresh = onRefresh,
         )
@@ -182,6 +180,7 @@ fun HomeScreen(
 private fun Toolbar(
     scrollBehavior: TopAppBarScrollBehavior,
     refreshState: HomeViewState.Refresh,
+    onReportsClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRefresh: () -> Unit,
 ) {
@@ -213,6 +212,18 @@ private fun Toolbar(
                         )
                     }
                 }
+            }
+            IconButton(
+                onClick = onReportsClick,
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .padding(4.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Description,
+                    contentDescription = "",
+                )
             }
             IconButton(
                 onClick = onSettingsClick,
@@ -487,17 +498,6 @@ private fun PeriodSelector(
         }
     }
 }
-
-@Composable
-private fun Period.formatted() =
-    when (this) {
-        is Period.ThisYear -> stringResource(Res.string.period_this_year)
-        is Period.OneYear -> stringResource(Res.string.period_one_year)
-        is Period.LastThreeYears -> stringResource(Res.string.period_last_three_years)
-        is Period.AllTime -> stringResource(Res.string.period_all)
-        is Period.ThisMonth -> stringResource(Res.string.period_this_month)
-        is Period.PreviousMonth -> stringResource(Res.string.period_previous_month)
-    }
 
 @Composable
 private fun HomeViewState.NetWorth.formatted(): String {

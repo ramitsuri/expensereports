@@ -38,4 +38,19 @@ sealed interface ReportNames {
     data object Savings : ReportNames {
         override val name: String = "Savings"
     }
+
+    companion object {
+        val all =
+            listOf(
+                NetWorth,
+                Income,
+                IncomeWithoutGains,
+                Expenses,
+                AfterDeductionsExpenses,
+                Assets,
+                Liabilities,
+                SavingsRate,
+                Savings,
+            )
+    }
 }

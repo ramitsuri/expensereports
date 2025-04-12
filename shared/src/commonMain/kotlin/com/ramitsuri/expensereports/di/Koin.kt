@@ -15,6 +15,7 @@ import com.ramitsuri.expensereports.settings.DataStoreKeyValueStore
 import com.ramitsuri.expensereports.settings.Settings
 import com.ramitsuri.expensereports.shared.BuildKonfig
 import com.ramitsuri.expensereports.ui.home.HomeViewModel
+import com.ramitsuri.expensereports.ui.report.ReportViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
 import com.ramitsuri.expensereports.usecase.ExpensesUseCase
 import com.ramitsuri.expensereports.usecase.IncomeUseCase
@@ -206,6 +207,14 @@ internal val coreModule =
         viewModel<SettingsViewModel> {
             SettingsViewModel(
                 settings = get<Settings>(),
+            )
+        }
+
+        viewModel<ReportViewModel> {
+            ReportViewModel(
+                mainRepository = get<MainRepository>(),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
             )
         }
     }

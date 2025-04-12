@@ -60,4 +60,7 @@
 
     <string name="income_expense_notification_title">New Numbers Are In!</string>
     <string name="income_expense_notification_body">You earned %1$s and spent %2$s last month. You saved %3$s of the earned amount (rest were taxes).</string>
+
+    <string name="report_error_title">Error</string>
+    <string name="report_error_body">Unable to load report</string>
 </resources>
