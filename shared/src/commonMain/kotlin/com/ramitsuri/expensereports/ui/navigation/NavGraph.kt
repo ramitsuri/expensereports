@@ -22,6 +22,8 @@ import com.ramitsuri.expensereports.ui.report.ReportViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsScreen
 import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
 import com.ramitsuri.expensereports.ui.theme.AppTheme
+import com.ramitsuri.expensereports.ui.transactions.TransactionsScreen
+import com.ramitsuri.expensereports.ui.transactions.TransactionsViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -64,6 +66,7 @@ fun NavGraph(
                         onNetWorthPeriodSelected = viewModel::onNetWorthPeriodSelected,
                         windowSize = windowSize,
                         onReportsClick = { navController.navigate(Destination.Report) },
+                        onTransactionsClick = { navController.navigate(Destination.Transactions) },
                         onSettingsClick = { navController.navigate(Destination.Settings) },
                         onRefresh = { navController.navigate(Destination.Report) },
                     )
@@ -87,6 +90,17 @@ fun NavGraph(
                         onBack = { navController.navigateUp() },
                         onPeriodSelected = viewModel::onPeriodSelected,
                         onReportSelected = viewModel::onReportSelected,
+                    )
+                }
+
+                composable<Destination.Transactions> {
+                    val viewModel = koinViewModel<TransactionsViewModel>()
+                    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+                    TransactionsScreen(
+                        viewState = viewState,
+                        windowSize = windowSize,
+                        onBack = { navController.navigateUp() },
+                        onFilterApplied = viewModel::onFilterApplied,
                     )
                 }
             }

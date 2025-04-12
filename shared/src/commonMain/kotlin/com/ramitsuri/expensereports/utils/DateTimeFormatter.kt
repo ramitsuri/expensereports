@@ -76,7 +76,7 @@ fun friendlyDate(
         .format(format)
 }
 
-suspend fun MonthYear.formatted(): String {
+suspend fun MonthYear.formattedSuspend(): String {
     val monthNames = monthNamesSuspend()
     val format =
         LocalDate.Format {
@@ -86,6 +86,22 @@ suspend fun MonthYear.formatted(): String {
         }
     return toLocalDateTime()
         .date
+        .format(format)
+}
+
+@Composable
+fun friendlyLocalDate(date: LocalDate): String {
+    val monthNames = monthNames()
+    val format =
+        LocalDate.Format {
+            monthName(monthNames)
+            char(' ')
+            dayOfMonth()
+            char(',')
+            char(' ')
+            year()
+        }
+    return date
         .format(format)
 }
 

@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.math.BigDecimal
 
 @Serializable
 @Entity(tableName = "db_transaction")
@@ -23,4 +24,7 @@ data class Transaction(
     @SerialName("description")
     @ColumnInfo(name = "description")
     val description: String,
-)
+) {
+    val total: BigDecimal
+        get() = splits.filter { it.amount < BigDecimal.ZERO }.sumOf { it.amount.abs() }
+}

@@ -17,6 +17,7 @@ import com.ramitsuri.expensereports.shared.BuildKonfig
 import com.ramitsuri.expensereports.ui.home.HomeViewModel
 import com.ramitsuri.expensereports.ui.report.ReportViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
+import com.ramitsuri.expensereports.ui.transactions.TransactionsViewModel
 import com.ramitsuri.expensereports.usecase.ExpensesUseCase
 import com.ramitsuri.expensereports.usecase.IncomeUseCase
 import com.ramitsuri.expensereports.usecase.SavingsRateUseCase
@@ -212,6 +213,14 @@ internal val coreModule =
 
         viewModel<ReportViewModel> {
             ReportViewModel(
+                mainRepository = get<MainRepository>(),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
+            )
+        }
+
+        viewModel<TransactionsViewModel> {
+            TransactionsViewModel(
                 mainRepository = get<MainRepository>(),
                 clock = get<Clock>(),
                 timeZone = get<TimeZone>(),

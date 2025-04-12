@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.BeachAccess
@@ -109,6 +110,7 @@ fun HomeScreen(
     viewState: HomeViewState,
     windowSize: WindowSizeClass,
     onNetWorthPeriodSelected: (Period) -> Unit,
+    onTransactionsClick: () -> Unit,
     onReportsClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRefresh: () -> Unit,
@@ -127,6 +129,7 @@ fun HomeScreen(
         Toolbar(
             scrollBehavior = scrollBehavior,
             refreshState = viewState.refreshState,
+            onTransactionsClick = onTransactionsClick,
             onReportsClick = onReportsClick,
             onSettingsClick = onSettingsClick,
             onRefresh = onRefresh,
@@ -180,6 +183,7 @@ fun HomeScreen(
 private fun Toolbar(
     scrollBehavior: TopAppBarScrollBehavior,
     refreshState: HomeViewState.Refresh,
+    onTransactionsClick: () -> Unit,
     onReportsClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRefresh: () -> Unit,
@@ -212,6 +216,18 @@ private fun Toolbar(
                         )
                     }
                 }
+            }
+            IconButton(
+                onClick = onTransactionsClick,
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .padding(4.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.List,
+                    contentDescription = "",
+                )
             }
             IconButton(
                 onClick = onReportsClick,
