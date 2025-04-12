@@ -68,7 +68,7 @@ fun NavGraph(
                         onReportsClick = { navController.navigate(Destination.Report) },
                         onTransactionsClick = { navController.navigate(Destination.Transactions) },
                         onSettingsClick = { navController.navigate(Destination.Settings) },
-                        onRefresh = { navController.navigate(Destination.Report) },
+                        onRefresh = viewModel::onRefresh,
                     )
                 }
 
