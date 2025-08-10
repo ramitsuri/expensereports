@@ -63,4 +63,13 @@
 
     <string name="report_error_title">Error</string>
     <string name="report_error_body">Unable to load report</string>
+
+    <string name="transactions_filter_from">From: %1$s</string>
+    <string name="transactions_filter_from_account">From Account</string>
+    <string name="transactions_filter_to">To: %1$s</string>
+    <string name="transactions_filter_to_account">To Account</string>
+    <string name="transactions_filter_amount_from_to">Amount: %1$s to %2$s</string>
+    <string name="transactions_filter_min_amount">Min Amount</string>
+    <string name="transactions_filter_max_amount">Max Amount</string>
+    <string name="transaction_description">Description</string>
 </resources>

@@ -7,12 +7,15 @@ import com.ramitsuri.expensereports.log.logI
 import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.network.api.Api
 import com.ramitsuri.expensereports.settings.Settings
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.math.BigDecimal
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
@@ -52,6 +55,10 @@ class MainRepository internal constructor(
         description: String?,
         start: LocalDate,
         end: LocalDate,
+        fromAccount: String?,
+        toAccount: String?,
+        minAmount: BigDecimal?,
+        maxAmount: BigDecimal?,
     ) = if (description.isNullOrEmpty()) {
         transactionsDao.get(
             start = start,
@@ -63,6 +70,22 @@ class MainRepository internal constructor(
             start = start,
             end = end,
         )
+    }.map { transactions ->
+        transactions.filter { transaction ->
+            val fromAccountMatch =
+                fromAccount.isNullOrEmpty() ||
+                    transaction.fromSplits().any { it.accountName.contains(fromAccount, ignoreCase = true) }
+            val toAccountMatch =
+                toAccount.isNullOrEmpty() ||
+                    transaction.toSplits().any { it.accountName.contains(toAccount, ignoreCase = true) }
+
+            val totalAmount = transaction.fromSplits().sumOf { it.amount.abs() }
+
+            val minAmountMatch = minAmount == null || totalAmount >= minAmount
+            val maxAmountMatch = maxAmount == null || totalAmount <= maxAmount
+
+            fromAccountMatch && toAccountMatch && minAmountMatch && maxAmountMatch
+        }
     }
 
     fun getCurrentBalances() = currentBalancesDao.get()
@@ -71,6 +94,16 @@ class MainRepository internal constructor(
         reportName: String,
         monthYears: List<MonthYear>,
     ) = reportsDao.get(reportName, monthYears)
+
+    fun getAllAccountNames(): Flow<List<String>> {
+        return transactionsDao.getAll().map { transactions ->
+            transactions
+                .flatMap { it.splits }
+                .map { it.accountName }
+                .distinct()
+                .sorted()
+        }
+    }
 
     private suspend fun refreshTransactions(fetchFromStart: Boolean): Boolean {
         val baseUrl = settings.getBaseUrl()

@@ -101,6 +101,8 @@ fun NavGraph(
                         windowSize = windowSize,
                         onBack = { navController.navigateUp() },
                         onFilterApplied = viewModel::onFilterApplied,
+                        onFromAccountTextUpdated = viewModel::onFromAccountTextUpdated,
+                        onToAccountTextUpdated = viewModel::onToAccountTextUpdated,
                     )
                 }
             }
