@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.grid.GridCells.Fixed
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
@@ -36,10 +37,14 @@ import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -64,27 +69,51 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ramitsuri.expensereports.model.Transaction
 import com.ramitsuri.expensereports.model.TransactionSplit
-import com.ramitsuri.expensereports.ui.components.DateRangePicker
+import com.ramitsuri.expensereports.ui.components.Date
 import com.ramitsuri.expensereports.ui.theme.redColor
 import com.ramitsuri.expensereports.utils.format
 import com.ramitsuri.expensereports.utils.friendlyLocalDate
+import expensereports.shared.generated.resources.Res
+import expensereports.shared.generated.resources.transaction_description
+import expensereports.shared.generated.resources.transactions_filter_amount_from_to
+import expensereports.shared.generated.resources.transactions_filter_from
+import expensereports.shared.generated.resources.transactions_filter_from_account
+import expensereports.shared.generated.resources.transactions_filter_max_amount
+import expensereports.shared.generated.resources.transactions_filter_min_amount
+import expensereports.shared.generated.resources.transactions_filter_to
+import expensereports.shared.generated.resources.transactions_filter_to_account
+import io.ktor.client.request.invoke
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.stringResource
 import java.math.BigDecimal
 
+@Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(
     viewState: TransactionsViewState,
     windowSize: WindowSizeClass,
     onBack: () -> Unit,
-    onFilterApplied: (String, LocalDate, LocalDate) -> Unit,
+    onFilterApplied: (
+        description: String,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        fromAccount: String?,
+        toAccount: String?,
+        minAmount: BigDecimal?,
+        maxAmount: BigDecimal?,
+    ) -> Unit,
+    onFromAccountTextUpdated: (String) -> Unit,
+    onToAccountTextUpdated: (String) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
@@ -120,7 +149,15 @@ fun TransactionsScreen(
                     description = viewState.description,
                     selectedStartDate = viewState.startDate,
                     selectedEndDate = viewState.endDate,
+                    filterFromAccount = viewState.filterFromAccount,
+                    filterToAccount = viewState.filterToAccount,
+                    filterMinAmount = viewState.filterMinAmount,
+                    filterMaxAmount = viewState.filterMaxAmount,
+                    fromAccountSuggestions = viewState.fromAccountSuggestions,
+                    toAccountSuggestions = viewState.toAccountSuggestions,
                     onFilterApplied = onFilterApplied,
+                    onFromAccountTextUpdated = onFromAccountTextUpdated,
+                    onToAccountTextUpdated = onToAccountTextUpdated,
                 )
                 LazyVerticalGrid(
                     modifier =
@@ -145,6 +182,7 @@ fun TransactionsScreen(
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier =
                                             Modifier
+                                                .fillMaxWidth()
                                                 .background(MaterialTheme.colorScheme.background)
                                                 .padding(8.dp),
                                     )
@@ -223,8 +261,8 @@ private fun TransactionItem(
                 )
             }
             AnimatedVisibility(isExpanded) {
-                val splitsPartition =
-                    remember(transaction) { transaction.splits.partition { it.amount < BigDecimal.ZERO } }
+                val fromSplits = remember(transaction) { transaction.fromSplits() }
+                val toSplits = remember(transaction) { transaction.toSplits() }
                 Column(modifier = Modifier.padding(vertical = 16.dp)) {
                     Row(
                         modifier =
@@ -236,11 +274,11 @@ private fun TransactionItem(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Spacer(modifier = Modifier.width(8.dp))
-                        splitsPartition.first.forEach {
+                        fromSplits.forEach {
                             Split(it, snackbarHostState)
                         }
                         Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = "")
-                        splitsPartition.second.forEach {
+                        toSplits.forEach {
                             Split(it, snackbarHostState)
                         }
                     }
@@ -289,19 +327,36 @@ private fun Split(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Filter(
     description: String,
     selectedStartDate: LocalDate,
     selectedEndDate: LocalDate,
-    onFilterApplied: (String, LocalDate, LocalDate) -> Unit,
+    filterFromAccount: String?,
+    filterToAccount: String?,
+    filterMinAmount: BigDecimal?,
+    filterMaxAmount: BigDecimal?,
+    fromAccountSuggestions: List<String>,
+    toAccountSuggestions: List<String>,
+    onFilterApplied: (
+        description: String,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        fromAccount: String?,
+        toAccount: String?,
+        minAmount: BigDecimal?,
+        maxAmount: BigDecimal?,
+    ) -> Unit,
+    onFromAccountTextUpdated: (String) -> Unit,
+    onToAccountTextUpdated: (String) -> Unit,
 ) {
     var filterExpanded by remember { mutableStateOf(false) }
-    AnimatedContent(filterExpanded) { expanded ->
+    AnimatedContent(filterExpanded, label = "FilterToggle") { expanded ->
         Row(
             modifier =
-                Modifier.fillMaxWidth().padding(16.dp)
-                    .clickable(onClick = { filterExpanded = true }),
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    .clickable(onClick = { if (!expanded) filterExpanded = true }),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -310,19 +365,31 @@ private fun Filter(
                     description = description,
                     selectedStartDate = selectedStartDate,
                     selectedEndDate = selectedEndDate,
-                    onFilterApplied = { description, startDate, endDate ->
-                        onFilterApplied(description, startDate, endDate)
+                    fromAccount = filterFromAccount,
+                    toAccount = filterToAccount,
+                    minAmount = filterMinAmount,
+                    maxAmount = filterMaxAmount,
+                    fromAccountSuggestions = fromAccountSuggestions,
+                    toAccountSuggestions = toAccountSuggestions,
+                    onFilterApplied = { desc, start, end, from, to, min, max ->
+                        onFilterApplied(desc, start, end, from, to, min, max)
                         filterExpanded = false
                     },
                     onFilterCanceled = {
                         filterExpanded = false
                     },
+                    onFromAccountTextUpdated = onFromAccountTextUpdated,
+                    onToAccountTextUpdated = onToAccountTextUpdated,
                 )
             } else {
                 CollapsedFilterContent(
                     description = description,
                     selectedStartDate = selectedStartDate,
                     selectedEndDate = selectedEndDate,
+                    fromAccount = filterFromAccount,
+                    toAccount = filterToAccount,
+                    minAmount = filterMinAmount,
+                    maxAmount = filterMaxAmount,
                     onFilterExpanded = {
                         filterExpanded = true
                     },
@@ -337,11 +404,26 @@ private fun RowScope.CollapsedFilterContent(
     description: String,
     selectedStartDate: LocalDate,
     selectedEndDate: LocalDate,
+    fromAccount: String?,
+    toAccount: String?,
+    minAmount: BigDecimal?,
+    maxAmount: BigDecimal?,
     onFilterExpanded: () -> Unit,
 ) {
     Column(modifier = Modifier.weight(1f)) {
         if (description.isNotEmpty()) {
             Text(description)
+        }
+        if (!fromAccount.isNullOrEmpty()) {
+            Text(stringResource(Res.string.transactions_filter_from, fromAccount))
+        }
+        if (!toAccount.isNullOrEmpty()) {
+            Text(stringResource(Res.string.transactions_filter_to, toAccount))
+        }
+        if (minAmount != null || maxAmount != null) {
+            val min = minAmount?.toPlainString() ?: "-"
+            val max = maxAmount?.toPlainString() ?: "-"
+            Text(stringResource(Res.string.transactions_filter_amount_from_to, min, max))
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Text(friendlyLocalDate(selectedStartDate))
@@ -352,65 +434,254 @@ private fun RowScope.CollapsedFilterContent(
     IconButton(
         onClick = onFilterExpanded,
     ) {
-        Icon(Icons.Outlined.ArrowDropDown, contentDescription = "apply")
+        Icon(Icons.Outlined.ArrowDropDown, contentDescription = "Expand Filters")
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RowScope.ExpandedFilterContent(
     description: String,
     selectedStartDate: LocalDate,
     selectedEndDate: LocalDate,
-    onFilterApplied: (String, LocalDate, LocalDate) -> Unit,
+    fromAccount: String?,
+    toAccount: String?,
+    minAmount: BigDecimal?,
+    maxAmount: BigDecimal?,
+    fromAccountSuggestions: List<String>,
+    toAccountSuggestions: List<String>,
+    onFilterApplied: (
+        description: String,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        fromAccount: String?,
+        toAccount: String?,
+        minAmount: BigDecimal?,
+        maxAmount: BigDecimal?,
+    ) -> Unit,
     onFilterCanceled: () -> Unit,
+    onFromAccountTextUpdated: (String) -> Unit,
+    onToAccountTextUpdated: (String) -> Unit,
 ) {
-    var text by remember { mutableStateOf(TextFieldValue(description)) }
+    var descriptionText by remember { mutableStateOf(TextFieldValue(description)) }
     var startDate by remember { mutableStateOf(selectedStartDate) }
     var endDate by remember { mutableStateOf(selectedEndDate) }
+
+    var fromAccountTextSelection by remember(fromAccount) { mutableIntStateOf(fromAccount?.length ?: 0) }
+    var toAccountTextSelection by remember(toAccount) { mutableIntStateOf(toAccount?.length ?: 0) }
+
+    var minAmountText by remember { mutableStateOf(TextFieldValue(minAmount?.toPlainString() ?: "")) }
+    var maxAmountText by remember { mutableStateOf(TextFieldValue(maxAmount?.toPlainString() ?: "")) }
+
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
+
+    var fromAccountExpanded by remember { mutableStateOf(false) }
+    var toAccountExpanded by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.weight(1f)) {
         OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
+            value = descriptionText,
+            onValueChange = { descriptionText = it },
+            label = { Text(stringResource(Res.string.transaction_description)) },
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
-                if (text.text.isNotEmpty()) {
-                    IconButton(
-                        onClick = {
-                            text = TextFieldValue("")
-                        },
-                    ) {
-                        Icon(Icons.Outlined.Clear, contentDescription = "apply")
+                if (descriptionText.text.isNotEmpty()) {
+                    IconButton(onClick = { descriptionText = TextFieldValue("") }) {
+                        Icon(Icons.Outlined.Clear, contentDescription = "Clear Description")
                     }
                 }
             },
         )
-        DateRangePicker(
-            modifier = Modifier.weight(1f),
-            selectedStartDate = startDate,
-            selectedEndDate = endDate,
-            onSelectedDateChange = { start, end ->
-                startDate = start
-                endDate = end
-            },
-        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // From Account with Autocomplete
+        ExposedDropdownMenuBox(
+            expanded = fromAccountExpanded,
+            onExpandedChange = { fromAccountExpanded = !fromAccountExpanded },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            OutlinedTextField(
+                value = TextFieldValue(fromAccount ?: "", TextRange(fromAccountTextSelection)),
+                onValueChange = {
+                    onFromAccountTextUpdated(it.text)
+                    fromAccountExpanded = it.text.isNotEmpty() && fromAccountSuggestions.isNotEmpty()
+                },
+                label = {
+                    Text(stringResource(Res.string.transactions_filter_from_account))
+                },
+                modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryEditable),
+                singleLine = true,
+            )
+            ExposedDropdownMenu(
+                expanded = fromAccountExpanded && fromAccountSuggestions.isNotEmpty(),
+                onDismissRequest = { fromAccountExpanded = false },
+            ) {
+                fromAccountSuggestions.forEach { suggestion ->
+                    DropdownMenuItem(
+                        text = { Text(suggestion) },
+                        onClick = {
+                            onFromAccountTextUpdated(suggestion)
+                            fromAccountExpanded = false
+                        },
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // To Account with Autocomplete
+        ExposedDropdownMenuBox(
+            expanded = toAccountExpanded,
+            onExpandedChange = { toAccountExpanded = !toAccountExpanded },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            OutlinedTextField(
+                value = TextFieldValue(toAccount ?: "", TextRange(toAccountTextSelection)),
+                onValueChange = {
+                    onToAccountTextUpdated(it.text)
+                    toAccountExpanded = it.text.isNotEmpty() && toAccountSuggestions.isNotEmpty()
+                },
+                label = {
+                    Text(stringResource(Res.string.transactions_filter_to_account))
+                },
+                modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryEditable),
+                singleLine = true,
+            )
+            ExposedDropdownMenu(
+                expanded = toAccountExpanded && toAccountSuggestions.isNotEmpty(),
+                onDismissRequest = { toAccountExpanded = false },
+            ) {
+                toAccountSuggestions.forEach { suggestion ->
+                    DropdownMenuItem(
+                        text = { Text(suggestion) },
+                        onClick = {
+                            onToAccountTextUpdated(suggestion)
+                            toAccountExpanded = false
+                        },
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedTextField(
+                value = minAmountText,
+                onValueChange = { minAmountText = it },
+                label = {
+                    Text(stringResource(Res.string.transactions_filter_min_amount))
+                },
+                modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                trailingIcon = {
+                    if (minAmountText.text.isNotEmpty()) {
+                        IconButton(onClick = { minAmountText = TextFieldValue("") }) {
+                            Icon(Icons.Outlined.Clear, contentDescription = "Clear Min Amount")
+                        }
+                    }
+                },
+            )
+            OutlinedTextField(
+                value = maxAmountText,
+                onValueChange = { maxAmountText = it },
+                label = {
+                    Text(stringResource(Res.string.transactions_filter_max_amount))
+                },
+                modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                trailingIcon = {
+                    if (maxAmountText.text.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                maxAmountText =
+                                    TextFieldValue("")
+                            },
+                        ) {
+                            Icon(
+                                Icons.Outlined.Clear,
+                                contentDescription = "Clear Max Amount",
+                            )
+                        }
+                    }
+                },
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement =
+                Arrangement.spacedBy(
+                    8.dp,
+                    Alignment.CenterHorizontally,
+                ),
+        ) {
+            OutlinedButton(
+                onClick = { showStartDatePicker = true },
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(friendlyLocalDate(startDate))
+            }
+            OutlinedButton(
+                onClick = { showEndDatePicker = true },
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(friendlyLocalDate(endDate))
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.Center,
         ) {
-            IconButton(
-                onClick = onFilterCanceled,
-            ) {
-                Icon(Icons.Outlined.Clear, contentDescription = "apply")
+            IconButton(onClick = onFilterCanceled) {
+                Icon(Icons.Outlined.Clear, contentDescription = "Cancel Filter")
             }
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(
                 onClick = {
-                    onFilterApplied(text.text, startDate, endDate)
+                    onFilterApplied(
+                        descriptionText.text,
+                        startDate,
+                        endDate,
+                        fromAccount?.takeIf { it.isNotBlank() },
+                        toAccount?.takeIf { it.isNotBlank() },
+                        minAmountText.text.toBigDecimalOrNull(),
+                        maxAmountText.text.toBigDecimalOrNull(),
+                    )
                 },
             ) {
-                Icon(Icons.Outlined.Check, contentDescription = "apply")
+                Icon(Icons.Outlined.Check, contentDescription = "Apply Filter")
             }
         }
+    }
+
+    if (showStartDatePicker) {
+        Date(
+            selectedDate = startDate,
+            onDateSelected = { newDate ->
+                startDate = newDate
+                showStartDatePicker = false
+            },
+            onDismiss = {
+                showStartDatePicker = false
+            },
+        )
+    }
+
+    if (showEndDatePicker) {
+        Date(
+            selectedDate = endDate,
+            onDateSelected = { newDate ->
+                endDate = newDate
+                showEndDatePicker = false
+            },
+            onDismiss = {
+                showEndDatePicker = false
+            },
+        )
     }
 }
 
@@ -436,7 +707,7 @@ private fun Toolbar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "",
+                    contentDescription = "Back",
                 )
             }
         },

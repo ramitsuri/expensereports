@@ -23,6 +23,7 @@ import com.ramitsuri.expensereports.usecase.IncomeUseCase
 import com.ramitsuri.expensereports.usecase.SavingsRateUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
@@ -93,6 +94,11 @@ internal val coreModule =
                         } else {
                             LogLevel.HEADERS
                         }
+                }
+                install(HttpTimeout) {
+                    requestTimeoutMillis = 30_000
+                    connectTimeoutMillis = 30_000
+                    socketTimeoutMillis = 30_000
                 }
             }
         }

@@ -10,7 +10,7 @@ import kotlinx.datetime.LocalDate
 
 @Dao
 internal interface TransactionsDao {
-    @Query("SELECT * FROM db_transaction WHERE date BETWEEN :start AND :end AND date")
+    @Query("SELECT * FROM db_transaction WHERE date BETWEEN :start AND :end")
     fun get(
         start: LocalDate,
         end: LocalDate,
@@ -18,13 +18,16 @@ internal interface TransactionsDao {
 
     @Query(
         "SELECT * FROM db_transaction WHERE description LIKE '%' || :description || '%' " +
-            "AND date BETWEEN :start AND :end AND date",
+            "AND date BETWEEN :start AND :end",
     )
     fun get(
         description: String,
         start: LocalDate,
         end: LocalDate,
     ): Flow<List<Transaction>>
+
+    @Query("SELECT * FROM db_transaction")
+    fun getAll(): Flow<List<Transaction>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transactions: List<Transaction>)

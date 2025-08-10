@@ -27,4 +27,12 @@ data class Transaction(
 ) {
     val total: BigDecimal
         get() = splits.filter { it.amount < BigDecimal.ZERO }.sumOf { it.amount.abs() }
+
+    fun fromSplits(): List<TransactionSplit> {
+        return splits.filter { it.amount < BigDecimal.ZERO }
+    }
+
+    fun toSplits(): List<TransactionSplit> {
+        return splits.filter { it.amount >= BigDecimal.ZERO }
+    }
 }
