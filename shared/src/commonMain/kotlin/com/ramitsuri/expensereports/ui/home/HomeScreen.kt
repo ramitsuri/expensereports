@@ -79,7 +79,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ramitsuri.expensereports.model.MonthYear
 import com.ramitsuri.expensereports.model.Period
 import com.ramitsuri.expensereports.model.formatted
 import com.ramitsuri.expensereports.ui.components.AnimationMode
@@ -94,14 +93,11 @@ import com.ramitsuri.expensereports.ui.components.PopupProperties
 import com.ramitsuri.expensereports.ui.theme.greenColor
 import com.ramitsuri.expensereports.ui.theme.redColor
 import com.ramitsuri.expensereports.utils.formatRounded
+import com.ramitsuri.expensereports.utils.formatted
 import expensereports.shared.generated.resources.Res
-import expensereports.shared.generated.resources.month_names_short
 import expensereports.shared.generated.resources.net_worth
-import expensereports.shared.generated.resources.value1_value2_formatted
 import expensereports.shared.generated.resources.value1_value2_new_line_formatted
 import kotlinx.coroutines.delay
-import kotlinx.datetime.number
-import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -522,14 +518,4 @@ private fun HomeViewState.NetWorth.formatted(): String {
         monthYear.formatted(),
         netWorth.formatRounded(),
     )
-}
-
-@Composable
-private fun MonthYear.formatted(withNewLine: Boolean = false): String {
-    val month = stringArrayResource(Res.array.month_names_short)[month.number - 1]
-    return if (withNewLine) {
-        stringResource(Res.string.value1_value2_new_line_formatted, month, year.toString())
-    } else {
-        stringResource(Res.string.value1_value2_formatted, month, year.toString())
-    }
 }

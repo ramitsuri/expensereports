@@ -67,7 +67,7 @@ private fun HeaderColumn(
             row {
                 cell {
                     Text(
-                        it.split(":").last(),
+                        it,
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                     )

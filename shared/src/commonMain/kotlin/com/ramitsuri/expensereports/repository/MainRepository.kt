@@ -5,6 +5,7 @@ import com.ramitsuri.expensereports.database.dao.ReportsDao
 import com.ramitsuri.expensereports.database.dao.TransactionsDao
 import com.ramitsuri.expensereports.log.logI
 import com.ramitsuri.expensereports.model.MonthYear
+import com.ramitsuri.expensereports.model.RunInfo
 import com.ramitsuri.expensereports.network.api.Api
 import com.ramitsuri.expensereports.settings.Settings
 import kotlinx.coroutines.flow.Flow
@@ -31,9 +32,17 @@ class MainRepository internal constructor(
     suspend fun refresh(forced: Boolean = false) {
         val now = clock.now()
         val lastFetch = settings.getLastFetchTime()
-        if ((now.minus(lastFetch) < 6.hours) && !forced) {
-            logI(TAG) { "Skipping refresh, less than 6 hours since last fetch" }
-            return
+        val runInfo = getRunInfo()
+        if (runInfo == null) {
+            if ((now.minus(lastFetch) < 6.hours) && !forced) {
+                logI(TAG) { "Skipping refresh, less than 6 hours since last fetch" }
+                return
+            }
+        } else {
+            if (lastFetch > runInfo.lastRunTime) {
+                logI(TAG) { "Skipping refresh, last fetch time is after last run time" }
+                return
+            }
         }
         val fetchFromStart = (now.minus(settings.getLastFullFetchTime()) >= 21.days) || forced
         logI(TAG) { "Refreshing data, fetchFromStart: $fetchFromStart" }
@@ -154,14 +163,23 @@ class MainRepository internal constructor(
     }
 
     private suspend fun refreshRunInfo(): Boolean {
+        val runInfo = getRunInfo()
+        if (runInfo != null) {
+            settings.setRunInfo(runInfo)
+            return true
+        } else {
+            return false
+        }
+    }
+
+    private suspend fun getRunInfo(): RunInfo? {
         val baseUrl = settings.getBaseUrl()
         api.getRunInfo(
             baseUrl = baseUrl,
         ).onSuccess {
-            settings.setRunInfo(it)
-            return true
+            return it
         }
-        return false
+        return null
     }
 
     private fun Instant.toSince(fetchFromStart: Boolean) =
