@@ -66,6 +66,7 @@ class HomeViewModel(
                     listOf(
                         Period.ThisMonth,
                         Period.ThisYear,
+                        Period.PreviousYear,
                         Period.PreviousMonth,
                         Period.AllTime,
                         Period.LastThreeYears,
@@ -207,7 +208,7 @@ class HomeViewModel(
             return listOf()
         }
         val savingsRateThisYear = savingsRates.getValue(Period.ThisYear).savingsRate
-        val savingsRateThisMonth = savingsRates.getValue(Period.ThisMonth).savingsRate
+        val savingsRateLastYear = savingsRates.getValue(Period.PreviousYear).savingsRate
         val savingsRateLastMonth = savingsRates.getValue(Period.PreviousMonth).savingsRate
         val savingsRateLastThreeYears = savingsRates.getValue(Period.LastThreeYears).savingsRate
         val savingsRateAllTime = savingsRates.getValue(Period.AllTime).savingsRate
@@ -220,12 +221,12 @@ class HomeViewModel(
                 children =
                     listOf(
                         HomeViewState.ExpandableCardGroup.Child(
-                            title = "MTD",
-                            value = savingsRateThisMonth.formatPercent(),
-                        ),
-                        HomeViewState.ExpandableCardGroup.Child(
                             title = "Last month",
                             value = savingsRateLastMonth.formatPercent(),
+                        ),
+                        HomeViewState.ExpandableCardGroup.Child(
+                            title = "Last year",
+                            value = savingsRateLastYear.formatPercent(),
                         ),
                         HomeViewState.ExpandableCardGroup.Child(
                             title = "Last 3 years",

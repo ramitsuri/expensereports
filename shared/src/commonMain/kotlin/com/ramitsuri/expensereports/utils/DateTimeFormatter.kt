@@ -11,14 +11,18 @@ import expensereports.shared.generated.resources.month_names_long
 import expensereports.shared.generated.resources.month_names_short
 import expensereports.shared.generated.resources.one_day_ago
 import expensereports.shared.generated.resources.one_hour_ago
+import expensereports.shared.generated.resources.value1_value2_formatted
+import expensereports.shared.generated.resources.value1_value2_new_line_formatted
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getStringArray
 import org.jetbrains.compose.resources.stringArrayResource
@@ -87,6 +91,21 @@ suspend fun MonthYear.formattedSuspend(): String {
     return toLocalDateTime()
         .date
         .format(format)
+}
+
+@Composable
+fun MonthYear.formatted(withNewLine: Boolean = false): String {
+    val month = month.formatted()
+    return if (withNewLine) {
+        stringResource(Res.string.value1_value2_new_line_formatted, month, year.toString())
+    } else {
+        stringResource(Res.string.value1_value2_formatted, month, year.toString())
+    }
+}
+
+@Composable
+fun Month.formatted(): String {
+    return stringArrayResource(Res.array.month_names_short)[number - 1]
 }
 
 @Composable

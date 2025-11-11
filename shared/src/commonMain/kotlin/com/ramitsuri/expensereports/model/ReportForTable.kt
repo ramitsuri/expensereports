@@ -19,9 +19,16 @@ data class ReportForTable(
             val accounts = report.accounts.sortedBy { it.order }
 
             val firstColumn =
-                accounts.map {
-                    val splits = it.name.split(":")
-                    splits.last()
+                accounts.map { account ->
+                    val prefix =
+                        buildString {
+                            repeat(account.name.count { it == ':' }.minus(1).coerceAtLeast(0)) {
+                                // Minus 1 because accounts direct children of root account don't need to be indented
+                                append("-")
+                            }
+                        }
+                    val splits = account.name.split(":")
+                    prefix + " " + splits.last()
                 }
 
             val sortedMonthYears =

@@ -4,7 +4,6 @@ import com.ramitsuri.expensereports.network.MonthYearSerializer
 import com.ramitsuri.expensereports.utils.minus
 import com.ramitsuri.expensereports.utils.nowLocal
 import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
@@ -96,33 +95,8 @@ fun Map<MonthYear, BigDecimal>.sumPeriod(
     period: Period,
     now: MonthYear,
 ): BigDecimal {
-    return when (period) {
-        is Period.AllTime -> {
-            val allTime = MonthYear(Month.JANUARY, 2021)
-            filterKeys { monthYear -> monthYear >= allTime }
-        }
-
-        is Period.LastThreeYears -> {
-            val lastThreeYears = now.minus(DateTimePeriod(years = 3))
-            filterKeys { monthYear -> monthYear >= lastThreeYears }
-        }
-
-        is Period.OneYear -> {
-            val oneYear = now.minus(DateTimePeriod(years = 1))
-            filterKeys { monthYear -> monthYear >= oneYear }
-        }
-
-        is Period.PreviousMonth -> {
-            val previousMonthYear = now.previous()
-            filterKeys { monthYear -> monthYear == previousMonthYear }
-        }
-
-        is Period.ThisMonth -> {
-            filterKeys { monthYear -> monthYear == now }
-        }
-
-        is Period.ThisYear -> {
-            filterKeys { (_, year) -> year == now.year }
-        }
+    val monthYearsInPeriod = period.toMonthYears(now)
+    return filterKeys { monthYear ->
+        monthYear in monthYearsInPeriod
     }.sum()
 }

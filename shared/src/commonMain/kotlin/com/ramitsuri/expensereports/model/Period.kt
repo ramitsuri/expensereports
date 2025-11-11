@@ -1,12 +1,14 @@
 package com.ramitsuri.expensereports.model
 
 import androidx.compose.runtime.Composable
+import com.ramitsuri.expensereports.utils.formatted
 import com.ramitsuri.expensereports.utils.minus
 import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.period_all
 import expensereports.shared.generated.resources.period_last_three_years
 import expensereports.shared.generated.resources.period_one_year
 import expensereports.shared.generated.resources.period_previous_month
+import expensereports.shared.generated.resources.period_previous_year
 import expensereports.shared.generated.resources.period_this_month
 import expensereports.shared.generated.resources.period_this_year
 import kotlinx.datetime.DateTimePeriod
@@ -20,11 +22,15 @@ sealed interface Period {
 
     data object ThisYear : Period
 
+    data object PreviousYear : Period
+
     data object OneYear : Period
 
     data object LastThreeYears : Period
 
     data object AllTime : Period
+
+    data class Custom(val start: MonthYear, val end: MonthYear) : Period
 
     fun toMonthYears(now: MonthYear): List<MonthYear> {
         val start =
@@ -45,12 +51,31 @@ sealed interface Period {
                     now.copy(month = Month.JANUARY)
                 }
 
+                is PreviousYear -> {
+                    val previousYear = now.year - 1
+                    val start =
+                        MonthYear(
+                            month = Month.JANUARY,
+                            year = previousYear,
+                        )
+                    val end =
+                        MonthYear(
+                            month = Month.DECEMBER,
+                            year = previousYear,
+                        )
+                    return (start..end).toList()
+                }
+
                 is PreviousMonth -> {
                     return listOf(now.previous())
                 }
 
                 is ThisMonth -> {
                     return listOf(now)
+                }
+
+                is Custom -> {
+                    return (start..end).toList()
                 }
             }
         return (start..now).toList()
@@ -62,9 +87,11 @@ sealed interface Period {
                 ThisMonth,
                 PreviousMonth,
                 ThisYear,
+                PreviousYear,
                 OneYear,
                 LastThreeYears,
                 AllTime,
+                Custom(MonthYear(Month.JANUARY, 2021), MonthYear(Month.DECEMBER, 2021)),
             )
     }
 }
@@ -78,4 +105,10 @@ fun Period.formatted() =
         is Period.AllTime -> stringResource(Res.string.period_all)
         is Period.ThisMonth -> stringResource(Res.string.period_this_month)
         is Period.PreviousMonth -> stringResource(Res.string.period_previous_month)
+        is Period.PreviousYear -> stringResource(Res.string.period_previous_year)
+        is Period.Custom -> {
+            val start = start.formatted()
+            val end = end.formatted()
+            "$start - $end"
+        }
     }

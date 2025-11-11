@@ -42,6 +42,7 @@
     <string name="days_ago_format">%1$s days ago</string>
     <string name="just_now">Just now</string>
     <string name="minutes_ago_format">%1$d minutes ago</string>
+    <string name="year">Year</string>
 
     <string name="period_this_year">YTD</string>
     <string name="period_one_year">1Y</string>
@@ -49,6 +50,7 @@
     <string name="period_all">All</string>
     <string name="period_this_month">MTD</string>
     <string name="period_previous_month">Last month</string>
+    <string name="period_previous_year">Last year</string>
 
     <string name="settings_url">URL</string>
     <string name="settings_times_title">Time Info</string>
