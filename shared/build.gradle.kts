@@ -8,7 +8,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kmp.library)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
@@ -18,11 +18,20 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(17)
     jvm()
 
-    androidTarget {
+    android {
+        namespace = "com.ramitsuri.expensereports"
+        compileSdk = 37
+        minSdk = 30
+
+        withJava()
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
+        }
+        androidResources {
+            enable = true
         }
     }
 
@@ -42,7 +51,6 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel.savedstate)
             implementation(libs.lifecycle.runtime.compose)
 
-            implementation(libs.room.ktx)
             implementation(libs.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.koin.core)
@@ -95,19 +103,6 @@ kotlin {
     // fix it.
     configurations.commonMainApi {
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-android")
-    }
-}
-
-android {
-    namespace = "com.ramitsuri.expensereports"
-    compileSdk = 35
-
-    defaultConfig {
-        minSdk = 30
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -183,7 +178,8 @@ ktlint {
     outputToConsole.set(true)
     filter {
         // Excluded because copied from somewhere else
-        exclude("kotlin/com/ramitsuri/expensereports/ui/components/LineChart.kt")
+        exclude("**/LineChart.kt")
+        exclude { element -> element.file.toString().contains("LineChart.kt") }
 
         exclude("**/generated/**")
         exclude("**/build/**")

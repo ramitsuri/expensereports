@@ -23,9 +23,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import java.math.BigDecimal
+import kotlin.time.Clock
 
 class HomeViewModel(
     private val mainRepository: MainRepository,

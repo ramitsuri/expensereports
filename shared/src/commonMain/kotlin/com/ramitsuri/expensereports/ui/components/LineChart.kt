@@ -1,3 +1,8 @@
+@file:Suppress(
+    "ktlint:standard:property-naming",
+    "ktlint:standard:max-line-length",
+)
+
 package com.ramitsuri.expensereports.ui.components
 
 import androidx.compose.animation.core.Animatable

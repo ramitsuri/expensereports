@@ -1,11 +1,11 @@
 package com.ramitsuri.expensereports.testutils
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class TestClock : Clock {
     var timeZone: TimeZone = TimeZone.UTC

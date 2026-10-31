@@ -13,8 +13,6 @@ import expensereports.shared.generated.resources.one_day_ago
 import expensereports.shared.generated.resources.one_hour_ago
 import expensereports.shared.generated.resources.value1_value2_formatted
 import expensereports.shared.generated.resources.value1_value2_new_line_formatted
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
@@ -27,6 +25,8 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getStringArray
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Composable
 fun friendlyDate(

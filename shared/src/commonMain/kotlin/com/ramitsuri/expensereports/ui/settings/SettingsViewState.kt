@@ -1,6 +1,6 @@
 package com.ramitsuri.expensereports.ui.settings
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class SettingsViewState(
     val url: String = "",

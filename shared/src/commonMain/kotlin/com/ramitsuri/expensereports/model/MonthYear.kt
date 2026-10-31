@@ -3,7 +3,6 @@ package com.ramitsuri.expensereports.model
 import com.ramitsuri.expensereports.network.MonthYearSerializer
 import com.ramitsuri.expensereports.utils.minus
 import com.ramitsuri.expensereports.utils.nowLocal
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
@@ -11,6 +10,7 @@ import kotlinx.datetime.number
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
+import kotlin.time.Clock
 
 @Serializable(with = MonthYearSerializer::class)
 data class MonthYear(
@@ -23,7 +23,7 @@ data class MonthYear(
         return if (month == Month.DECEMBER) {
             MonthYear(year = year + 1, month = Month.JANUARY)
         } else {
-            MonthYear(year = year, month = Month.of(month.number + 1))
+            MonthYear(year = year, month = Month(month.number + 1))
         }
     }
 
@@ -31,7 +31,7 @@ data class MonthYear(
         return if (month == Month.JANUARY) {
             MonthYear(year = year - 1, month = Month.DECEMBER)
         } else {
-            MonthYear(year = year, month = Month.of(month.number - 1))
+            MonthYear(year = year, month = Month(month.number - 1))
         }
     }
 

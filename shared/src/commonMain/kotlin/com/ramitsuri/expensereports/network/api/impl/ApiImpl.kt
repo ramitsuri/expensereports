@@ -15,8 +15,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
+import kotlin.time.Clock
 
 internal class ApiImpl(
     private val httpClient: HttpClient,

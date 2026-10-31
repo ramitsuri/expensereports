@@ -12,10 +12,10 @@ import expensereports.shared.generated.resources.Res
 import expensereports.shared.generated.resources.income_expense_notification_body
 import expensereports.shared.generated.resources.income_expense_notification_title
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
+import kotlin.time.Clock
 
 class MonthEndIncomeExpenseNotificationHelper(
     private val savingsRateUseCase: SavingsRateUseCase,

@@ -8,9 +8,9 @@ import com.ramitsuri.expensereports.model.sumPeriod
 import com.ramitsuri.expensereports.repository.MainRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import java.math.BigDecimal
+import kotlin.time.Clock
 
 /**
  * Income here is salary plus income from other means like rewards, which is not the case for income

@@ -51,9 +51,9 @@ import expensereports.shared.generated.resources.settings_last_full_fetch_time_f
 import expensereports.shared.generated.resources.settings_last_run_time_format
 import expensereports.shared.generated.resources.settings_times_title
 import expensereports.shared.generated.resources.settings_url
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

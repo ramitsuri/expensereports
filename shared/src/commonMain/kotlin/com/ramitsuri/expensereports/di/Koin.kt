@@ -31,7 +31,6 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
 import okio.Path
@@ -41,6 +40,7 @@ import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import kotlin.time.Clock
 
 fun initKoin(appModule: KoinApplication.() -> Module): KoinApplication {
     val koinApplication =
