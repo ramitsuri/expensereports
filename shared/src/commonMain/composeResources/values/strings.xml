@@ -74,4 +74,28 @@
     <string name="transactions_filter_min_amount">Min Amount</string>
     <string name="transactions_filter_max_amount">Max Amount</string>
     <string name="transaction_description">Description</string>
+
+    <string name="overview">Overview</string>
+    <string name="reports">Reports</string>
+    <string name="activity">Activity</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="working_capital">Working Capital</string>
+    <string name="liquid_cash">Liquid Cash</string>
+    <string name="credit_debt">Credit Balances</string>
+    <string name="monthly_cash_flow">Monthly Cash Flow</string>
+    <string name="income_label">Income</string>
+    <string name="living_expenses_label">Living Expenses</string>
+    <string name="top_spending_categories">Top Spending Categories</string>
+    <string name="view_full_expenses">View Full Expense Breakdown \u2192</string>
+    <string name="annual_goals">Annual Goals</string>
+    <string name="active_trips">Active Trips</string>
+    <string name="recent_activity">Recent Activity</string>
+    <string name="view_all_transactions">View All Transactions \u2192</string>
+    <string name="no_active_trips">No active trips</string>
+    <string name="no_recent_transactions">No recent transactions</string>
+    <string name="no_history_available">No history available</string>
+    <string name="vs_last_month">vs last month</string>
+    <string name="after_tax_income_label">After-Tax Income</string>
+    <string name="savings_rate_history">Savings Rate History</string>
+    <string name="tap_bar_for_details">Tap a bar for details</string>
 </resources>

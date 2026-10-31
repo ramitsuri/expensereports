@@ -2,6 +2,7 @@ package com.ramitsuri.expensereports.settings
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -72,6 +73,33 @@ internal class DataStoreKeyValueStore(
     ) {
         dataStore.edit {
             it[intPreferencesKey(key.value)] = value
+        }
+    }
+
+    override fun getBooleanFlow(
+        key: Key,
+        defaultValue: Boolean,
+    ): Flow<Boolean> {
+        return dataStore
+            .data
+            .mapDistinct {
+                it[booleanPreferencesKey(key.value)] ?: defaultValue
+            }
+    }
+
+    override suspend fun getBoolean(
+        key: Key,
+        defaultValue: Boolean,
+    ): Boolean {
+        return getBooleanFlow(key, defaultValue).first()
+    }
+
+    override suspend fun putBoolean(
+        key: Key,
+        value: Boolean,
+    ) {
+        dataStore.edit {
+            it[booleanPreferencesKey(key.value)] = value
         }
     }
 

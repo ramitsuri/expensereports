@@ -32,4 +32,19 @@ internal interface KeyValueStore {
         key: Key,
         value: Int,
     )
+
+    fun getBooleanFlow(
+        key: Key,
+        defaultValue: Boolean,
+    ): Flow<Boolean>
+
+    suspend fun getBoolean(
+        key: Key,
+        defaultValue: Boolean,
+    ): Boolean
+
+    suspend fun putBoolean(
+        key: Key,
+        value: Boolean,
+    )
 }

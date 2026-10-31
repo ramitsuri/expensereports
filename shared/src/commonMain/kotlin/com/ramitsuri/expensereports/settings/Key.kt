@@ -9,4 +9,5 @@ enum class Key(val value: String) {
     LAST_FETCH_TIME("last_fetch_time"),
     LAST_MONTH_END_INCOME_EXPENSES_NOTIFICATION("last_month_end_income_expenses_notification"),
     RUN_INFO("run_info"),
+    IS_PRIVACY_MASKED("is_privacy_masked"),
 }

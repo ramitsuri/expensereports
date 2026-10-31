@@ -68,3 +68,24 @@ private fun currencyFormatter(locale: Locale): DecimalFormat {
 
 private val thousand = BigDecimal("1000")
 private val million = thousand.multiply(thousand)
+
+fun Double.format(
+    stripZeros: Boolean = false,
+    locale: Locale = Locale.US,
+): String {
+    return BigDecimal(this.toString()).format(stripZeros, locale)
+}
+
+fun Double.formatCurrency(
+    showSign: Boolean = false,
+    stripZeros: Boolean = false,
+    locale: Locale = Locale.US,
+): String {
+    val absValue = kotlin.math.abs(this)
+    val formatted = BigDecimal(absValue.toString()).format(stripZeros, locale)
+    return when {
+        this > 0.0 && showSign -> "+$formatted"
+        this < 0.0 -> "-$formatted"
+        else -> formatted
+    }
+}

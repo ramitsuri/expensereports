@@ -14,6 +14,7 @@ import com.ramitsuri.expensereports.repository.MainRepository
 import com.ramitsuri.expensereports.settings.DataStoreKeyValueStore
 import com.ramitsuri.expensereports.settings.Settings
 import com.ramitsuri.expensereports.shared.BuildKonfig
+import com.ramitsuri.expensereports.ui.dashboard.DashboardViewModel
 import com.ramitsuri.expensereports.ui.home.HomeViewModel
 import com.ramitsuri.expensereports.ui.report.ReportViewModel
 import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
@@ -197,6 +198,16 @@ internal val coreModule =
 
         factory<TimeZone> {
             TimeZone.currentSystemDefault()
+        }
+
+        viewModel<DashboardViewModel> {
+            DashboardViewModel(
+                mainRepository = get<MainRepository>(),
+                settings = get<Settings>(),
+                isDesktop = get<Boolean>(qualifier = KoinQualifier.IS_DESKTOP),
+                clock = get<Clock>(),
+                timeZone = get<TimeZone>(),
+            )
         }
 
         viewModel<HomeViewModel> {

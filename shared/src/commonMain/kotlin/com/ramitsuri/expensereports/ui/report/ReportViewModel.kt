@@ -58,6 +58,14 @@ class ReportViewModel(
         this.reportName.value = reportName
     }
 
+    fun onReportSelected(reportName: String) {
+        ReportNames.all.firstOrNull {
+            it.name.replace(" ", "").equals(reportName.replace(" ", ""), ignoreCase = true)
+        }?.let {
+            onReportSelected(it)
+        }
+    }
+
     fun onPeriodSelected(period: Period) {
         this.period.value = period
     }

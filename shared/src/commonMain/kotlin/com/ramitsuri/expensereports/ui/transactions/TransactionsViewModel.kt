@@ -21,8 +21,8 @@ import kotlin.time.Clock
 
 class TransactionsViewModel(
     mainRepository: MainRepository,
-    clock: Clock,
-    timeZone: TimeZone,
+    private val clock: Clock,
+    private val timeZone: TimeZone,
 ) : ViewModel() {
     private val selectedDescription = MutableStateFlow("")
     private val selectedEndDate = MutableStateFlow(clock.nowLocal(timeZone).date)
@@ -146,6 +146,23 @@ class TransactionsViewModel(
 
     fun onFromAccountTextUpdated(text: String) {
         selectedFromAccount.update { text }
+    }
+
+    fun filterByTag(tag: String?) {
+        if (tag != null) {
+            selectedDescription.update { tag }
+            val today = clock.nowLocal(timeZone).date
+            val oneYearAgo =
+                LocalDate(year = today.year - 1, month = today.month, day = 1)
+            selectStartDate.update { oneYearAgo }
+            selectedEndDate.update { today }
+            selectedFromAccount.update { null }
+            selectedToAccount.update { null }
+            selectedMinAmount.update { null }
+            selectedMaxAmount.update { null }
+        } else {
+            selectedDescription.update { "" }
+        }
     }
 
     fun onToAccountTextUpdated(text: String) {

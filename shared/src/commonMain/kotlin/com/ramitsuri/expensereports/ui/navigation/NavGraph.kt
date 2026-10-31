@@ -15,15 +15,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
-import com.ramitsuri.expensereports.ui.home.HomeScreen
-import com.ramitsuri.expensereports.ui.home.HomeViewModel
-import com.ramitsuri.expensereports.ui.report.ReportScreen
-import com.ramitsuri.expensereports.ui.report.ReportViewModel
+import com.ramitsuri.expensereports.ui.main.MainScreen
+import com.ramitsuri.expensereports.ui.main.MainTab
 import com.ramitsuri.expensereports.ui.settings.SettingsScreen
 import com.ramitsuri.expensereports.ui.settings.SettingsViewModel
 import com.ramitsuri.expensereports.ui.theme.AppTheme
-import com.ramitsuri.expensereports.ui.transactions.TransactionsScreen
-import com.ramitsuri.expensereports.ui.transactions.TransactionsViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -59,16 +55,10 @@ fun NavGraph(
                             navDeepLink<Destination.Home>(basePath = Destination.Home.deepLinkUri),
                         ),
                 ) {
-                    val viewModel = koinViewModel<HomeViewModel>()
-                    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
-                    HomeScreen(
-                        viewState = viewState,
-                        onNetWorthPeriodSelected = viewModel::onNetWorthPeriodSelected,
+                    MainScreen(
                         windowSize = windowSize,
-                        onReportsClick = { navController.navigate(Destination.Report) },
-                        onTransactionsClick = { navController.navigate(Destination.Transactions) },
+                        initialTab = MainTab.OVERVIEW,
                         onSettingsClick = { navController.navigate(Destination.Settings) },
-                        onRefresh = viewModel::onRefresh,
                     )
                 }
 
@@ -82,27 +72,29 @@ fun NavGraph(
                     )
                 }
 
-                composable<Destination.Report> {
-                    val viewModel = koinViewModel<ReportViewModel>()
-                    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
-                    ReportScreen(
-                        viewState = viewState,
-                        onBack = { navController.navigateUp() },
-                        onPeriodSelected = viewModel::onPeriodSelected,
-                        onReportSelected = viewModel::onReportSelected,
+                composable<Destination.Report>(
+                    deepLinks =
+                        listOf(
+                            navDeepLink<Destination.Report>(basePath = Destination.Report.deepLinkUri),
+                        ),
+                ) {
+                    MainScreen(
+                        windowSize = windowSize,
+                        initialTab = MainTab.REPORTS,
+                        onSettingsClick = { navController.navigate(Destination.Settings) },
                     )
                 }
 
-                composable<Destination.Transactions> {
-                    val viewModel = koinViewModel<TransactionsViewModel>()
-                    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
-                    TransactionsScreen(
-                        viewState = viewState,
+                composable<Destination.Transactions>(
+                    deepLinks =
+                        listOf(
+                            navDeepLink<Destination.Transactions>(basePath = Destination.Transactions.deepLinkUri),
+                        ),
+                ) {
+                    MainScreen(
                         windowSize = windowSize,
-                        onBack = { navController.navigateUp() },
-                        onFilterApplied = viewModel::onFilterApplied,
-                        onFromAccountTextUpdated = viewModel::onFromAccountTextUpdated,
-                        onToAccountTextUpdated = viewModel::onToAccountTextUpdated,
+                        initialTab = MainTab.ACTIVITY,
+                        onSettingsClick = { navController.navigate(Destination.Settings) },
                     )
                 }
             }

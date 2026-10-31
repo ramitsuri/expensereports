@@ -147,5 +147,13 @@ class Settings internal constructor(
             }
     }
 
+    fun getIsPrivacyMaskedFlow(): Flow<Boolean> {
+        return keyValueStore.getBooleanFlow(Key.IS_PRIVACY_MASKED, defaultValue = true)
+    }
+
+    suspend fun setIsPrivacyMasked(masked: Boolean) {
+        keyValueStore.putBoolean(Key.IS_PRIVACY_MASKED, masked)
+    }
+
     private val distantPast = Instant.parse("2000-01-01T12:00:00Z")
 }
