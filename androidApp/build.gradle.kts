@@ -16,7 +16,7 @@ android {
     defaultConfig {
         applicationId = "com.ramitsuri.expensereports.android"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 37
         versionCode = appVersion.toDouble().times(100).toInt()
         versionName = appVersion
 
