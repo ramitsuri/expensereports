@@ -130,6 +130,8 @@ object DashboardDataTransformer {
                 TrendPoint(
                     periodLabel = month.toShortLabel(),
                     value = (inc - tax) - exp,
+                    afterTaxIncome = inc - tax,
+                    expenses = exp,
                 )
             }
 
@@ -139,11 +141,21 @@ object DashboardDataTransformer {
             savingsRateMonths.map { month ->
                 val fullLabel =
                     "${month.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${month.year}"
+                val inc =
+                    incomeAcc?.monthTotals?.get(month)?.toDouble()
+                        ?: (incomeAccount?.monthTotals?.get(month)?.toDouble() ?: 0.0)
+                val tax = taxAcc?.monthTotals?.get(month)?.toDouble() ?: 0.0
+                val afterTax = inc - tax
+                val exp =
+                    livingExpensesAccount?.monthTotals?.get(month)?.toDouble()
+                        ?: (expAcc?.monthTotals?.get(month)?.toDouble() ?: 0.0)
                 TrendPoint(
                     periodLabel = month.toShortLabel(),
                     value = computeMonthSavingsRatePercent(month) ?: 0.0,
                     fullLabel = fullLabel,
                     subLabel = "'${month.year % 100}",
+                    afterTaxIncome = afterTax,
+                    expenses = exp,
                 )
             }
 

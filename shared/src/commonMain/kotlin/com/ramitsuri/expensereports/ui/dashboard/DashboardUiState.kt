@@ -64,7 +64,12 @@ data class TrendPoint(
     val value: Double,
     val fullLabel: String = periodLabel,
     val subLabel: String = "",
-)
+    val afterTaxIncome: Double? = null,
+    val expenses: Double? = null,
+) {
+    val netDelta: Double?
+        get() = if ((afterTaxIncome != null) && (expenses != null)) (afterTaxIncome - expenses) else null
+}
 
 data class WorkingCapitalSummary(
     val totalCash: Double,

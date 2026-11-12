@@ -97,31 +97,46 @@ fun CashFlowHeroCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Primary: After-tax net cash flow delta
-            val isPositive = summary.netDelta >= 0
+            val displayNetDelta = selectedPoint?.netDelta ?: summary.netDelta
+            val isPositive = displayNetDelta >= 0
             val deltaColor = if (isPositive) greenColor else redColor
-            Text(
-                text = summary.netDelta.formatCurrency(showSign = true),
-                style =
-                    MaterialTheme.typography.headlineMedium.copy(
-                        fontFeatureSettings = "tnum",
-                        fontWeight = FontWeight.Bold,
-                    ),
-                color = deltaColor,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = displayNetDelta.formatCurrency(showSign = true),
+                    style =
+                        MaterialTheme.typography.headlineMedium.copy(
+                            fontFeatureSettings = "tnum",
+                            fontWeight = FontWeight.Bold,
+                        ),
+                    color = deltaColor,
+                )
+                if (selectedPoint != null) {
+                    Text(
+                        text = "(${selectedPoint!!.fullLabel})",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(6.dp))
 
             // Context: After-tax income vs. Living expenses breakdown
             val incomeLabel = stringResource(Res.string.after_tax_income_label)
             val expensesLabel = stringResource(Res.string.living_expenses_label)
-            val effectiveIncome =
+            val defaultIncome =
                 if (summary.afterTaxIncome != 0.0) {
                     summary.afterTaxIncome
                 } else {
                     summary.incomeWithoutGains
                 }
-            val formattedIncome = effectiveIncome.formatCurrency(showSign = true)
-            val formattedExpenses = summary.livingExpenses.formatCurrency()
+            val displayIncome = selectedPoint?.afterTaxIncome ?: defaultIncome
+            val displayExpenses = selectedPoint?.expenses ?: summary.livingExpenses
+            val formattedIncome = displayIncome.formatCurrency(showSign = true)
+            val formattedExpenses = displayExpenses.formatCurrency()
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),

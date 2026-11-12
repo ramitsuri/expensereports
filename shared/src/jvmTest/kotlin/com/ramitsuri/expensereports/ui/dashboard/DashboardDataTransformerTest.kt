@@ -146,6 +146,12 @@ class DashboardDataTransformerTest {
         assertEquals(33.33, state.monthlyCashFlow.trailingSavingsRates.last().value, 0.1)
         assertEquals("October 2026", state.monthlyCashFlow.trailingSavingsRates.last().fullLabel)
         assertEquals("'26", state.monthlyCashFlow.trailingSavingsRates.last().subLabel)
+        assertEquals(6000.0, state.monthlyCashFlow.trailingSavingsRates.last().afterTaxIncome ?: 0.0, 0.01)
+        assertEquals(5000.0, state.monthlyCashFlow.trailingSavingsRates.last().expenses ?: 0.0, 0.01)
+        assertEquals(1000.0, state.monthlyCashFlow.trailingSavingsRates.last().netDelta ?: 0.0, 0.01)
+        assertEquals(6000.0, state.monthlyCashFlow.trailingSavingsRates.first().afterTaxIncome ?: 0.0, 0.01)
+        assertEquals(4500.0, state.monthlyCashFlow.trailingSavingsRates.first().expenses ?: 0.0, 0.01)
+        assertEquals(1500.0, state.monthlyCashFlow.trailingSavingsRates.first().netDelta ?: 0.0, 0.01)
     }
 
     @Test
